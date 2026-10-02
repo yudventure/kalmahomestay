@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalma Brand Guidelines</title>
+<meta name="description" content="Panduan identitas brand Kalma Raja Ampat Homestay: logo, warna, tipografi, elemen grafis, tone of voice, dan aplikasi.">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,100;1,9..144,300..700,100&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--color-bg); color: var(--color-text);
+    font-family: var(--font-body); font-size: var(--text-base); line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: var(--color-link); }
+  h1, h2, h3, h4 {
+    font-family: var(--font-display); font-variation-settings: "SOFT" 100;
+    color: var(--color-heading); line-height: var(--leading-tight); letter-spacing: var(--tracking-tight);
+    margin: 0 0 var(--space-4); font-weight: 500;
+  }
+  h2 { font-size: var(--text-3xl); }
+  h3 { font-size: var(--text-xl); line-height: var(--leading-snug); }
+  p { margin: 0 0 var(--space-4); max-width: 68ch; }
+  .wrap { max-width: var(--container); margin: 0 auto; padding: 0 16px; }
+  @media (min-width: 720px) { .wrap { padding: 0 var(--space-6); } }
+
+  .eyebrow {
+    font-family: var(--font-body); font-size: var(--text-xs); font-weight: 600;
+    text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--kalma-lagoon-deep);
+    margin: 0 0 var(--space-3);
+  }
+  .lead { font-size: var(--text-lg); color: var(--color-text-muted); }
+  .muted { color: var(--color-text-muted); }
+  .small { font-size: var(--text-sm); }
+  code, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85em; }
+
+  /* ---------- Nav ---------- */
+  .toc {
+    position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--kalma-sand) 92%, transparent);
+    backdrop-filter: blur(8px); border-bottom: 1px solid var(--color-border);
+  }
+  .toc .wrap { display: flex; align-items: center; gap: var(--space-5); height: 60px; }
+  .toc img { height: 30px; width: auto; flex: none; }
+  .toc nav { min-width: 0; display: flex; gap: var(--space-4); overflow-x: auto; scrollbar-width: none; font-size: var(--text-sm); font-weight: 500; }
+  .toc nav::-webkit-scrollbar { display: none; }
+  .toc nav a { color: var(--kalma-deep-sea); text-decoration: none; white-space: nowrap; padding: 6px 0; }
+  .toc nav a:hover { color: var(--kalma-lagoon-deep); }
+
+  /* ---------- Cover ---------- */
+  .cover { padding: var(--space-9) 0 var(--space-8); text-align: center; }
+  .cover img { width: min(520px, 86%); margin: 0 auto var(--space-7); }
+  .cover h1 { font-size: var(--text-4xl); margin-bottom: var(--space-4); }
+  .cover p { margin-inline: auto; }
+  .wave-divider { display: block; width: 100%; height: 80px; }
+
+  /* ---------- Sections ---------- */
+  section.block { padding: var(--space-9) 0; }
+  section.alt { background: var(--kalma-shell); }
+  section.dark { background: var(--kalma-deep-sea); color: var(--kalma-shell); }
+  section.dark h2, section.dark h3 { color: var(--kalma-shell); }
+  section.dark .eyebrow { color: var(--kalma-sand); }
+  section.dark .muted, section.dark .lead { color: #C7D6E0; }
+  .sec-head { display: grid; gap: var(--space-2); margin-bottom: var(--space-7); }
+  .sec-num { font-family: var(--font-display); font-size: var(--text-sm); color: var(--kalma-lagoon); font-weight: 600; }
+
+  .grid { display: grid; gap: var(--space-5); }
+  .grid > * { min-width: 0; }
+  .g2 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); }
+  .g3 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+  .g4 { grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); }
+
+  .card {
+    background: var(--kalma-shell); border: 1px solid var(--color-border); border-radius: var(--radius-md);
+    padding: var(--space-5);
+  }
+  section.alt .card { background: #fff; }
+  .card h3 { margin-bottom: var(--space-2); }
+  .card p:last-child { margin-bottom: 0; }
+
+  /* ---------- Essence ---------- */
+  .meaning {
+    display: grid; gap: var(--space-6); align-items: center;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  }
+  .big-quote {
+    font-family: var(--font-display); font-style: italic; font-size: var(--text-3xl);
+    color: var(--kalma-deep-sea); line-height: 1.15; margin: 0;
+  }
+  .pill-list { display: flex; flex-wrap: wrap; gap: var(--space-2); padding: 0; margin: 0; list-style: none; }
+  .pill-list li {
+    background: var(--kalma-sand); color: var(--kalma-deep-sea); border-radius: var(--radius-pill);
+    padding: 6px 14px; font-size: var(--text-sm); font-weight: 600;
+  }
+
+  /* ---------- Logo showcases ---------- */
+  .stage {
+    border-radius: var(--radius-md); display: grid; place-items: center; padding: var(--space-7) var(--space-5);
+    min-height: 240px; border: 1px solid var(--color-border); position: relative; overflow: hidden;
+  }
+  .stage img { max-height: 160px; width: auto; }
+  .stage.tall { min-height: 360px; }
+  .stage.tall img { max-height: 240px; }
+  .st-sand { background: var(--kalma-sand); }
+  .st-shell { background: var(--kalma-shell); }
+  .st-white { background: #fff; }
+  .st-deep { background: var(--kalma-deep-sea); border-color: transparent; }
+  .st-ink { background: var(--kalma-ink); border-color: transparent; }
+  .st-lagoon { background: var(--kalma-lagoon); border-color: transparent; }
+  .st-photo {
+    background:
+      linear-gradient(180deg, rgba(27,43,56,.15), rgba(27,43,56,.55)),
+      radial-gradient(120% 80% at 70% 10%, #9FD3DA 0%, transparent 60%),
+      linear-gradient(170deg, #7EC4CF 0%, #3E8FA6 40%, #1F5873 75%, #163B52 100%);
+    border-color: transparent;
+  }
+  .caption { margin-top: var(--space-3); font-size: var(--text-sm); }
+  .caption strong { color: var(--kalma-deep-sea); display: block; font-size: var(--text-base); }
+  section.dark .caption strong { color: var(--kalma-shell); }
+
+  .anatomy { position: relative; }
+  .anatomy .tag {
+    position: absolute; font-size: var(--text-xs); font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
+    background: var(--kalma-ink); color: var(--kalma-shell); padding: 4px 10px; border-radius: var(--radius-pill);
+  }
+
+  /* Clear space diagram */
+  .clearspace { position: relative; display: block; max-width: 360px; padding: clamp(32px, 8vw, 48px); outline: 1px dashed var(--kalma-coral-deep); outline-offset: -1px; background: repeating-linear-gradient(45deg, rgba(224,122,95,.12) 0 6px, transparent 6px 12px); }
+  .clearspace .inner { background: var(--kalma-sand); padding: 0; }
+  .clearspace img { width: 100%; height: auto; }
+  .clearspace .x { position: absolute; font-family: var(--font-display); font-style: italic; color: var(--kalma-coral-deep); font-size: 18px; }
+
+  .minsize { display: flex; align-items: flex-end; gap: var(--space-6); flex-wrap: wrap; }
+  .minsize figure { margin: 0; text-align: center; font-size: var(--text-xs); }
+
+  /* Misuse */
+  .misuse .stage { min-height: 180px; }
+  .misuse .stage img { max-height: 110px; }
+  .misuse .stage::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top right, transparent calc(50% - 1.5px), rgba(176,58,46,.85) 50%, transparent calc(50% + 1.5px));
+  }
+  .no { color: var(--color-danger); font-weight: 700; }
+  .yes { color: var(--color-success); font-weight: 700; }
+
+  /* ---------- Colors ---------- */
+  .swatch { border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); background: #fff; }
+  .swatch .chip { height: 150px; padding: var(--space-4); display: flex; align-items: flex-end; font-family: var(--font-display); font-size: var(--text-xl); }
+  .swatch .chip.lg { height: 220px; }
+  .swatch dl { margin: 0; padding: var(--space-4); display: grid; grid-template-columns: auto 1fr; gap: 2px var(--space-3); font-size: var(--text-sm); }
+  .swatch dt { color: var(--color-text-muted); }
+  .swatch dd { margin: 0; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 0.8rem; }
+  .swatch .use { padding: 0 var(--space-4) var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted); margin: 0; }
+
+  .ratio-bar { display: flex; height: 72px; border-radius: var(--radius-md); overflow: hidden; border: 1px solid var(--color-border); }
+  .ratio-bar div { display: flex; align-items: flex-end; padding: 8px 10px; font-size: var(--text-xs); font-weight: 700; }
+
+  .contrast { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); }
+  .contrast .pair { border-radius: var(--radius-sm); padding: var(--space-4); border: 1px solid var(--color-border); }
+  .contrast .pair b { font-family: var(--font-display); font-size: var(--text-xl); font-weight: 500; display: block; }
+  .contrast .pair span { font-size: var(--text-xs); font-weight: 600; }
+
+  /* ---------- Typography ---------- */
+  .font-card { padding: var(--space-6); }
+  .specimen { font-size: clamp(4rem, 3rem + 6vw, 8rem); line-height: 1; margin: 0 0 var(--space-4); color: var(--kalma-deep-sea); }
+  .specimen.display { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-weight: 500; }
+  .specimen.body { font-family: var(--font-body); font-weight: 600; }
+  .glyphs { font-size: var(--text-lg); word-break: break-all; color: var(--kalma-lagoon-deep); margin-bottom: var(--space-4); }
+  .scale-row { display: grid; grid-template-columns: 140px 1fr; gap: var(--space-4); align-items: baseline; padding: var(--space-4) 0; border-bottom: 1px solid var(--color-border); }
+  .scale-row:last-child { border-bottom: 0; }
+  .scale-row .meta { font-size: var(--text-xs); color: var(--color-text-muted); line-height: 1.5; }
+  .scale-row .meta b { color: var(--kalma-deep-sea); font-size: var(--text-sm); display: block; }
+  @media (max-width: 600px) { .scale-row { grid-template-columns: 1fr; gap: var(--space-1); } }
+  .t-h1 { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-size: var(--text-4xl); font-weight: 500; line-height: 1.05; color: var(--kalma-deep-sea); }
+  .t-h2 { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-size: var(--text-3xl); font-weight: 500; line-height: 1.1; color: var(--kalma-deep-sea); }
+  .t-h3 { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-size: var(--text-2xl); font-weight: 500; line-height: 1.2; color: var(--kalma-deep-sea); }
+  .t-h4 { font-family: var(--font-body); font-size: var(--text-xl); font-weight: 600; line-height: 1.3; color: var(--kalma-deep-sea); }
+  .t-eyebrow { font-size: var(--text-xs); font-weight: 600; text-transform: uppercase; letter-spacing: var(--tracking-eyebrow); color: var(--kalma-lagoon-deep); }
+  .t-lead { font-size: var(--text-lg); line-height: 1.6; }
+  .t-body { font-size: var(--text-base); line-height: var(--leading-body); }
+  .t-caption { font-size: var(--text-sm); color: var(--color-text-muted); }
+
+  /* ---------- Graphic elements ---------- */
+  .blob { aspect-ratio: 1; border-radius: var(--radius-blob); }
+  .pattern-tile {
+    height: 220px; border-radius: var(--radius-md);
+    background-color: var(--kalma-sand);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 20 Q 30 4 60 20 T 120 20' fill='none' stroke='%234B8AA5' stroke-opacity='.35' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+    border: 1px solid var(--color-border);
+  }
+  .pattern-tile.dark {
+    background-color: var(--kalma-deep-sea);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' viewBox='0 0 120 40'%3E%3Cpath d='M0 20 Q 30 4 60 20 T 120 20' fill='none' stroke='%23EDE0B5' stroke-opacity='.18' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+    border-color: transparent;
+  }
+  .icon-row { display: flex; flex-wrap: wrap; gap: var(--space-4); }
+  .icon-row figure { margin: 0; width: 88px; text-align: center; font-size: var(--text-xs); color: var(--color-text-muted); }
+  .icon-row .ic { width: 64px; height: 64px; margin: 0 auto 6px; border-radius: 20px; background: var(--kalma-sand); display: grid; place-items: center; }
+  .icon-row svg { width: 30px; height: 30px; stroke: var(--kalma-deep-sea); stroke-width: 1.75; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ---------- Photography ---------- */
+  .photo { border-radius: var(--radius-md); aspect-ratio: 4/5; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: var(--space-4); color: #fff; font-weight: 600; font-size: var(--text-sm); }
+  .photo span { background: rgba(27,43,56,.55); padding: 4px 10px; border-radius: var(--radius-pill); backdrop-filter: blur(4px); }
+  .ph-1 { background: radial-gradient(90% 60% at 50% 0%, #F6D9A8 0%, transparent 60%), linear-gradient(180deg, #F2B58A 0%, #6FB3C3 45%, #2E7A92 70%, #1A4A63 100%); }
+  .ph-2 { background: radial-gradient(60% 40% at 30% 70%, #3E6B4D 0%, transparent 70%), radial-gradient(50% 50% at 75% 60%, #2F5A40 0%, transparent 70%), linear-gradient(180deg, #A9D8E4 0%, #79C1CC 40%, #3E9BAE 70%, #1F6A82 100%); }
+  .ph-3 { background: radial-gradient(70% 50% at 50% 50%, #E9D8A9 0%, transparent 70%), linear-gradient(160deg, #B98C5A 0%, #8A6440 50%, #5A4029 100%); }
+  .ph-4 { background: radial-gradient(40% 30% at 60% 40%, #E07A5F 0%, transparent 70%), radial-gradient(35% 25% at 30% 60%, #F2C14E 0%, transparent 70%), linear-gradient(180deg, #2C8AA0 0%, #1C6880 50%, #12425A 100%); }
+
+  /* ---------- Voice ---------- */
+  .voice-table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .voice-table th, .voice-table td { text-align: left; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-border); vertical-align: top; }
+  .voice-table th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .12em; color: var(--color-text-muted); }
+  .table-scroll { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-md); background: #fff; }
+
+  /* ---------- UI components ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer;
+    font: 600 var(--text-base)/1 var(--font-body); padding: 14px 26px; border-radius: var(--radius-pill);
+    transition: background var(--dur-fast) var(--ease-tide), transform var(--dur-fast) var(--ease-tide);
+    text-decoration: none;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn:focus-visible { outline: 3px solid var(--color-focus); outline-offset: 3px; }
+  .btn-cta { background: var(--color-cta); color: var(--color-cta-text); }
+  .btn-cta:hover { background: var(--color-cta-hover); }
+  .btn-primary { background: var(--kalma-deep-sea); color: var(--kalma-shell); }
+  .btn-primary:hover { background: #1A3A53; }
+  .btn-ghost { background: transparent; color: var(--kalma-deep-sea); box-shadow: inset 0 0 0 1.5px var(--kalma-deep-sea); }
+  .btn-ghost:hover { background: rgba(34,72,102,.06); }
+  .btn-sand { background: var(--kalma-sand); color: var(--kalma-deep-sea); }
+  .btn-row { display: flex; flex-wrap: wrap; gap: var(--space-3); align-items: center; }
+
+  .badge { display: inline-block; font-size: var(--text-xs); font-weight: 600; padding: 4px 12px; border-radius: var(--radius-pill); }
+  .b-lagoon { background: #D7E8EF; color: var(--kalma-lagoon-deep); }
+  .b-jungle { background: #DCE8DF; color: var(--kalma-jungle); }
+  .b-coral { background: #F8DDD4; color: var(--kalma-coral-deep); }
+  .b-sand { background: var(--kalma-sand); color: var(--kalma-deep-sea); }
+
+  .room-card { background: #fff; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); max-width: 380px; }
+  .room-card .img { aspect-ratio: 4/3; }
+  .room-card .body { padding: var(--space-5); }
+  .room-card h4 { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-size: var(--text-2xl); font-weight: 500; margin: var(--space-2) 0; color: var(--kalma-deep-sea); }
+  .room-card .price { display: flex; justify-content: space-between; align-items: center; margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid #EFE7CF; gap: var(--space-3); flex-wrap: wrap; }
+  .room-card .price b { font-family: var(--font-display); font-size: var(--text-xl); color: var(--kalma-deep-sea); font-weight: 600; }
+
+  .field { display: grid; gap: 6px; margin-bottom: var(--space-4); }
+  .field label { font-size: var(--text-sm); font-weight: 600; color: var(--kalma-deep-sea); }
+  .field input, .field select {
+    font: 400 var(--text-base) var(--font-body); color: var(--kalma-ink); padding: 12px 16px;
+    border: 1.5px solid var(--kalma-driftwood); border-radius: var(--radius-sm); background: #fff; width: 100%;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--kalma-lagoon); box-shadow: 0 0 0 4px rgba(75,138,165,.2); }
+
+  /* ---------- Applications ---------- */
+  .mock-site { border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-lg); background: var(--kalma-sand); border: 1px solid var(--color-border); }
+  .mock-bar { background: #E2D5A8; padding: 10px 14px; display: flex; gap: 6px; }
+  .mock-bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(34,72,102,.25); display: block; }
+  .mock-nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; gap: 16px; }
+  .mock-nav img { height: 34px; width: auto; }
+  .mock-nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; font-size: var(--text-sm); font-weight: 500; color: var(--kalma-deep-sea); }
+  @media (max-width: 760px) { .mock-nav ul { display: none; } }
+  .mock-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 28px; padding: 24px 28px 0; align-items: center; }
+  .mock-hero h1 { font-size: clamp(2rem, 1.4rem + 2.6vw, 3.4rem); line-height: 1.05; }
+  .mock-hero .img { border-radius: 200px 200px 24px 24px; aspect-ratio: 4/5; max-height: 420px; width: 100%; }
+  .mock-strip { margin-top: 28px; background: var(--kalma-deep-sea); color: var(--kalma-shell); padding: 18px 28px; display: flex; flex-wrap: wrap; gap: 12px 32px; font-size: var(--text-sm); }
+  .mock-strip b { color: var(--kalma-sand); font-family: var(--font-display); font-size: var(--text-lg); font-weight: 500; display: block; }
+
+  .bizcard { aspect-ratio: 85/55; border-radius: 10px; box-shadow: var(--shadow-md); padding: 7%; display: flex; flex-direction: column; justify-content: space-between; }
+  .bizcard.front { background: var(--kalma-sand); align-items: center; justify-content: center; }
+  .bizcard.front img { width: 62%; }
+  .bizcard.back { background: var(--kalma-deep-sea); color: var(--kalma-shell); font-size: clamp(10px, 1.3vw, 13px); line-height: 1.5; }
+  .bizcard.back .name { font-family: var(--font-display); font-size: 1.6em; color: var(--kalma-sand); line-height: 1.1; }
+  .bizcard.back .role { text-transform: uppercase; letter-spacing: .25em; font-size: .75em; color: #A9C4D3; }
+  .bizcard.back img { width: 18%; align-self: flex-end; }
+
+  .ig { aspect-ratio: 1; border-radius: var(--radius-md); overflow: hidden; position: relative; box-shadow: var(--shadow-md); }
+  .ig.a { background: var(--kalma-sand); padding: 9%; display: flex; flex-direction: column; justify-content: space-between; }
+  .ig.a .q { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-style: italic; font-size: clamp(0.95rem, 0.8rem + 0.6vw, 1.3rem); line-height: 1.2; color: var(--kalma-deep-sea); }
+  .ig.a img { width: 30%; }
+  .ig.b { display: flex; align-items: flex-end; padding: 8%; }
+  .ig.b .lbl { background: var(--kalma-shell); color: var(--kalma-deep-sea); border-radius: var(--radius-md); padding: 12px 16px; width: 100%; }
+  .ig.b .lbl small { display: block; font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--kalma-lagoon-deep); font-weight: 600; }
+  .ig.b .lbl b { font-family: var(--font-display); font-weight: 500; font-size: clamp(1rem, .9rem + .6vw, 1.35rem); }
+  .ig.b img.mark { position: absolute; top: 7%; left: 7%; width: 24%; }
+
+  .sign { background: #7A5A3C; background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 2px, transparent 2px 22px); border-radius: var(--radius-md); padding: var(--space-6); display: grid; place-items: center; min-height: 220px; }
+  .sign .board { background: var(--kalma-sand); border-radius: 18px; padding: 22px 30px; box-shadow: 0 10px 20px rgba(0,0,0,.25); text-align: center; }
+  .sign .board img { width: 200px; margin: 0 auto 8px; }
+  .sign .board small { font-size: 11px; letter-spacing: .25em; text-transform: uppercase; color: var(--kalma-deep-sea); font-weight: 600; }
+
+  .keytag { width: 120px; height: 200px; background: var(--kalma-deep-sea); border-radius: 60px 60px 24px 24px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 22px 0 26px; box-shadow: var(--shadow-md); }
+  .keytag::before { content: ""; width: 18px; height: 18px; border-radius: 50%; background: var(--kalma-sand); }
+  .keytag img { width: 46px; }
+  .keytag b { font-family: var(--font-display); color: var(--kalma-sand); font-size: 30px; font-weight: 500; line-height: 1; }
+  .keytag small { color: #A9C4D3; font-size: 9px; letter-spacing: .25em; text-transform: uppercase; }
+
+  /* ---------- Assets list ---------- */
+  .asset { display: flex; gap: var(--space-4); align-items: center; padding: var(--space-3); border-radius: var(--radius-sm); background: #fff; border: 1px solid var(--color-border); }
+  .asset .th { width: 64px; height: 64px; flex: none; border-radius: 10px; display: grid; place-items: center; padding: 8px; }
+  .asset .th img { max-height: 48px; width: auto; }
+  .asset code { display: block; word-break: break-all; color: var(--kalma-deep-sea); }
+  .asset span { font-size: var(--text-xs); color: var(--color-text-muted); }
+
+  footer { background: var(--kalma-ink); color: #A9B6C0; padding: var(--space-8) 0; font-size: var(--text-sm); }
+  footer img { height: 56px; width: auto; margin-bottom: var(--space-4); }
+
+  ul.rules { padding-left: 1.1em; margin: 0; }
+  ul.rules li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<header class="toc">
+  <div class="wrap">
+    <img src="assets/kalma-wordmark.png" alt="Kalma">
+    <nav aria-label="Daftar isi">
+      <a href="#esensi">Esensi</a>
+      <a href="#logo">Logo</a>
+      <a href="#warna">Warna</a>
+      <a href="#tipografi">Tipografi</a>
+      <a href="#grafis">Elemen Grafis</a>
+      <a href="#foto">Fotografi</a>
+      <a href="#suara">Tone of Voice</a>
+      <a href="#ui">Komponen Web</a>
+      <a href="#aplikasi">Aplikasi</a>
+      <a href="#aset">Aset</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ===================== COVER ===================== -->
+<section class="cover">
+  <div class="wrap">
+    <img src="assets/kalma-logo-primary.png" alt="Logo Kalma Raja Ampat">
+    <p class="eyebrow">Brand Identity Guidelines · v1.0 · 2026</p>
+    <h1>Tenang seperti laguna,<br>hangat seperti pasir.</h1>
+    <p class="lead">Panduan ini menjaga Kalma tampil konsisten di website, media sosial, cetakan, sampai papan nama di dermaga. Pakai sebagai rujukan tiap kali membuat apa pun atas nama Kalma.</p>
+    <p class="muted small">Catatan: harga, jumlah kamar, nama pulau, rating, dan detail fasilitas pada contoh di dokumen ini adalah <em>placeholder</em>. Ganti dengan data asli Kalma.</p>
+  </div>
+</section>
+<svg class="wave-divider" viewBox="0 0 1440 80" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 40 C 240 0, 480 0, 720 30 S 1200 80, 1440 30 L1440 80 L0 80 Z" fill="#FAF6EA"/>
+</svg>
+
+<!-- ===================== 01 ESENSI ===================== -->
+<section class="block alt" id="esensi" style="padding-top: var(--space-7)">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">01</span>
+      <h2>Esensi Brand</h2>
+      <p class="lead">Siapa Kalma, untuk siapa, dan rasa apa yang ingin ditinggalkan di benak tamu.</p>
+    </div>
+
+    <div class="meaning" style="margin-bottom: var(--space-8)">
+      <div>
+        <p class="eyebrow">Makna nama</p>
+        <p class="big-quote">“Kalma” — dari <em>calm</em>: ketenangan yang ditemukan saat waktu melambat di tengah laut Raja Ampat.</p>
+      </div>
+      <div>
+        <p>Kalma adalah homestay di Raja Ampat, Papua Barat Daya: rumah kayu sederhana di tepi air jernih, dikelola dengan keramahan lokal. Kami tidak menjual kemewahan. Kami menawarkan <strong>jeda</strong>: bangun dengan suara ombak, snorkeling dari depan kamar, makan ikan bakar bersama keluarga tuan rumah.</p>
+        <p>Gelombang yang membelah logo menjadi dua warna adalah garis permukaan air: bagian atas adalah laguna yang terang, bagian bawah adalah kedalaman laut yang tenang. Huruf-hurufnya meliuk seperti daun kelapa dan sirip ikan.</p>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-bottom: var(--space-7)">
+      <div class="card">
+        <p class="eyebrow">Visi</p>
+        <h3>Menjadi rumah singgah paling menenangkan di Raja Ampat.</h3>
+        <p class="muted small">Tempat tamu pulang dengan pikiran yang lebih ringan dan cerita tentang orang-orangnya, bukan hanya pemandangannya.</p>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Misi</p>
+        <ul class="rules small">
+          <li>Menyediakan penginapan bersih, nyaman, dan jujur harganya.</li>
+          <li>Membuka pengalaman laut &amp; budaya Papua secara autentik.</li>
+          <li>Menjaga karang dan memberdayakan warga kampung.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Positioning</p>
+        <h3>Untuk pelancong yang ingin melambat.</h3>
+        <p class="muted small">Berbeda dari resort mewah dan dive camp yang padat jadwal, Kalma menawarkan ketenangan, kehangatan keluarga lokal, dan akses langsung ke terumbu.</p>
+      </div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <p class="eyebrow">Nilai inti</p>
+        <div class="grid" style="gap: var(--space-3)">
+          <div><strong>Tenang</strong> <span class="muted small">— tidak terburu-buru, ruang untuk bernapas.</span></div>
+          <div><strong>Hangat</strong> <span class="muted small">— tamu disambut seperti keluarga.</span></div>
+          <div><strong>Jujur</strong> <span class="muted small">— apa adanya, tanpa janji berlebihan.</span></div>
+          <div><strong>Menjaga</strong> <span class="muted small">— laut, karang, dan kampung tetap lestari.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="eyebrow">Kepribadian brand</p>
+        <ul class="pill-list" style="margin-bottom: var(--space-4)">
+          <li>Kalem</li><li>Ramah</li><li>Membumi</li><li>Ceria secukupnya</li><li>Tulus</li><li>Peduli alam</li>
+        </ul>
+        <p class="eyebrow" style="margin-top: var(--space-5)">Tagline</p>
+        <p style="font-family: var(--font-display); font-size: var(--text-2xl); color: var(--kalma-deep-sea); margin-bottom: 4px; line-height:1.2">Slow down, Raja Ampat style.</p>
+        <p class="muted small">Alternatif: “Pelan-pelan saja di Raja Ampat.” · “Where the reef meets home.”</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 02 LOGO ===================== -->
+<section class="block" id="logo">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">02</span>
+      <h2>Logo</h2>
+      <p class="lead">Logo Kalma adalah wordmark tulisan tangan dengan garis gelombang dua warna, ditambah descriptor “RAJA AMPAT”. Logo adalah aset paling berharga: jangan digambar ulang, pakai file resmi.</p>
+    </div>
+
+    <div class="grid g2" style="margin-bottom: var(--space-7); align-items: stretch">
+      <div class="stage tall st-sand anatomy">
+        <img src="assets/kalma-logo-primary.png" alt="Logo utama Kalma">
+        <span class="tag" style="top: 16px; left: 16px">① Wordmark</span>
+        <span class="tag" style="top: 16px; right: 16px; background: var(--kalma-lagoon)">② Garis gelombang</span>
+        <span class="tag" style="bottom: 16px; left: 50%; transform: translateX(-50%)">③ Descriptor</span>
+      </div>
+      <div class="card">
+        <h3>Anatomi</h3>
+        <p><strong>① Wordmark “Kalma”</strong>: huruf organik yang meliuk seperti daun dan sirip. Bentuknya unik dan tidak boleh diganti font lain.</p>
+        <p><strong>② Garis gelombang</strong>: membagi huruf menjadi <span style="color: var(--kalma-lagoon-deep); font-weight:600">Laguna</span> (atas) dan <span style="color: var(--kalma-deep-sea); font-weight:600">Laut Dalam</span> (bawah). Ini “signature” Kalma dan menjadi sumber elemen grafis gelombang.</p>
+        <p><strong>③ Descriptor “RAJA AMPAT”</strong>: kapital dengan spasi huruf lebar, menegaskan lokasi. Boleh dilepas hanya pada versi wordmark (lihat varian).</p>
+        <p class="muted small" style="margin-top: var(--space-5)">Catatan: file logo saat ini berbentuk PNG resolusi tinggi. Untuk cetak besar (spanduk, papan nama) mintakan versi vektor (SVG/AI/PDF) dari desainer logo.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-8)">Varian logo</h3>
+    <p class="muted">Pilih varian sesuai latar dan ruang yang tersedia. Urutan prioritas: Utama → Putih → Monokrom → Wordmark → Monogram.</p>
+    <div class="grid g3" style="margin-bottom: var(--space-7)">
+      <div>
+        <div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt=""></div>
+        <p class="caption"><strong>A. Utama (full color)</strong>Default. Di atas Pasir, Kerang, atau putih.</p>
+      </div>
+      <div>
+        <div class="stage st-deep"><img src="assets/kalma-logo-white.png" alt=""></div>
+        <p class="caption"><strong>B. Putih (reversed)</strong>Di atas Laut Dalam, Tinta Malam, atau foto gelap.</p>
+      </div>
+      <div>
+        <div class="stage st-white"><img src="assets/kalma-logo-mono-deepsea.png" alt=""></div>
+        <p class="caption"><strong>C. Monokrom Laut Dalam</strong>Cetak 1 warna, stempel, sablon, faktur.</p>
+      </div>
+      <div>
+        <div class="stage st-sand"><img src="assets/kalma-wordmark.png" alt="" style="max-height:110px"></div>
+        <p class="caption"><strong>D. Wordmark</strong>Tanpa descriptor. Untuk header website, ruang horizontal sempit, atau saat “Raja Ampat” sudah jelas dari konteks.</p>
+      </div>
+      <div>
+        <div class="stage st-shell" style="gap: 16px; grid-auto-flow: column">
+          <img src="assets/kalma-icon-sand.png" alt="" style="max-height:110px; border-radius: 24px">
+          <img src="assets/kalma-icon-deepsea.png" alt="" style="max-height:110px; border-radius: 24px">
+        </div>
+        <p class="caption"><strong>E. Monogram “K” / Ikon</strong>Favicon, foto profil media sosial, ikon aplikasi, gantungan kunci, watermark.</p>
+      </div>
+      <div>
+        <div class="stage st-lagoon"><img src="assets/kalma-logo-mono-sand.png" alt=""></div>
+        <p class="caption"><strong>F. Monokrom Pasir</strong>Di atas Laguna atau Laut Dalam untuk nuansa hangat (merchandise, tote bag).</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top: var(--space-8)">
+      <div>
+        <h3>Area aman (clear space)</h3>
+        <p class="muted">Sisakan ruang kosong di sekeliling logo minimal <strong>X</strong>, yaitu tinggi huruf “a” kecil pada wordmark (± 25% tinggi logo). Tidak boleh ada teks, foto, atau tepi kertas di dalam area ini.</p>
+        <div class="clearspace">
+          <span class="x" style="top: 12px; left: 50%">x</span>
+          <span class="x" style="bottom: 12px; left: 50%">x</span>
+          <span class="x" style="left: 18px; top: 50%">x</span>
+          <span class="x" style="right: 18px; top: 50%">x</span>
+          <div class="inner"><img src="assets/kalma-logo-primary.png" alt="Diagram area aman logo"></div>
+        </div>
+      </div>
+      <div>
+        <h3>Ukuran minimum</h3>
+        <p class="muted">Di bawah ukuran ini descriptor “RAJA AMPAT” tidak terbaca. Gunakan wordmark atau monogram.</p>
+        <div class="minsize" style="margin-bottom: var(--space-5)">
+          <figure><img src="assets/kalma-logo-primary.png" alt="" style="width:120px"><figcaption>Logo utama<br><b>120 px</b> / 30 mm</figcaption></figure>
+          <figure><img src="assets/kalma-wordmark.png" alt="" style="width:80px"><figcaption>Wordmark<br><b>80 px</b> / 20 mm</figcaption></figure>
+          <figure><img src="assets/kalma-icon-sand.png" alt="" style="width:24px; margin: 0 auto"><figcaption>Monogram<br><b>16 px</b> / 6 mm</figcaption></figure>
+        </div>
+        <h3>Penempatan</h3>
+        <ul class="rules muted small">
+          <li>Website: wordmark di kiri atas header, tinggi 32–40 px desktop, 28 px mobile.</li>
+          <li>Cetak: logo di pojok kiri atas atau tengah, tidak di tengah lipatan.</li>
+          <li>Media sosial: monogram untuk foto profil; logo putih/utama di pojok konten sebagai watermark kecil.</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="margin-top: var(--space-8)">Logo di atas berbagai latar</h3>
+    <div class="grid g4" style="margin-bottom: var(--space-7)">
+      <div><div class="stage st-sand" style="min-height:160px"><img src="assets/kalma-logo-primary.png" alt="" style="max-height:90px"></div><p class="caption"><span class="yes">✓</span> Pasir: paling ideal</p></div>
+      <div><div class="stage st-white" style="min-height:160px"><img src="assets/kalma-logo-primary.png" alt="" style="max-height:90px"></div><p class="caption"><span class="yes">✓</span> Putih / Kerang</p></div>
+      <div><div class="stage st-deep" style="min-height:160px"><img src="assets/kalma-logo-white.png" alt="" style="max-height:90px"></div><p class="caption"><span class="yes">✓</span> Laut Dalam + logo putih</p></div>
+      <div><div class="stage st-photo" style="min-height:160px"><img src="assets/kalma-logo-white.png" alt="" style="max-height:90px"></div><p class="caption"><span class="yes">✓</span> Foto gelap/tenang + logo putih</p></div>
+    </div>
+
+    <h3>Larangan penggunaan logo</h3>
+    <div class="grid g4 misuse">
+      <div><div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt="" style="transform: scaleX(1.45)"></div><p class="caption"><span class="no">✕</span> Jangan meregangkan / memipihkan</p></div>
+      <div><div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt="" style="transform: rotate(-14deg)"></div><p class="caption"><span class="no">✕</span> Jangan memutar</p></div>
+      <div><div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt="" style="filter: hue-rotate(140deg) saturate(1.6)"></div><p class="caption"><span class="no">✕</span> Jangan mengganti warna di luar palet</p></div>
+      <div><div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt="" style="filter: drop-shadow(6px 8px 4px rgba(0,0,0,.45))"></div><p class="caption"><span class="no">✕</span> Jangan diberi bayangan, glow, atau efek 3D</p></div>
+      <div><div class="stage st-lagoon"><img src="assets/kalma-logo-primary.png" alt=""></div><p class="caption"><span class="no">✕</span> Jangan logo berwarna di atas latar biru (kontras hilang)</p></div>
+      <div><div class="stage" style="background: repeating-conic-gradient(#E07A5F 0 25%, #F2C14E 0 50%) 0 0/36px 36px"><img src="assets/kalma-logo-primary.png" alt=""></div><p class="caption"><span class="no">✕</span> Jangan di atas latar ramai</p></div>
+      <div><div class="stage st-sand"><img src="assets/kalma-logo-primary.png" alt="" style="opacity:.35"></div><p class="caption"><span class="no">✕</span> Jangan transparan/pudar (kecuali watermark foto)</p></div>
+      <div><div class="stage st-sand" style="font-family: 'Comic Sans MS', cursive; font-size: 42px; color: var(--kalma-deep-sea)"><span>Kalma</span></div><p class="caption"><span class="no">✕</span> Jangan mengetik ulang dengan font lain</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 03 WARNA ===================== -->
+<section class="block alt" id="warna">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>Warna</h2>
+      <p class="lead">Palet diambil dari logo dan alam Raja Ampat: pasir pantai, laguna toska, laut dalam, karang, dan hutan pulau karst.</p>
+    </div>
+
+    <h3>Warna inti</h3>
+    <div class="grid g3" style="margin-bottom: var(--space-6)">
+      <div class="swatch">
+        <div class="chip lg" style="background:#EDE0B5; color:#224866">Pasir Kalma</div>
+        <dl><dt>HEX</dt><dd>#EDE0B5</dd><dt>RGB</dt><dd>237 224 181</dd><dt>CMYK</dt><dd>5 8 32 0</dd><dt>Token</dt><dd>--kalma-sand</dd></dl>
+        <p class="use">Latar utama brand. Halaman website, kartu nama, kemasan.</p>
+      </div>
+      <div class="swatch">
+        <div class="chip lg" style="background:#4B8AA5; color:#fff">Laguna</div>
+        <dl><dt>HEX</dt><dd>#4B8AA5</dd><dt>RGB</dt><dd>75 138 165</dd><dt>CMYK</dt><dd>72 30 20 2</dd><dt>Token</dt><dd>--kalma-lagoon</dd></dl>
+        <p class="use">Elemen grafis, ilustrasi, ikon, garis gelombang. Untuk teks kecil gunakan Laguna Dalam.</p>
+      </div>
+      <div class="swatch">
+        <div class="chip lg" style="background:#224866; color:#EDE0B5">Laut Dalam</div>
+        <dl><dt>HEX</dt><dd>#224866</dd><dt>RGB</dt><dd>34 72 102</dd><dt>CMYK</dt><dd>92 68 38 25</dd><dt>Token</dt><dd>--kalma-deep-sea</dd></dl>
+        <p class="use">Judul, tombol utama, section gelap, footer, logo monokrom.</p>
+      </div>
+    </div>
+
+    <h3>Warna pendukung &amp; aksen</h3>
+    <div class="grid g4" style="margin-bottom: var(--space-7)">
+      <div class="swatch"><div class="chip" style="background:#FAF6EA; color:#224866">Kerang</div><dl><dt>HEX</dt><dd>#FAF6EA</dd><dt>CMYK</dt><dd>1 2 8 0</dd></dl><p class="use">Permukaan kartu, section selang-seling.</p></div>
+      <div class="swatch"><div class="chip" style="background:#C9B98A; color:#1B2B38">Kayu Hanyut</div><dl><dt>HEX</dt><dd>#C9B98A</dd><dt>CMYK</dt><dd>20 22 50 0</dd></dl><p class="use">Border, garis pemisah, ilustrasi.</p></div>
+      <div class="swatch"><div class="chip" style="background:#2B6680; color:#fff">Laguna Dalam</div><dl><dt>HEX</dt><dd>#2B6680</dd><dt>CMYK</dt><dd>85 50 30 10</dd></dl><p class="use">Link, eyebrow, teks biru (lolos AA).</p></div>
+      <div class="swatch"><div class="chip" style="background:#1B2B38; color:#EDE0B5">Tinta Malam</div><dl><dt>HEX</dt><dd>#1B2B38</dd><dt>CMYK</dt><dd>85 68 50 55</dd></dl><p class="use">Teks body, footer. Pengganti hitam.</p></div>
+      <div class="swatch"><div class="chip" style="background:#E07A5F; color:#1B2B38">Karang</div><dl><dt>HEX</dt><dd>#E07A5F</dd><dt>CMYK</dt><dd>5 62 65 0</dd></dl><p class="use">Aksen: tombol “Pesan Sekarang”, highlight promo.</p></div>
+      <div class="swatch"><div class="chip" style="background:#A84A33; color:#fff">Karang Tua</div><dl><dt>HEX</dt><dd>#A84A33</dd><dt>CMYK</dt><dd>20 78 88 12</dd></dl><p class="use">Teks aksen/harga di latar terang.</p></div>
+      <div class="swatch"><div class="chip" style="background:#3F6B4E; color:#fff">Hutan</div><dl><dt>HEX</dt><dd>#3F6B4E</dd><dt>CMYK</dt><dd>75 38 75 25</dd></dl><p class="use">Label eco, aktivitas alam, status berhasil.</p></div>
+    </div>
+
+    <div class="grid g2">
+      <div>
+        <h3>Proporsi penggunaan</h3>
+        <p class="muted">Pasir dominan agar kesan hangat dan lapang. Biru menjadi “suara” brand. Karang hanya untuk hal yang harus diklik.</p>
+        <div class="ratio-bar" role="img" aria-label="Proporsi warna: Pasir dan Kerang 60 persen, Laut Dalam 25 persen, Laguna 10 persen, Karang 5 persen">
+          <div style="flex:60; background:#EDE0B5; color:#224866">Pasir + Kerang 60%</div>
+          <div style="flex:25; background:#224866; color:#EDE0B5">Laut Dalam 25%</div>
+          <div style="flex:10; background:#4B8AA5; color:#fff">10%</div>
+          <div style="flex:5; background:#E07A5F; color:#1B2B38">5%</div>
+        </div>
+        <p class="muted small" style="margin-top: var(--space-3)">Nilai CMYK adalah perkiraan. Selalu minta <em>proof</em> cetak ke percetakan, terutama untuk Pasir yang mudah bergeser jadi kuning.</p>
+      </div>
+      <div>
+        <h3>Kombinasi aman (aksesibilitas)</h3>
+        <div class="contrast">
+          <div class="pair" style="background:#EDE0B5; color:#224866"><b>Aa Laut Dalam</b><span>di Pasir · 7.3 : 1 · AAA</span></div>
+          <div class="pair" style="background:#EDE0B5; color:#1B2B38"><b>Aa Tinta Malam</b><span>di Pasir · 11 : 1 · AAA</span></div>
+          <div class="pair" style="background:#224866; color:#FFFFFF"><b>Aa Putih</b><span>di Laut Dalam · 9.6 : 1 · AAA</span></div>
+          <div class="pair" style="background:#FAF6EA; color:#2B6680"><b>Aa Laguna Dalam</b><span>di Kerang · 5.9 : 1 · AA</span></div>
+          <div class="pair" style="background:#E07A5F; color:#1B2B38"><b>Aa Tinta Malam</b><span>di Karang · 4.9 : 1 · AA</span></div>
+          <div class="pair" style="background:#EDE0B5; color:#4B8AA5"><b>Aa Laguna</b><span>di Pasir · 2.9 : 1 · hanya dekoratif / judul ≥ 32 px</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 04 TIPOGRAFI ===================== -->
+<section class="block" id="tipografi">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Tipografi</h2>
+      <p class="lead">Dua keluarga huruf gratis (Google Fonts) yang melengkapi karakter logo: serif lembut untuk rasa hangat, sans buatan Indonesia untuk keterbacaan.</p>
+    </div>
+
+    <div class="grid g2" style="margin-bottom: var(--space-8)">
+      <div class="card font-card">
+        <p class="eyebrow">Display · Judul</p>
+        <p class="specimen display">Aa</p>
+        <h3 style="font-size: var(--text-2xl)">Fraunces <span class="muted small" style="font-family: var(--font-body)">(SOFT 100)</span></h3>
+        <p class="glyphs" style="font-family: var(--font-display); font-variation-settings: 'SOFT' 100">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 &amp; ? ! Rp</p>
+        <p class="muted small">Serif dengan sudut membulat (atur sumbu <code>SOFT</code> ke 100) sehingga senada dengan lekuk logo. Pakai untuk H1–H3, kutipan, angka harga. Bobot: <strong>Light 300, Regular 400, Medium 500</strong>. <em>Italic</em> untuk kutipan &amp; penekanan emosional.</p>
+      </div>
+      <div class="card font-card">
+        <p class="eyebrow">Teks · UI</p>
+        <p class="specimen body">Aa</p>
+        <h3 style="font-size: var(--text-2xl); font-family: var(--font-body); font-weight: 600">Plus Jakarta Sans</h3>
+        <p class="glyphs" style="font-family: var(--font-body)">ABCDEFGHIJKLMNOPQRSTUVWXYZ<br>abcdefghijklmnopqrstuvwxyz<br>0123456789 &amp; ? ! Rp</p>
+        <p class="muted small">Sans geometris karya desainer Indonesia (Tokotype). Bersih, ramah, sangat terbaca di layar kecil. Pakai untuk body, navigasi, tombol, form, dan label kapital ber-spasi lebar ala descriptor “RAJA AMPAT”. Bobot: <strong>Regular 400, Medium 500, SemiBold 600, Bold 700</strong>.</p>
+      </div>
+    </div>
+
+    <h3>Hierarki &amp; skala</h3>
+    <div class="card" style="padding: var(--space-3) var(--space-5); margin-bottom: var(--space-6)">
+      <div class="scale-row"><div class="meta"><b>Eyebrow</b>Jakarta 600 · 12px · CAPS · +0.3em</div><div class="t-eyebrow">Homestay di Pulau Kri</div></div>
+      <div class="scale-row"><div class="meta"><b>H1 / Hero</b>Fraunces 500 · 40→72px · 1.05</div><div class="t-h1">Bangun dengan suara ombak.</div></div>
+      <div class="scale-row"><div class="meta"><b>H2</b>Fraunces 500 · 32→44px · 1.1</div><div class="t-h2">Kamar di atas air</div></div>
+      <div class="scale-row"><div class="meta"><b>H3</b>Fraunces 500 · 24→32px · 1.2</div><div class="t-h3">Paket snorkeling 3 hari</div></div>
+      <div class="scale-row"><div class="meta"><b>H4</b>Jakarta 600 · 20→24px · 1.3</div><div class="t-h4">Fasilitas kamar</div></div>
+      <div class="scale-row"><div class="meta"><b>Lead</b>Jakarta 400 · 18px · 1.6</div><div class="t-lead">Rumah kayu sederhana di tepi laguna, dikelola keluarga lokal.</div></div>
+      <div class="scale-row"><div class="meta"><b>Body</b>Jakarta 400 · 16px · 1.65</div><div class="t-body">Sarapan, makan siang, dan makan malam sudah termasuk. Menu harian mengikuti tangkapan nelayan kampung: ikan bakar, papeda, sayur ganemo, dan buah segar.</div></div>
+      <div class="scale-row"><div class="meta"><b>Caption</b>Jakarta 400 · 14px</div><div class="t-caption">Foto: pemandangan dari dermaga Kalma, pukul 06.10 WIT.</div></div>
+    </div>
+
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="yes">✓</span> Lakukan</h3>
+        <ul class="rules small">
+          <li>Judul pakai <em>sentence case</em>: “Kamar di atas air”, bukan “Kamar Di Atas Air”.</li>
+          <li>Panjang baris body 55–75 karakter (maks. ±680 px).</li>
+          <li>Label kecil boleh kapital dengan <code>letter-spacing: 0.3em</code>, gema descriptor logo.</li>
+          <li>Harga dan angka besar pakai Fraunces: <span style="font-family: var(--font-display); color: var(--kalma-deep-sea); font-weight: 600">Rp 850.000</span> / malam.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="no">✕</span> Hindari</h3>
+        <ul class="rules small">
+          <li>Font tulisan tangan atau script lain: bersaing dengan logo.</li>
+          <li>Paragraf panjang dalam huruf kapital semua.</li>
+          <li>Fraunces untuk teks di bawah 18 px atau di tombol.</li>
+          <li>Lebih dari 2 keluarga font dalam satu desain.</li>
+        </ul>
+        <p class="muted small" style="margin-top: var(--space-4)">Fallback bila font tidak tersedia (mis. di Word/Canva): Georgia untuk judul, Arial/Segoe UI untuk teks.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 05 ELEMEN GRAFIS ===================== -->
+<section class="block alt" id="grafis">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">05</span>
+      <h2>Elemen Grafis</h2>
+      <p class="lead">Semua elemen grafis diturunkan dari garis gelombang di logo: lembut, mengalir, tanpa sudut tajam.</p>
+    </div>
+
+    <div class="grid g3" style="margin-bottom: var(--space-7)">
+      <div>
+        <div class="stage st-sand" style="padding:0; min-height:200px; display:block">
+          <svg viewBox="0 0 400 200" width="100%" height="200" preserveAspectRatio="none" aria-hidden="true">
+            <rect width="400" height="200" fill="#EDE0B5"/>
+            <path d="M0 95 C 90 60, 170 70, 230 100 S 340 140, 400 110 L400 200 L0 200 Z" fill="#4B8AA5"/>
+            <path d="M0 130 C 110 100, 190 110, 260 135 S 350 165, 400 150 L400 200 L0 200 Z" fill="#224866"/>
+          </svg>
+        </div>
+        <p class="caption"><strong>Pemisah gelombang</strong>Transisi antar-section di website dan bagian bawah poster. Maks. 2 lapis.</p>
+      </div>
+      <div>
+        <div class="pattern-tile"></div>
+        <p class="caption"><strong>Pola riak</strong>Latar halus untuk kemasan, kertas surat, background story. Opasitas 15–35%.</p>
+      </div>
+      <div>
+        <div class="pattern-tile dark"></div>
+        <p class="caption"><strong>Pola riak (gelap)</strong>Untuk footer, kartu nama belakang, merchandise.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="align-items: start">
+      <div>
+        <h3>Bentuk organik</h3>
+        <p class="muted small">Bingkai foto berbentuk lengkung (arch) atau blob seperti batu karang. Radius besar, tidak ada sudut tajam 90° pada elemen dekoratif.</p>
+        <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: var(--space-4); max-width: 420px">
+          <div class="blob" style="background: var(--kalma-lagoon)"></div>
+          <div style="aspect-ratio: 3/4; border-radius: 999px 999px 18px 18px; background: var(--kalma-deep-sea)"></div>
+          <div style="aspect-ratio: 1; border-radius: 28px; background: var(--kalma-coral)"></div>
+        </div>
+      </div>
+      <div>
+        <h3>Ikon</h3>
+        <p class="muted small">Garis (outline) 1.75 px, ujung membulat, satu warna Laut Dalam di atas lingkaran/kotak Pasir. Rekomendasi set: <a href="https://lucide.dev" target="_blank" rel="noopener">Lucide</a> atau Phosphor (Regular).</p>
+        <div class="icon-row">
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></div>Snorkeling</figure>
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>Kamar</figure>
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><path d="M3 18c3 0 4-3 9-3s6 3 9 3"/><path d="M12 15V4"/><path d="M12 4l6 7H12"/></svg></div>Boat trip</figure>
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 11h16"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M9 7c0-1 1-1 1-2M13 7c0-1 1-1 1-2"/></svg></div>Makan</figure>
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>Sunrise</figure>
+          <figure><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19l8-8"/></svg></div>Eco</figure>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 06 FOTOGRAFI ===================== -->
+<section class="block" id="foto">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">06</span>
+      <h2>Fotografi</h2>
+      <p class="lead">Foto adalah 70% wajah website Kalma. Arah gayanya: cahaya alami, tenang, jujur, dan selalu ada rasa “manusia” di dalamnya.</p>
+    </div>
+    <div class="grid g4" style="margin-bottom: var(--space-6)">
+      <div class="photo ph-1"><span>Golden hour di dermaga</span></div>
+      <div class="photo ph-2"><span>Laguna &amp; pulau karst</span></div>
+      <div class="photo ph-3"><span>Detail kamar kayu</span></div>
+      <div class="photo ph-4"><span>Bawah air: karang &amp; ikan</span></div>
+    </div>
+    <p class="muted small" style="margin-bottom: var(--space-6)">Kotak di atas adalah ilustrasi suasana warna; ganti dengan foto asli Kalma.</p>
+    <div class="grid g2">
+      <div class="card">
+        <h3><span class="yes">✓</span> Cari momen seperti ini</h3>
+        <ul class="rules small">
+          <li>Pagi &amp; sore hari (golden hour), cahaya lembut, bayangan panjang.</li>
+          <li>Komposisi lapang dengan banyak ruang air/langit; cocok untuk teks di atasnya.</li>
+          <li>Orang sungguhan: tuan rumah, nelayan, anak kampung, tamu yang sedang santai (dengan izin).</li>
+          <li>Detail tekstur: anyaman, kayu, piring makan, kaki di dermaga.</li>
+          <li>Edit: warna natural, sedikit hangat, toska tidak terlalu jenuh.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="no">✕</span> Hindari</h3>
+        <ul class="rules small">
+          <li>Saturasi berlebihan atau filter HDR yang membuat air tampak “neon”.</li>
+          <li>Foto stok yang bukan Raja Ampat atau bukan milik Kalma.</li>
+          <li>Pose kaku, foto selfie, atau sudut lebar yang mendistorsi kamar.</li>
+          <li>Sampah, plastik, atau aktivitas yang merusak karang (menginjak karang, memegang biota).</li>
+          <li>Watermark besar di tengah foto.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 07 TONE OF VOICE ===================== -->
+<section class="block dark" id="suara">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num" style="color: var(--kalma-sand)">07</span>
+      <h2>Tone of Voice</h2>
+      <p class="lead">Kalma berbicara seperti tuan rumah yang ramah menjemput tamu di dermaga: santai, hangat, tidak berlebihan.</p>
+    </div>
+    <div class="grid g4" style="margin-bottom: var(--space-7)">
+      <div class="card" style="background: rgba(255,255,255,.06); border-color: rgba(237,224,181,.2)"><h3>Tenang, bukan malas</h3><p class="small" style="color:#C7D6E0">Kalimat pendek, ritme pelan. Tidak memakai tanda seru beruntun.</p></div>
+      <div class="card" style="background: rgba(255,255,255,.06); border-color: rgba(237,224,181,.2)"><h3>Hangat, bukan lebay</h3><p class="small" style="color:#C7D6E0">Sapa dengan “kamu”/“you”. Hindari superlatif kosong seperti “terbaik se-Indonesia”.</p></div>
+      <div class="card" style="background: rgba(255,255,255,.06); border-color: rgba(237,224,181,.2)"><h3>Jujur &amp; jelas</h3><p class="small" style="color:#C7D6E0">Sebut apa adanya: listrik jam berapa, sinyal di mana, berapa lama perjalanan.</p></div>
+      <div class="card" style="background: rgba(255,255,255,.06); border-color: rgba(237,224,181,.2)"><h3>Lokal &amp; peduli</h3><p class="small" style="color:#C7D6E0">Sisipkan kata lokal secukupnya (mis. “Selamat datang di kampung”) dan pesan menjaga laut.</p></div>
+    </div>
+    <div class="table-scroll" style="background: var(--kalma-shell); color: var(--kalma-ink)">
+      <table class="voice-table">
+        <thead><tr><th>Situasi</th><th>✓ Gaya Kalma</th><th>✕ Bukan Kalma</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Hero website</strong></td><td>Bangun dengan suara ombak. Sisanya, biar laut yang atur.</td><td>RESORT TERBAIK DAN TERMURAH DI RAJA AMPAT!!!</td></tr>
+          <tr><td><strong>Tombol</strong></td><td>Cek ketersediaan · Pesan kamar · Tanya via WhatsApp</td><td>Klik di sini · Submit · BURUAN PESAN</td></tr>
+          <tr><td><strong>Info praktis</strong></td><td>Listrik menyala pukul 18.00–06.00. Sinyal ada di dermaga, cukup untuk kabar ke rumah.</td><td>Fasilitas lengkap 24 jam.</td></tr>
+          <tr><td><strong>Caption IG</strong></td><td>Pagi ini lautnya diam sekali. Kopi, dermaga, dan tidak ada rencana. 🌊</td><td>Guys wajib banget ke sini sih, auto healing parah!!! 😍😍🔥</td></tr>
+          <tr><td><strong>English</strong></td><td>Slow mornings, clear water, and a family that cooks like you're one of them.</td><td>Luxury paradise experience of a lifetime!</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="small" style="color:#C7D6E0; margin-top: var(--space-4)">Bahasa: website dwibahasa <strong>Indonesia &amp; English</strong>. Mayoritas tamu Raja Ampat adalah wisatawan mancanegara, jadi English diutamakan di halaman pemesanan.</p>
+  </div>
+</section>
+
+<!-- ===================== 08 KOMPONEN UI ===================== -->
+<section class="block" id="ui">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">08</span>
+      <h2>Komponen Website</h2>
+      <p class="lead">Dasar UI untuk website. Semua nilai ada di <code>brand/tokens.css</code>; pakai token, jangan menulis hex langsung.</p>
+    </div>
+
+    <div class="grid g2" style="margin-bottom: var(--space-7); align-items: start">
+      <div>
+        <h3>Tombol</h3>
+        <div class="btn-row" style="margin-bottom: var(--space-4)">
+          <a class="btn btn-cta" href="#ui">Pesan kamar</a>
+          <a class="btn btn-primary" href="#ui">Cek ketersediaan</a>
+          <a class="btn btn-ghost" href="#ui">Lihat paket</a>
+        </div>
+        <div class="btn-row" style="background: var(--kalma-deep-sea); padding: var(--space-4); border-radius: var(--radius-md); margin-bottom: var(--space-4)">
+          <a class="btn btn-sand" href="#ui">Tanya via WhatsApp</a>
+          <a class="btn btn-cta" href="#ui">Pesan kamar</a>
+        </div>
+        <ul class="rules small muted">
+          <li><strong>Karang</strong> hanya untuk 1 aksi utama per layar (pemesanan).</li>
+          <li>Bentuk pill (radius penuh), tinggi min. 48 px agar mudah disentuh.</li>
+          <li>Label berupa kata kerja, maks. 3 kata.</li>
+        </ul>
+
+        <h3 style="margin-top: var(--space-6)">Badge / label</h3>
+        <div class="btn-row">
+          <span class="badge b-lagoon">Snorkeling</span>
+          <span class="badge b-jungle">Eco-friendly</span>
+          <span class="badge b-coral">Sisa 2 kamar</span>
+          <span class="badge b-sand">Termasuk makan 3x</span>
+        </div>
+
+        <h3 style="margin-top: var(--space-6)">Form</h3>
+        <div class="card" style="max-width: 420px">
+          <div class="field"><label for="ci">Check-in</label><input id="ci" type="text" value="12 Des 2026"></div>
+          <div class="field"><label for="gs">Jumlah tamu</label><select id="gs"><option>2 dewasa</option></select></div>
+          <a class="btn btn-cta" href="#ui" style="width:100%; justify-content:center">Cek ketersediaan</a>
+        </div>
+      </div>
+      <div>
+        <h3>Kartu kamar</h3>
+        <article class="room-card">
+          <div class="img ph-2"></div>
+          <div class="body">
+            <span class="badge b-lagoon">Di atas air</span>
+            <h4>Bungalow Laguna</h4>
+            <p class="small muted" style="margin:0">Kasur double, kelambu, teras pribadi dengan tangga langsung ke laut.</p>
+            <div class="price">
+              <div><b>Rp 850.000</b> <span class="small muted">/ malam / orang</span></div>
+              <a class="btn btn-primary" href="#ui" style="padding: 10px 18px; font-size: var(--text-sm)">Detail</a>
+            </div>
+          </div>
+        </article>
+        <h3 style="margin-top: var(--space-6)">Token kunci</h3>
+        <div class="card small mono" style="line-height:1.8">
+          --radius-md: 16px · --radius-lg: 28px<br>
+          --shadow-md: 0 8px 24px -8px rgba(34,72,102,.22)<br>
+          --space: 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96<br>
+          --container: 1200px · grid 12 kolom, gutter 24px<br>
+          --ease-tide: cubic-bezier(.33,0,.2,1) · 280ms
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 09 APLIKASI ===================== -->
+<section class="block alt" id="aplikasi">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">09</span>
+      <h2>Aplikasi</h2>
+      <p class="lead">Contoh penerapan identitas di titik-titik sentuh utama.</p>
+    </div>
+
+    <h3>Website: hero beranda</h3>
+    <div class="mock-site" style="margin-bottom: var(--space-8)">
+      <div class="mock-bar"><i></i><i></i><i></i></div>
+      <div class="mock-nav">
+        <img src="assets/kalma-wordmark.png" alt="Kalma">
+        <ul><li>Kamar</li><li>Pengalaman</li><li>Cerita</li><li>Lokasi</li></ul>
+        <a class="btn btn-cta" href="#aplikasi" style="padding: 10px 20px; font-size: var(--text-sm)">Pesan</a>
+      </div>
+      <div class="mock-hero">
+        <div>
+          <p class="t-eyebrow" style="margin-bottom: 12px">Homestay · Raja Ampat</p>
+          <h1>Bangun dengan suara ombak.</h1>
+          <p class="lead" style="margin-bottom: 24px">Rumah kayu di tepi laguna, makan bersama keluarga lokal, dan karang tepat di depan kamar.</p>
+          <div class="btn-row"><a class="btn btn-cta" href="#aplikasi">Cek ketersediaan</a><a class="btn btn-ghost" href="#aplikasi">Lihat kamar</a></div>
+        </div>
+        <div class="img ph-1"></div>
+      </div>
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" style="display:block; width:100%; height:40px; margin-top: 28px" aria-hidden="true"><path d="M0 30 C 300 0, 600 0, 820 26 S 1250 60, 1440 22 L1440 60 L0 60 Z" fill="#224866"/></svg>
+      <div class="mock-strip" style="margin-top:0">
+        <div><b>4.9 ★</b>ulasan tamu</div>
+        <div><b>5 kamar</b>di atas air</div>
+        <div><b>10 menit</b>ke spot manta</div>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-bottom: var(--space-7)">
+      <div>
+        <div class="bizcard front"><img src="assets/kalma-logo-primary.png" alt=""></div>
+        <div class="bizcard back" style="margin-top: var(--space-4)">
+          <div><div class="name">Nama Pemilik</div><div class="role">Host · Kalma</div></div>
+          <div style="display:flex; justify-content: space-between; align-items:flex-end; gap: 8px">
+            <div>+62 8xx xxxx xxxx<br>hello@kalma-rajaampat.com<br>kalma-rajaampat.com</div>
+            <img src="assets/kalma-logo-mono-sand.png" alt="" style="width:28%">
+          </div>
+        </div>
+        <p class="caption"><strong>Kartu nama</strong>85 × 55 mm. Depan Pasir + logo utama; belakang Laut Dalam.</p>
+      </div>
+      <div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-3)">
+          <div class="ig a"><div class="q">“Di sini, jam tidak terlalu penting.”</div><img src="assets/kalma-logo-mono-deepsea.png" alt=""></div>
+          <div class="ig b ph-1"><img class="mark" src="assets/kalma-logo-white.png" alt=""><div class="lbl"><small>Paket</small><b>3H2M Snorkel</b></div></div>
+          <div class="ig b ph-4"><img class="mark" src="assets/kalma-logo-white.png" alt=""><div class="lbl"><small>Bawah laut</small><b>Kebun karang</b></div></div>
+          <div class="ig" style="background: var(--kalma-deep-sea); display:grid; place-items:center"><img src="assets/kalma-icon-sand.png" alt="" style="width:46%; border-radius: 22%"></div>
+        </div>
+        <p class="caption"><strong>Instagram feed</strong>Selang-seling: kutipan di Pasir, foto + label Kerang, monogram sebagai foto profil.</p>
+      </div>
+      <div>
+        <div class="sign"><div class="board"><img src="assets/kalma-logo-primary.png" alt=""><small>Selamat datang · Welcome</small></div></div>
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-3); margin-top: var(--space-4); align-items:center">
+          <div class="keytag"><img src="assets/kalma-icon-deepsea.png" alt="" style="border-radius: 12px; box-shadow: 0 0 0 1px rgba(237,224,181,.3)"><b>03</b><small>Laguna</small></div>
+          <div style="background: var(--kalma-sand); border-radius: 0 0 40px 40px; aspect-ratio: 3/4; display:grid; place-items:center; box-shadow: var(--shadow-md); padding: 16px; border-top: 10px solid var(--kalma-deep-sea)"><img src="assets/kalma-logo-mono-deepsea.png" alt="" style="width: 80%"></div>
+        </div>
+        <p class="caption"><strong>Papan nama, gantungan kunci, tote bag</strong>Nama kamar memakai nama alam lokal (Laguna, Karang, Manta, Pari).</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 10 ASET ===================== -->
+<section class="block" id="aset">
+  <div class="wrap">
+    <div class="sec-head">
+      <span class="sec-num">10</span>
+      <h2>File &amp; Aset</h2>
+      <p class="lead">Semua file ada di folder <code>brand/assets/</code>. Latar transparan kecuali file original.</p>
+    </div>
+    <div class="grid g3">
+      <div class="asset"><div class="th st-sand"><img src="assets/kalma-logo-primary.png" alt=""></div><div><code>kalma-logo-primary.png</code><span>Logo utama, transparan</span></div></div>
+      <div class="asset"><div class="th st-deep"><img src="assets/kalma-logo-white.png" alt=""></div><div><code>kalma-logo-white.png</code><span>Logo putih</span></div></div>
+      <div class="asset"><div class="th st-white"><img src="assets/kalma-logo-mono-deepsea.png" alt=""></div><div><code>kalma-logo-mono-deepsea.png</code><span>Monokrom Laut Dalam</span></div></div>
+      <div class="asset"><div class="th st-deep"><img src="assets/kalma-logo-mono-sand.png" alt=""></div><div><code>kalma-logo-mono-sand.png</code><span>Monokrom Pasir</span></div></div>
+      <div class="asset"><div class="th st-sand"><img src="assets/kalma-wordmark.png" alt=""></div><div><code>kalma-wordmark.png</code><span>Wordmark tanpa descriptor</span></div></div>
+      <div class="asset"><div class="th st-deep"><img src="assets/kalma-wordmark-white.png" alt=""></div><div><code>kalma-wordmark-white.png</code><span>Wordmark putih</span></div></div>
+      <div class="asset"><div class="th st-shell"><img src="assets/kalma-monogram.png" alt=""></div><div><code>kalma-monogram.png</code><span>Monogram “K”, transparan</span></div></div>
+      <div class="asset"><div class="th st-shell"><img src="assets/kalma-icon-sand.png" alt=""></div><div><code>kalma-icon-sand.png / -deepsea.png</code><span>Ikon 512 px (profil sosmed)</span></div></div>
+      <div class="asset"><div class="th st-shell"><img src="assets/favicon-32.png" alt="" style="max-height:32px"></div><div><code>favicon.ico · favicon-32.png · apple-touch-icon.png</code><span>Ikon website</span></div></div>
+      <div class="asset"><div class="th st-sand"><img src="assets/kalma-logo-original.png" alt=""></div><div><code>kalma-logo-original.png</code><span>File asli 1254 px (latar pasir)</span></div></div>
+      <div class="asset"><div class="th st-shell" style="font-family: var(--font-display); font-size: 22px; color: var(--kalma-deep-sea)">{ }</div><div><code>tokens.css</code><span>Design tokens untuk website</span></div></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <img src="assets/kalma-logo-white.png" alt="Kalma Raja Ampat">
+    <p>Kalma Raja Ampat · Brand Identity Guidelines v1.0 · Oktober 2026</p>
+    <p>Pertanyaan soal penggunaan brand? Hubungi pengelola Kalma sebelum mencetak atau memublikasikan materi baru.</p>
+  </div>
+</footer>
+
+</body>
+</html>
