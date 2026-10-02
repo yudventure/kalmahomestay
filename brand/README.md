@@ -8,7 +8,8 @@ Panduan identitas brand untuk website dan semua materi Kalma Homestay.
 | File | Fungsi |
 |---|---|
 | `brand-guidelines.html` | Dokumen brand guideline (esensi, logo, warna, tipografi, elemen grafis, fotografi, tone of voice, komponen web, aplikasi) |
-| `Kalma-Brand-Guidelines.pdf` | Versi PDF siap cetak/kirim |
+| `Kalma-Brand-Guidelines-ID.pdf` · `-EN.pdf` · `-ES.pdf` | Deck presentasi klien (16:9, 26 halaman) dalam Bahasa Indonesia, English, Español |
+| `deck/` | Sumber deck: `content.py` (teks 3 bahasa), `build_deck.py` (template), `render.js` (ekspor PDF) |
 | `tokens.css` | Design tokens (CSS variables) untuk dipakai langsung di website |
 | `assets/` | Logo (utama, putih, monokrom, wordmark, monogram), ikon sosmed, favicon |
 
@@ -30,6 +31,13 @@ Panduan identitas brand untuk website dan semua materi Kalma Homestay.
 - Teks & UI: **Plus Jakarta Sans**, weight 400–700
 - Label kapital: Plus Jakarta Sans 600, `letter-spacing: 0.3em`
 
+## Membuat ulang PDF
+```bash
+cd brand/deck && python3 build_deck.py && node render.js
+```
+Ubah teks di `content.py`; tampilan di `build_deck.py`.
+
 ## Catatan
 - Logo saat ini berupa PNG hasil ekstraksi dari file asli. Untuk cetak besar, minta versi vektor (SVG/AI/PDF) ke desainer logo.
 - Harga, jumlah kamar, rating, dan detail fasilitas pada contoh di guideline adalah placeholder.
+- Dokumen disusun oleh Team Dampier (watermark & kredit di setiap halaman deck).
