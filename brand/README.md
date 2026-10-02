@@ -8,6 +8,7 @@ Panduan identitas brand untuk website dan semua materi Kalma Homestay.
 | File | Fungsi |
 |---|---|
 | `brand-guidelines.html` | Dokumen brand guideline (esensi, logo, warna, tipografi, elemen grafis, fotografi, tone of voice, komponen web, aplikasi) |
+| `Kalma-Brand-Guidelines.pdf` | Versi PDF siap cetak/kirim |
 | `tokens.css` | Design tokens (CSS variables) untuk dipakai langsung di website |
 | `assets/` | Logo (utama, putih, monokrom, wordmark, monogram), ikon sosmed, favicon |
 
