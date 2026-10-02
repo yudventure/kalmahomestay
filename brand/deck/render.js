@@ -4,7 +4,7 @@ const path = require('path');
 let pw; try { pw = require('playwright'); } catch { pw = require(require('child_process').execSync('npm root -g').toString().trim() + '/playwright'); }
 (async () => {
   const browser = await pw.chromium.launch();
-  for (const lang of ['id', 'en', 'es']) {
+  for (const lang of ['id', 'en']) {
     const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
     await page.goto('file://' + path.join(__dirname, `kalma-deck-${lang}.html`), { waitUntil: 'networkidle' });
     await page.evaluate(() => document.fonts.ready);

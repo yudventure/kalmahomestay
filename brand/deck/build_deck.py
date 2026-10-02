@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the Kalma brand-guidelines presentation deck (16:9) in ID / EN / ES.
+"""Build the Kalma brand-guidelines presentation deck (16:9) in ID / EN.
 
 Output: brand/deck/kalma-deck-<lang>.html  ->  render to PDF with render.js
 Usage:  python3 build_deck.py && node render.js
@@ -136,18 +136,13 @@ ul.l { margin: 0; padding-left: 1.1em; } ul.l li { font-size: 16px; line-height:
 
 /* cover */
 .cover { padding: 0; background: var(--kalma-sand); }
-.cover .in { position: relative; z-index: 2; display: grid; grid-template-columns: 1.05fr 1fr; height: 100%; }
-.cover .left { padding: 96px 0 0 104px; display: flex; flex-direction: column; }
-.cover .left img { width: 520px; }
-.cover .left .kick { margin-top: 56px; }
-.cover h1 { font-size: 64px; line-height: 1.05; max-width: 640px; }
-.cover .meta { margin-top: auto; margin-bottom: 120px; display: grid; grid-template-columns: auto auto; gap: 8px 48px; width: max-content; }
-.cover .meta small { display: block; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: var(--kalma-lagoon-deep); font-weight: 600; }
+.cover .in { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 96px; }
+.cover .in > img { width: 500px; }
+.cover .in .kick { margin-top: 48px; }
+.cover h1 { font-size: 60px; line-height: 1.08; max-width: 760px; }
+.cover .meta { margin-top: 44px; display: flex; gap: 64px; justify-content: center; }
+.cover .meta small { display: block; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: var(--kalma-lagoon-deep); font-weight: 600; margin-bottom: 4px; }
 .cover .meta b { font-size: 19px; color: var(--kalma-deep-sea); font-weight: 600; }
-.cover .right { position: relative; }
-.cover .arch { position: absolute; right: 104px; top: 84px; width: 560px; height: 660px; border-radius: 300px 300px 28px 28px; overflow: hidden;
-  background: radial-gradient(90% 60% at 50% 0%, #F6D9A8 0%, transparent 60%), linear-gradient(180deg, #F2B58A 0%, #6FB3C3 45%, #2E7A92 70%, #1A4A63 100%); }
-.cover .arch img { position: absolute; left: 50%; bottom: 64px; transform: translateX(-50%); width: 190px; border-radius: 40px; box-shadow: 0 20px 40px rgba(0,0,0,.25); }
 .cover .wave { position: absolute; left: 0; right: 0; bottom: 0; height: 110px; z-index: 1; }
 .cover .foot .l, .cover .foot { color: #E6EEF2; }
 .cover .foot .r b { color: var(--kalma-sand); } .cover .dmark { color: var(--kalma-sand); }
@@ -249,17 +244,17 @@ table.v tr:last-child td { border-bottom: 0; }
 .badge { display: inline-block; font-size: 13px; font-weight: 600; padding: 5px 13px; border-radius: 999px; }
 .bg-l { background: #D7E8EF; color: var(--kalma-lagoon-deep); } .bg-j { background: #DCE8DF; color: var(--kalma-jungle); }
 .bg-c { background: #F8DDD4; color: var(--kalma-coral-deep); } .bg-s { background: var(--kalma-sand); color: var(--kalma-deep-sea); }
-.room { background: #fff; border-radius: 26px; overflow: hidden; box-shadow: 0 18px 40px -16px rgba(34,72,102,.35); }
+.room { background: #fff; border-radius: 26px; overflow: hidden; border: 1px solid #E2D5A8; }
 .room .img { height: 230px; } .room .bd { padding: 22px 24px; }
 .room h4 { font-family: var(--font-display); font-weight: 500; font-size: 28px; margin: 8px 0 6px; color: var(--kalma-deep-sea); }
 .room .pr { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #EFE7CF; margin-top: 14px; padding-top: 14px; }
 .room .pr b { font-family: var(--font-display); font-size: 24px; color: var(--kalma-deep-sea); font-weight: 600; }
 .field { display: grid; gap: 6px; margin-bottom: 14px; } .field label { font-size: 14px; font-weight: 600; color: var(--kalma-deep-sea); }
 .field div { border: 1.5px solid var(--kalma-driftwood); border-radius: 10px; background: #fff; padding: 13px 16px; font-size: 16px; }
-.field.f div { border-color: var(--kalma-lagoon); box-shadow: 0 0 0 4px rgba(75,138,165,.2); }
+.field.f div { border-color: var(--kalma-lagoon); }
 
 /* applications */
-.site { border-radius: 18px; overflow: hidden; background: var(--kalma-sand); border: 1px solid var(--kalma-driftwood); box-shadow: 0 30px 60px -24px rgba(34,72,102,.4); }
+.site { border-radius: 18px; overflow: hidden; background: var(--kalma-sand); border: 1px solid var(--kalma-driftwood); border: 1px solid #E2D5A8; }
 .site .bar { background: #E2D5A8; padding: 10px 14px; display: flex; gap: 6px; } .site .bar i { width: 10px; height: 10px; border-radius: 50%; background: rgba(34,72,102,.25); }
 .site .nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 30px; }
 .site .nav img { height: 32px; width: auto; } .site .nav ul { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; font-size: 14px; font-weight: 500; color: var(--kalma-deep-sea); }
@@ -268,7 +263,7 @@ table.v tr:last-child td { border-bottom: 0; }
 .site .hero .img { border-radius: 200px 200px 22px 22px; height: 270px; }
 .site .strip { background: var(--kalma-deep-sea); color: var(--kalma-shell); padding: 16px 30px; display: flex; gap: 40px; font-size: 13px; }
 .site .strip b { display: block; color: var(--kalma-sand); font-family: var(--font-display); font-size: 20px; font-weight: 500; }
-.biz { width: 340px; aspect-ratio: 85/55; border-radius: 12px; box-shadow: 0 14px 30px -12px rgba(34,72,102,.35); padding: 7%; display: flex; flex-direction: column; justify-content: space-between; }
+.biz { width: 340px; aspect-ratio: 85/55; border-radius: 12px; border: 1px solid #E2D5A8; padding: 7%; display: flex; flex-direction: column; justify-content: space-between; }
 .biz.f { background: var(--kalma-sand); align-items: center; justify-content: center; } .biz.f img { width: 62%; }
 .biz.b { background: var(--kalma-deep-sea); color: var(--kalma-shell); font-size: 12px; line-height: 1.5; }
 .biz.b .nm { font-family: var(--font-display); font-size: 21px; color: var(--kalma-sand); line-height: 1.1; }
@@ -283,7 +278,7 @@ table.v tr:last-child td { border-bottom: 0; }
 .ig.b .lb b { font-family: var(--font-display); font-weight: 500; font-size: 17px; }
 .ig.b img.mk { position: absolute; top: 8%; left: 8%; width: 26%; }
 .sign { padding: 22px !important; background: #7A5A3C; background-image: repeating-linear-gradient(90deg, rgba(0,0,0,.06) 0 2px, transparent 2px 22px); border-radius: 16px; padding: 28px; display: grid; place-items: center; }
-.sign .bd { background: var(--kalma-sand); border-radius: 16px; padding: 20px 28px; box-shadow: 0 10px 20px rgba(0,0,0,.25); text-align: center; }
+.sign .bd { background: var(--kalma-sand); border-radius: 16px; padding: 20px 28px; border: 1px solid #E2D5A8; text-align: center; }
 .sign .bd img { width: 190px; margin: 0 auto 6px; } .sign .bd small { font-size: 10px; letter-spacing: .25em; text-transform: uppercase; color: var(--kalma-deep-sea); font-weight: 600; }
 .key { width: 110px; height: 184px; background: var(--kalma-deep-sea); border-radius: 55px 55px 22px 22px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 20px 0 22px; }
 .key::before { content: ""; width: 16px; height: 16px; border-radius: 50%; background: var(--kalma-sand); }
@@ -349,17 +344,16 @@ def build(t):
 
     # 1 cover
     d.add(f"""
-<div class="in"><div class="left">
+<div class="in">
   <img src="{A}kalma-logo-primary.png" alt="Kalma Raja Ampat">
   <p class="kick">{S['cover']['kick']}</p>
   <h1>{S['cover']['title']}</h1>
   <div class="meta">
     <div><small>{S['cover']['for']}</small><b>Kalma Raja Ampat Homestay</b></div>
     <div><small>{S['cover']['by']}</small><b>Team Dampier</b></div>
-    <div style="grid-column: 1 / -1; margin-top: 10px"><small>{S['cover']['date']}</small></div>
+    <div><small>{S['cover']['date_k']}</small><b>{S['cover']['date']}</b></div>
   </div>
 </div>
-<div class="right"><div class="arch"><img src="{A}kalma-icon-sand.png" alt=""></div></div></div>
 <svg class="wave" viewBox="0 0 1600 110" preserveAspectRatio="none" aria-hidden="true">
   <path d="M0 52 C 260 10, 540 10, 800 46 S 1340 104, 1600 40 L1600 110 L0 110 Z" fill="#4B8AA5"/>
   <path d="M0 78 C 300 46, 560 52, 840 76 S 1360 112, 1600 70 L1600 110 L0 110 Z" fill="#224866"/>
@@ -452,13 +446,13 @@ def build(t):
     d.add(head(f"02 · {C[1]}", g['bg_title'], g['bg_lead']) + f'<div class="body"><div class="row c4">{cells}</div></div>')
 
     # 10 misuse
-    mis_style = ['style="transform:scaleX(1.45)"', 'style="transform:rotate(-14deg)"', 'style="filter:hue-rotate(140deg) saturate(1.6)"',
-                 'style="filter:drop-shadow(6px 8px 4px rgba(0,0,0,.45))"', '', '', 'style="opacity:.35"', None]
+    mis_style = ['style="transform:scaleX(1.45)"', 'style="transform:rotate(-14deg)"', 'img/misuse-recolor.png',
+                 'img/misuse-shadow.png', '', '', 'img/misuse-faded.png', None]
     mis_bg = ["st-sand", "st-sand", "st-sand", "st-sand", "st-lagoon", None, "st-sand", "st-sand"]
     cells = ""
     for stl, bg, lb in zip(mis_style, mis_bg, g['misuse']):
         bgattr = f'class="stage {bg}"' if bg else 'class="stage" style="background: repeating-conic-gradient(#E07A5F 0 25%, #F2C14E 0 50%) 0 0/40px 40px"'
-        inner = f'<img src="{A}kalma-logo-primary.png" alt="" {stl}>' if stl is not None else '<span style="font-family:\'DejaVu Sans\', sans-serif; font-size:44px; color:var(--kalma-deep-sea)">Kalma</span>'
+        inner = (f'<img src="{stl}" alt="">' if stl.startswith('img/') else f'<img src="{A}kalma-logo-primary.png" alt="" {stl}>') if stl is not None else '<span style="font-family:\'DejaVu Sans\', sans-serif; font-size:44px; color:var(--kalma-deep-sea)">Kalma</span>'
         cells += f'<div><div {bgattr} style="height:170px">{inner}</div><p class="cap"><span class="no">✕</span> {lb}</p></div>'
     cells = cells.replace('class="stage" style="background: repeating-conic-gradient(#E07A5F 0 25%, #F2C14E 0 50%) 0 0/40px 40px" style="height:170px"',
                           'class="stage" style="height:170px; background: repeating-conic-gradient(#E07A5F 0 25%, #F2C14E 0 50%) 0 0/40px 40px"')
@@ -639,7 +633,7 @@ def build(t):
   <div><div class="sign"><div class="bd"><img src="{A}kalma-logo-primary.png" alt=""><small>{ap['welcome']}</small></div></div>
     <div style="display:flex; gap:20px; margin-top:16px; align-items:center; justify-content:center">
       <div class="key"><img src="{A}kalma-icon-deepsea.png" alt="" style="box-shadow:0 0 0 1px rgba(237,224,181,.3)"><b>03</b><small>Laguna</small></div>
-      <div style="background:var(--kalma-sand); border-radius:0 0 40px 40px; width:150px; height:190px; display:grid; place-items:center; border-top:10px solid var(--kalma-deep-sea); box-shadow:0 14px 30px -12px rgba(34,72,102,.35)"><img src="{A}kalma-logo-mono-deepsea.png" alt="" style="width:80%"></div>
+      <div style="background:var(--kalma-sand); border-radius:0 0 40px 40px; width:150px; height:190px; display:grid; place-items:center; border-top:10px solid var(--kalma-deep-sea)"><img src="{A}kalma-logo-mono-deepsea.png" alt="" style="width:80%"></div>
     </div><p class="cap"><b>{ap['sign'][0]}</b>{ap['sign'][1]}</p></div>
 </div></div>""", "shell")
 
