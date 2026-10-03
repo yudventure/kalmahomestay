@@ -86,9 +86,13 @@ test('video slots pair mp4 and webm files by name', () => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 
-test('hero has no video players until clips are added, and assets are versioned', async () => {
+test('hero tiles play the bundled clips over their poster photos, and assets are versioned', async () => {
   const html = await (await fetch(base + '/')).text();
-  assert.doesNotMatch(html, /<video/);
+  for (let i = 1; i <= 4; i++) {
+    assert.match(html, new RegExp(`--img:url\\(/img/hero-${i}\\.jpg\\)`));
+    assert.match(html, new RegExp(`<video class="tile__video"[^>]*preload="none"[^>]*data-mp4="/video/hero-${i}\\.mp4"`));
+  }
+  assert.equal((await fetch(base + '/video/hero-1.mp4')).headers.get('content-type'), 'video/mp4');
   assert.match(html, /href="\/css\/home\.css\?v=[a-z0-9]+"/);
   assert.match(html, /src="\/js\/main\.js\?v=[a-z0-9]+"/);
 });
