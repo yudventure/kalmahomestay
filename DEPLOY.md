@@ -48,6 +48,7 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `DB_NAME` | `u123456789_kalma` | Dari langkah 1 |
 | `DB_USER` | `u123456789_kalma` | Dari langkah 1 |
 | `DB_PASSWORD` | ••••••• | Dari langkah 1 |
+| `DB_SOCKET` | `/var/lib/mysql/mysql.sock` | Opsional, hanya jika koneksi lewat host gagal |
 | `NODE_ENV` | `production` | Aktifkan cache file statis |
 | `GOOGLE_SITE_VERIFICATION` | `AbC123…` | Kode verifikasi Search Console (langkah 8) |
 
@@ -129,7 +130,7 @@ Hostinger otomatis deploy ulang dari `main`. Perubahan struktur database ditamba
 - **`/healthz` menampilkan `"db":"error"`**: website tetap jalan, tapi data belum tersimpan ke database. Lihat isi `hint`:
   - `DB_USER atau DB_PASSWORD salah` → cek user & password di hPanel → MySQL Databases
   - `DB_NAME tidak ditemukan` / `DB_NAME salah…` → pakai nama lengkap dengan awalan, mis. `u865185815_kalma`
-  - `DB_HOST/DB_PORT tidak bisa dihubungi` → coba `DB_HOST=localhost` atau host yang tertulis di hPanel, `DB_PORT=3306`
+  - `Database tidak bisa dihubungi (EINVAL/ECONNREFUSED/…)` → aplikasi sudah otomatis mencoba IPv4 (`127.0.0.1`) dan socket MySQL lokal. Kalau masih gagal, isi `DB_HOST=127.0.0.1`, atau `DB_SOCKET` dengan lokasi socket MySQL (mis. `/var/lib/mysql/mysql.sock`; tanyakan ke support Hostinger bila perlu)
 
   Setelah environment variable diperbaiki, deploy ulang. Aplikasi juga mencoba menghubungi database lagi secara otomatis setiap beberapa menit.
 - **Tamu tetap bisa memesan** walaupun database sedang bermasalah: mereka tetap mendapat link WhatsApp, hanya pencatatan di admin yang terlewat (tercatat di log).

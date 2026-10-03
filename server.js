@@ -16,7 +16,10 @@ function hint(e) {
   if (code === 'ER_ACCESS_DENIED_ERROR') return 'DB_USER atau DB_PASSWORD salah';
   if (code === 'ER_BAD_DB_ERROR') return 'DB_NAME tidak ditemukan';
   if (code === 'ER_DBACCESS_DENIED_ERROR') return 'DB_NAME salah, atau DB_USER belum diberi akses ke database ini';
-  if (code === 'ECONNREFUSED' || code === 'ENOTFOUND' || code === 'ETIMEDOUT' || code === 'EHOSTUNREACH') return 'DB_HOST/DB_PORT tidak bisa dihubungi';
+  if (['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'EHOSTUNREACH', 'EINVAL', 'EAFNOSUPPORT', 'EADDRNOTAVAIL', 'ENETUNREACH'].includes(code)) {
+    const where = e.address ? ` ${e.address}${e.port ? ':' + e.port : ''}` : '';
+    return `Database tidak bisa dihubungi (${code}${where}). Coba DB_HOST=127.0.0.1, atau isi DB_SOCKET (mis. /var/lib/mysql/mysql.sock)`;
+  }
   return code ? `database error (${code})` : 'database error';
 }
 
@@ -27,7 +30,7 @@ async function initStorage(attempt = 1) {
     await repo.init();
     status.ready = true;
     status.error = '';
-    console.log(repo.kind === 'mysql' ? 'Storage: MySQL database ready' : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
+    console.log(repo.kind === 'mysql' ? `Storage: MySQL database ready (${repo.connection})` : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
   } catch (e) {
     status.ready = false;
     status.error = hint(e);

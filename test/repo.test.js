@@ -10,6 +10,7 @@ const path = require('path');
 const { createFileRepo } = require('../src/db/file');
 const { createMysqlRepo } = require('../src/db/mysql');
 const { parseContact, normalizePhone } = require('../src/db/shared');
+const { loadConfig } = require('../src/config');
 
 test('parseContact / normalizePhone', () => {
   assert.deepEqual(parseContact('0812-3456 7890'), { phone: '6281234567890', email: null, other: null });
@@ -20,6 +21,34 @@ test('parseContact / normalizePhone', () => {
   assert.deepEqual(parseContact('@rina.travels'), { phone: null, email: null, other: '@rina.travels' });
   assert.deepEqual(parseContact(''), { phone: null, email: null, other: null });
   assert.equal(normalizePhone('12345'), null);
+});
+
+test('DB settings: trimmed values, optional socket', () => {
+  const c = loadConfig({ DB_HOST: ' localhost ', DB_USER: 'u1_kalma ', DB_PASSWORD: 'p', DB_NAME: ' u1_kalma' }).db;
+  assert.deepEqual(c, { host: 'localhost', port: 3306, socket: '', user: 'u1_kalma', password: 'p', name: 'u1_kalma' });
+  const s = loadConfig({ DB_SOCKET: '/var/lib/mysql/mysql.sock', DB_USER: 'u', DB_NAME: 'n' }).db;
+  assert.equal(s.socket, '/var/lib/mysql/mysql.sock');
+  assert.equal(loadConfig({ DB_USER: 'u', DB_NAME: 'n' }).db, null);
+});
+
+// Falls back from TCP to the local MySQL socket (like on shared hosting). Needs TEST_DATABASE_SOCKET + TEST_DB_USER/PASSWORD/NAME.
+test('mysql: falls back to the local socket when TCP to localhost fails', { skip: !process.env.TEST_DATABASE_SOCKET }, async () => {
+  const repo = createMysqlRepo(
+    { host: 'localhost', port: 1, user: process.env.TEST_DB_USER, password: process.env.TEST_DB_PASSWORD, name: process.env.TEST_DB_NAME },
+    { autoMigrate: false, socketCandidates: ['/nonexistent.sock', process.env.TEST_DATABASE_SOCKET] });
+  const log = console.log; console.log = () => {};
+  try { await repo.init(); } finally { console.log = log; }
+  assert.equal(repo.connection, `socket ${process.env.TEST_DATABASE_SOCKET}`);
+  assert.equal(await repo.ping(), true);
+  await repo.close();
+});
+
+test('mysql: a remote host does not fall back to a socket', { skip: !process.env.TEST_DATABASE_SOCKET }, async () => {
+  const repo = createMysqlRepo({ host: '10.255.255.1', port: 3306, user: 'x', password: 'x', name: 'x' },
+    { autoMigrate: false, socketCandidates: [process.env.TEST_DATABASE_SOCKET] });
+  repo._pool.pool.config.connectionConfig.connectTimeout = 1000;
+  await assert.rejects(repo.init());
+  await repo.close();
 });
 
 const backends = [['file', () => {
