@@ -1,0 +1,7 @@
+<% var pages = Math.max(1, Math.ceil(result.total / result.perPage)); if (pages > 1) { %>
+<nav class="pager" aria-label="Halaman">
+  <% if (result.page > 1) { %><a href="?<%= qs(Object.assign({}, params, { page: result.page - 1 })) %>">← Sebelumnya</a><% } %>
+  <span>Halaman <%= result.page %> dari <%= pages %></span>
+  <% if (result.page < pages) { %><a href="?<%= qs(Object.assign({}, params, { page: result.page + 1 })) %>">Berikutnya →</a><% } %>
+</nav>
+<% } %>

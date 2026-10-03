@@ -1,8 +1,5 @@
 'use strict';
 
-const fs = require('fs');
-const path = require('path');
-const crypto = require('crypto');
 const { ROOMS, GUEST_OPTIONS } = require('./config');
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -58,26 +55,6 @@ function buildMessage(v, lang, t) {
   ].filter((l) => l !== null).join('\n');
 }
 
-/** Append-only JSON Lines store: data/inquiries.jsonl */
-function createStore(dataDir) {
-  const file = path.join(dataDir, 'inquiries.jsonl');
-  return {
-    file,
-    add(record) {
-      fs.mkdirSync(dataDir, { recursive: true });
-      const row = { id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...record };
-      fs.appendFileSync(file, JSON.stringify(row) + '\n', 'utf8');
-      return row;
-    },
-    list() {
-      if (!fs.existsSync(file)) return [];
-      return fs.readFileSync(file, 'utf8').split('\n').filter(Boolean).map((l) => {
-        try { return JSON.parse(l); } catch { return null; }
-      }).filter(Boolean).reverse();
-    },
-  };
-}
-
 /** Link to reply to a guest: WhatsApp for phone numbers, mailto for emails. */
 function replyLink(contact, name) {
   const c = String(contact || '').trim();
@@ -91,4 +68,4 @@ function replyLink(contact, name) {
   return '';
 }
 
-module.exports = { replyLink, normalize, validate, buildMessage, createStore, todayISO };
+module.exports = { replyLink, normalize, validate, buildMessage, todayISO };

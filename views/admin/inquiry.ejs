@@ -1,0 +1,42 @@
+<%- include('_top') %>
+<p class="crumb"><a href="/admin/inquiries">← Semua permintaan</a></p>
+<h1>Permintaan #<%= item.id %> <%- include('_status', { s: item.status }) %></h1>
+<div class="grid2">
+  <section class="panel">
+    <h2>Detail menginap</h2>
+    <dl class="dl">
+      <dt>Check-in</dt><dd><%= fmtDate(item.checkin) %></dd>
+      <dt>Check-out</dt><dd><%= fmtDate(item.checkout) %> (<%= nights(item.checkin, item.checkout) %> malam)</dd>
+      <dt>Tamu</dt><dd><%= item.guests %></dd>
+      <dt>Kamar</dt><dd><%= roomName(item.room) %></dd>
+      <dt>Pesan</dt><dd class="pre"><%= item.message || '—' %></dd>
+      <dt>Bahasa</dt><dd><%= item.lang === 'en' ? 'English' : 'Indonesia' %></dd>
+      <dt>Masuk</dt><dd><%= fmtDateTime(item.created_at) %></dd>
+    </dl>
+  </section>
+  <section class="panel">
+    <h2>Customer</h2>
+    <dl class="dl">
+      <dt>Nama</dt><dd><a href="/admin/customers/<%= item.customer_id %>"><b><%= item.name %></b></a></dd>
+      <dt>WhatsApp/HP</dt><dd><%= phoneDisplay(item.phone) || '—' %></dd>
+      <dt>Email</dt><dd><%= item.email || '—' %></dd>
+      <% if (item.other_contact) { %><dt>Kontak lain</dt><dd><%= item.other_contact %></dd><% } %>
+      <dt>Asal</dt><dd><%= item.country || '—' %></dd>
+    </dl>
+    <% var r = reply(item); if (r) { %><a class="btn btn--cta btn--sm" href="<%= r.href %>" target="_blank" rel="noopener"><%= r.label %></a><% } else { %><p class="muted">Tidak ada nomor/email. Cek pesan WhatsApp masuk dari customer ini.</p><% } %>
+  </section>
+</div>
+<section class="panel">
+  <h2>Tindak lanjut</h2>
+  <form method="post" action="/admin/inquiries/<%= item.id %>" class="stack">
+    <div class="field"><label for="status">Status</label>
+      <select id="status" name="status"><% STATUSES.forEach(function (s) { %><option value="<%= s.id %>"<%= s.id === item.status ? ' selected' : '' %>><%= s.label %></option><% }) %></select></div>
+    <div class="field"><label for="admin_note">Catatan internal</label>
+      <textarea id="admin_note" name="admin_note" rows="4" maxlength="2000" placeholder="Mis. sudah transfer DP, jemput di Waisai jam 14.00"><%= item.admin_note || '' %></textarea></div>
+    <button class="btn btn--primary" type="submit">Simpan</button>
+  </form>
+</section>
+<form method="post" action="/admin/inquiries/<%= item.id %>/delete" class="danger" onsubmit="return confirm('Hapus permintaan ini? Tidak bisa dibatalkan.')">
+  <button class="btn btn--danger btn--sm" type="submit">Hapus permintaan ini</button>
+</form>
+<%- include('_bottom') %>
