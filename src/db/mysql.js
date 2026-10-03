@@ -14,6 +14,20 @@ require('dns').setDefaultResultOrder('ipv4first');
 /** Usual MySQL/MariaDB socket locations, tried when a TCP connection to localhost fails. */
 const SOCKET_CANDIDATES = ['/var/lib/mysql/mysql.sock', '/var/run/mysqld/mysqld.sock', '/run/mysqld/mysqld.sock', '/tmp/mysql.sock', '/var/mysql/mysql.sock'];
 const NETWORK_CODES = new Set(['EINVAL', 'EAFNOSUPPORT', 'EADDRNOTAVAIL', 'ENETUNREACH', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'ENOTFOUND', 'ECONNRESET', 'PROTOCOL_CONNECTION_LOST']);
+// Shared hosting usually grants users only @'localhost' (socket); TCP from 127.0.0.1 is then denied.
+const RETRY_ON_SOCKET = new Set([...NETWORK_CODES, 'ER_ACCESS_DENIED_ERROR', 'ER_HOST_NOT_PRIVILEGED']);
+
+/** Socket paths named in the server's MySQL config files (e.g. "socket = /var/lib/mysql/mysql.sock"). */
+function socketsFromConfig(files = ['/etc/my.cnf', '/etc/mysql/my.cnf', '/etc/mysql/mariadb.cnf', '/etc/my.cnf.d/client.cnf', '/etc/mysql/conf.d/mysql.cnf']) {
+  const found = [];
+  for (const f of files) {
+    try {
+      for (const m of fs.readFileSync(f, 'utf8').matchAll(/^\s*socket\s*=\s*(\S+)/gm)) found.push(m[1].replace(/^["']|["']$/g, ''));
+    } catch { /* not readable */ }
+  }
+  return found;
+}
+
 const isLocalHost = (h) => !h || ['localhost', '127.0.0.1', '::1'].includes(String(h).trim());
 
 const like = (q) => '%' + String(q).replace(/[\\%_]/g, (m) => '\\' + m) + '%';
@@ -69,7 +83,8 @@ function parseSurveyRow(r) {
   return { ...r, answers };
 }
 
-function createMysqlRepo(db, { autoMigrate = true, socketCandidates = SOCKET_CANDIDATES } = {}) {
+function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
+  socketCandidates = socketCandidates || [...new Set([...socketsFromConfig(), ...SOCKET_CANDIDATES])];
   let pool = mysql.createPool(poolOptions(db));
 
   /** If TCP to localhost fails (IPv6, firewall, socket-only MySQL), try the local MySQL socket instead. */
@@ -78,7 +93,7 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates = SOCKET_CAN
       await pool.query('SELECT 1');
       return;
     } catch (e) {
-      if (db.url || db.socket || !isLocalHost(db.host) || !NETWORK_CODES.has(e.code)) throw e;
+      if (db.url || db.socket || !isLocalHost(db.host) || !RETRY_ON_SOCKET.has(e.code)) throw e;
       for (const socket of socketCandidates) {
         if (!fs.existsSync(socket)) continue;
         const candidate = mysql.createPool(poolOptions({ ...db, socket }));

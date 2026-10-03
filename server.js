@@ -13,7 +13,10 @@ const status = app.locals.dbStatus;
 /** Explain common database errors in plain words (no secrets). */
 function hint(e) {
   const code = e && e.code;
-  if (code === 'ER_ACCESS_DENIED_ERROR') return 'DB_USER atau DB_PASSWORD salah';
+  if (code === 'ER_ACCESS_DENIED_ERROR') {
+    return 'Akses ditolak: cek DB_USER (nama lengkap, mis. u123456789_kalma) dan DB_PASSWORD. '
+      + 'Jika sudah benar, user mungkin hanya diizinkan lewat socket: isi DB_SOCKET (lokasi socket MySQL dari support Hostinger)';
+  }
   if (code === 'ER_BAD_DB_ERROR') return 'DB_NAME tidak ditemukan';
   if (code === 'ER_DBACCESS_DENIED_ERROR') return 'DB_NAME salah, atau DB_USER belum diberi akses ke database ini';
   if (['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'EHOSTUNREACH', 'EINVAL', 'EAFNOSUPPORT', 'EADDRNOTAVAIL', 'ENETUNREACH'].includes(code)) {

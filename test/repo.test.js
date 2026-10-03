@@ -48,6 +48,17 @@ test('mysql: falls back to the local socket when TCP to localhost fails', { skip
   await repo.close();
 });
 
+// Like shared hosting: user exists only @'localhost' and the server skips name resolution, so TCP via 127.0.0.1 is denied.
+test('mysql: retries on the socket when TCP login is denied', { skip: !process.env.TEST_SOCKET_ONLY_USER }, async () => {
+  const [user, password] = process.env.TEST_SOCKET_ONLY_USER.split(':');
+  const repo = createMysqlRepo({ host: '127.0.0.1', port: Number(process.env.TEST_DB_PORT || 3306), user, password, name: process.env.TEST_DB_NAME },
+    { autoMigrate: false, socketCandidates: [process.env.TEST_DATABASE_SOCKET] });
+  const log = console.log; console.log = () => {};
+  try { await repo.init(); } finally { console.log = log; }
+  assert.equal(repo.connection, `socket ${process.env.TEST_DATABASE_SOCKET}`);
+  await repo.close();
+});
+
 test('mysql: a remote host does not fall back to a socket', { skip: !process.env.TEST_DATABASE_SOCKET }, async () => {
   const repo = createMysqlRepo({ host: '10.255.255.1', port: 3306, user: 'x', password: 'x', name: 'x' },
     { autoMigrate: false, socketCandidates: [process.env.TEST_DATABASE_SOCKET] });
