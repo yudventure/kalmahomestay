@@ -116,9 +116,20 @@
     var build = function () {
       var w = shore.clientWidth, h = shore.clientHeight;
       if (!w || !h) return;
-      var sr = shore.getBoundingClientRect(), tr = track ? track.getBoundingClientRect() : null;
-      var from = tr ? tr.left - sr.left + 40 : w * 0.1;
-      var to = tr ? tr.right - sr.left - 40 : w * 0.45;
+      // Desktop: from under the logo to under the first menu item ("Beranda"/"Home").
+      // Phones (menu folded into the burger): under the booking box.
+      var sr = shore.getBoundingClientRect(), from, to;
+      var logo = document.querySelector(".nav__logo"), first = document.querySelector(".nav__links a");
+      var burger = document.querySelector(".nav__burger");
+      if (logo && first && burger && getComputedStyle(burger).display === "none") {
+        var lr = logo.getBoundingClientRect(), fr = first.getBoundingClientRect();
+        from = lr.left + lr.width / 2 - sr.left;
+        to = fr.left + fr.width / 2 - sr.left;
+      } else {
+        var tr = track ? track.getBoundingClientRect() : null;
+        from = tr ? tr.left - sr.left + 40 : w * 0.1;
+        to = tr ? tr.right - sr.left - 40 : w * 0.9;
+      }
       from = Math.max(30, from); to = Math.min(w - 30, Math.max(from + 80, to));
       var key = w + "x" + h + ":" + Math.round(from) + "-" + Math.round(to);
       if (key === builtFor) return;
