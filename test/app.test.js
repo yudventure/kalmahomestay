@@ -93,6 +93,8 @@ test('hero tiles play the bundled clips over their poster photos, and assets are
     assert.match(html, new RegExp(`<video class="tile__video"[^>]*preload="none"[^>]*data-mp4="/video/hero-${i}\\.mp4"`));
   }
   assert.equal((await fetch(base + '/video/hero-1.mp4')).headers.get('content-type'), 'video/mp4');
+  assert.match(html, /<path class="shore__line"[^>]*d="M0 50 C 240 10/, 'crab path follows the top wave');
+  assert.match(html, /<svg class="crab"/);
   assert.match(html, /href="\/css\/home\.css\?v=[a-z0-9]+"/);
   assert.match(html, /src="\/js\/main\.js\?v=[a-z0-9]+"/);
 });
