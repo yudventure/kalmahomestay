@@ -154,39 +154,55 @@
   </div>
 </section>
 
-<!-- ============================== ROOMS (cards carousel) ============================== -->
+<!-- ============================== KALMA SERVICES ============================== -->
+<%
+  const waAsk = function (key) { return 'https://wa.me/' + contact.whatsapp + '?text=' + encodeURIComponent(t(key)); };
+  const tick = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+%>
 <section class="sec sec--tint" id="kamar">
   <div class="wrap">
-    <div class="sec__head sec__head--row reveal">
-      <div>
-        <p class="eyebrow"><%- t('rooms.eyebrow') %></p>
-      <h2><%- t('rooms.title') %></h2>
-        <p class="sub"><%- t('rooms.lead') %></p>
-      </div>
-      <div class="arrows" data-for="rooms-track">
-        <button type="button" class="arrow" data-dir="-1" aria-label="<%= t('car.prev') %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-        <button type="button" class="arrow arrow--fill" data-dir="1" aria-label="<%= t('car.next') %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-      </div>
+    <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('svc.eyebrow') %></p>
+      <h2><%- t('svc.title') %></h2>
+      <p class="sub"><span class="svc-hint"><%- t('svc.lead') %></span><span class="svc-hint--touch"><%- t('svc.leadTouch') %></span></p>
     </div>
-    <div class="track" id="rooms-track">
-      <% rooms.forEach(function (r, i) { const k = ROOM_KEYS[i]; %>
-      <article class="card reveal">
-        <div class="photo card__img <%= ROOM_PH[i] %>" style="<%= photo('room-' + r.id) %>" role="img" aria-label="<%= t(r.nameKey) %>">
-          <span class="card__tag"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg><%- t(k + '.badge') %></span>
+    <div class="svc-grid" id="services">
+      <article class="svc is-active" data-svc="homestay" tabindex="0" aria-labelledby="svc1">
+        <div class="photo svc__bg ph-house" style="<%= photo('svc-homestay') || photo('hero-2') %>"></div>
+        <div class="svc__body">
+          <span class="svc__n">01</span>
+          <h3 id="svc1"><%- t('s1.t') %></h3>
+          <p class="svc__lead"><%- t('s1.d') %></p>
+          <div class="svc__more">
+            <ul class="svc__rooms">
+              <% rooms.forEach(function (r, i) { %>
+              <li><a href="<%= base || '' %>/?book=<%= r.id %>#checkout" class="svc__room" data-room="<%= r.id %>">
+                <span><b><%- t(r.nameKey) %></b><small><%- t(ROOM_KEYS[i] + '.m1') %> · <%- t(ROOM_KEYS[i] + '.badge') %></small></span>
+                <span class="svc__price"><b><%= rupiah(r.price) %></b><small><%- t('r.per') %></small></span>
+              </a></li>
+              <% }) %>
+            </ul>
+            <a href="<%= base || '' %>/?book=<%= rooms[0].id %>#checkout" class="btn btn--cta btn--sm" data-room="<%= rooms[0].id %>"><%- t('s1.cta') %></a>
+            <p class="svc__note"><%- t('rooms.note') %></p>
+          </div>
         </div>
-        <div class="card__body">
-          <h3><%- t(r.nameKey) %></h3>
-          <p class="card__meta"><%- t(k + '.m1') %> · <%- t(k + '.m2') %> · <%- t('r.meals') %></p>
-          <p class="card__desc"><%- t(k + '.desc') %></p>
-          <div class="card__foot">
-            <div><b><%= rupiah(r.price) %></b><span><%- t('r.per') %></span></div>
-            <a href="<%= base || '' %>/?book=<%= r.id %>#checkout" class="btn btn--soft btn--sm" data-room="<%= r.id %>"><%- t('r.book') %></a>
+      </article>
+      <% [['s2', 'svc-diving', 'hero-4', 'ph-reef', 'diving'], ['s3', 'svc-trips', 'hero-1', 'ph-karst', 'trips']].forEach(function (s, n) { %>
+      <article class="svc" data-svc="<%= s[4] %>" tabindex="0" aria-labelledby="svc<%= n + 2 %>">
+        <div class="photo svc__bg <%= s[3] %>" style="<%= photo(s[1]) || photo(s[2]) %>"></div>
+        <div class="svc__body">
+          <span class="svc__n">0<%= n + 2 %></span>
+          <h3 id="svc<%= n + 2 %>"><%- t(s[0] + '.t') %></h3>
+          <p class="svc__lead"><%- t(s[0] + '.d') %></p>
+          <div class="svc__more">
+            <ul class="svc__list"><% for (let k = 1; k <= 4; k++) { %><li><%- tick %><%- t(s[0] + '.i' + k) %></li><% } %></ul>
+            <a href="<%= waAsk(s[0] + '.wa') %>" class="btn btn--light btn--sm" target="_blank" rel="noopener"><%- t('svc.ask') %></a>
+            <p class="svc__note"><%- t('svc.askNote') %></p>
           </div>
         </div>
       </article>
       <% }) %>
     </div>
-    <p class="note"><%- t('rooms.note') %></p>
   </div>
 </section>
 

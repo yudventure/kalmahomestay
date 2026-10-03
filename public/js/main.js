@@ -158,6 +158,22 @@
     }
   }
 
+  /* ---------------------------------------------------------------- Kalma services
+     Homestay is the tall (open) card by default; pointing at or focusing another service opens it
+     instead, and leaving the row returns to Homestay. */
+  var svcGrid = document.getElementById("services");
+  if (svcGrid) {
+    var cards = Array.prototype.slice.call(svcGrid.querySelectorAll(".svc"));
+    var activate = function (card) { cards.forEach(function (c) { c.classList.toggle("is-active", c === card); }); };
+    cards.forEach(function (card) {
+      card.addEventListener("mouseenter", function () { activate(card); });
+      card.addEventListener("focusin", function () { activate(card); });
+      card.addEventListener("click", function () { activate(card); });
+    });
+    svcGrid.addEventListener("mouseleave", function () { if (!svcGrid.contains(document.activeElement)) activate(cards[0]); });
+    svcGrid.addEventListener("focusout", function (e) { if (!svcGrid.contains(e.relatedTarget)) activate(cards[0]); });
+  }
+
   /* ---------------------------------------------------------------- card carousel arrows */
   document.querySelectorAll(".arrows[data-for]").forEach(function (box) {
     var track = document.getElementById(box.dataset.for);
