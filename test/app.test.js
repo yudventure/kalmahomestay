@@ -90,13 +90,25 @@ test('hero tiles play the bundled clips over their poster photos, and assets are
   const html = await (await fetch(base + '/')).text();
   for (let i = 1; i <= 4; i++) {
     assert.match(html, new RegExp(`--img:url\\(/img/hero-${i}\\.jpg\\)`));
-    assert.match(html, new RegExp(`<video class="tile__video"[^>]*preload="none"[^>]*data-mp4="/video/hero-${i}\\.mp4"`));
+    assert.match(html, new RegExp(`<video class="tile__video" autoplay muted loop playsinline[^>]*poster="/img/hero-${i}\\.jpg"><source src="/video/hero-${i}\\.mp4" type="video/mp4">`));
   }
   assert.equal((await fetch(base + '/video/hero-1.mp4')).headers.get('content-type'), 'video/mp4');
   assert.match(html, /<path class="shore__line"[^>]*d="M0 50 C 240 10/, 'crab path follows the top wave');
   assert.match(html, /<svg class="crab"/);
   assert.match(html, /href="\/css\/home\.css\?v=[a-z0-9]+"/);
   assert.match(html, /src="\/js\/main\.js\?v=[a-z0-9]+"/);
+});
+
+test('assets are compressed, long-cached and fonts are self-hosted', async () => {
+  const css = await fetch(base + '/css/home.css?v=1', { headers: { 'Accept-Encoding': 'gzip' } });
+  assert.equal(css.headers.get('content-encoding'), 'gzip');
+  assert.match(css.headers.get('cache-control'), /max-age=31536000, immutable/);
+  const font = await fetch(base + '/fonts/jakarta-latin.woff2');
+  assert.equal(font.status, 200);
+  assert.equal(font.headers.get('content-type'), 'font/woff2');
+  const html = await (await fetch(base + '/')).text();
+  assert.doesNotMatch(html, /fonts\.googleapis\.com/);
+  assert.match(html, /<link rel="preload" href="\/fonts\/jakarta-latin\.woff2" as="font"/);
 });
 
 test('static assets and brand files are served, guideline sources are not', async () => {

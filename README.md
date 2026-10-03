@@ -90,11 +90,11 @@ Empat kotak di bagian atas bisa memutar video pendek (otomatis, tanpa suara, ber
 Agar ringan: 5–10 detik, potret ±720 px, tanpa audio, di bawah ±1,5 MB per video. Contoh konversi dengan ffmpeg:
 
 ```bash
-ffmpeg -i asli.mov -t 8 -vf "scale=-2:720,fps=24" -an -c:v libx264 -crf 28 -preset slow -movflags +faststart public/video/hero-1.mp4
+ffmpeg -i asli.mov -t 8 -vf "scale=-2:640,fps=24" -an -c:v libx264 -profile:v main -crf 30 -preset veryslow -g 48 -movflags +faststart public/video/hero-1.mp4
 ffmpeg -i asli.mov -t 8 -vf "scale=-2:720,fps=24" -an -c:v libvpx-vp9 -crf 38 -b:v 0 public/video/hero-1.webm
 ```
 
-Video baru dimuat setelah halaman tampil, hanya diputar saat terlihat di layar, dan berhenti saat tab tidak aktif. Untuk pengunjung yang mengaktifkan "kurangi animasi" atau mode hemat data, video tidak diputar dan foto/gradasi tetap tampil.
+Video diputar otomatis oleh browser (tanpa menunggu JavaScript), dijeda saat tidak terlihat di layar atau tab tidak aktif. Untuk pengunjung yang mengaktifkan "kurangi animasi" atau mode hemat data, video tidak diputar dan foto/gradasi tetap tampil.
 
 ## Cerita tamu
 

@@ -8,6 +8,7 @@ const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
 const survey = require('./survey');
 const fs = require('fs');
+const compression = require('compression');
 
 const ROOT = path.join(__dirname, '..');
 const CONTENT = {
@@ -33,7 +34,9 @@ function photoFinder(dir = path.join(ROOT, 'public/img')) {
     const m = /^([a-z0-9-]+)\.(jpe?g|png|webp|avif)$/i.exec(f);
     if (m && !found[m[1]]) found[m[1]] = '/img/' + f;
   }
-  return (name) => (found[name] ? `--img:url(${found[name]})` : '');
+  const photo = (name) => (found[name] ? `--img:url(${found[name]})` : '');
+  photo.url = (name) => found[name] || '';
+  return photo;
 }
 
 /**
@@ -86,9 +89,14 @@ function createApp(options = {}) {
     next();
   });
 
-  const staticOpts = { maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0 };
-  app.use('/css', express.static(path.join(ROOT, 'public/css'), staticOpts));
-  app.use('/js', express.static(path.join(ROOT, 'public/js'), staticOpts));
+  app.use(compression()); // gzip HTML/CSS/JS/SVG (videos and images are already compressed and skipped)
+  app.locals.v = ASSET_VERSION;
+  // CSS/JS URLs carry ?v=<deploy>, so browsers may keep them for a year; media and fonts for 30 days.
+  const versioned = { maxAge: '365d', immutable: true };
+  const staticOpts = { maxAge: '30d' };
+  app.use('/css', express.static(path.join(ROOT, 'public/css'), versioned));
+  app.use('/js', express.static(path.join(ROOT, 'public/js'), versioned));
+  app.use('/fonts', express.static(path.join(ROOT, 'public/fonts'), { maxAge: '365d', immutable: true }));
   app.use('/img', express.static(path.join(ROOT, 'public/img'), staticOpts));
   app.use('/video', express.static(path.join(ROOT, 'public/video'), staticOpts));
   // Only the brand files the site needs are public (not the guideline sources).
@@ -108,7 +116,6 @@ function createApp(options = {}) {
       lang, t, rupiah,
       photo: photoFinder(),
       video: videoFinder(),
-      v: ASSET_VERSION,
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
