@@ -30,9 +30,17 @@ function loadConfig(env = process.env) {
 function loadDb(env) {
   if (env.DATABASE_URL) return { url: env.DATABASE_URL };
   if ((env.DB_HOST || env.DB_SOCKET) && env.DB_USER && env.DB_NAME) {
+    let host = String(env.DB_HOST || 'localhost').trim();
+    let port = Number(env.DB_PORT) || 3306;
+    // A host that is only digits (e.g. "3306") is a port typed into the wrong field; Node would
+    // read it as the IPv4 address 0.0.12.234. Treat it as the port and connect to localhost.
+    if (/^\d+$/.test(host)) {
+      if (!env.DB_PORT) port = Number(host);
+      host = 'localhost';
+    }
     return {
-      host: String(env.DB_HOST || 'localhost').trim(),
-      port: Number(env.DB_PORT) || 3306,
+      host,
+      port,
       socket: env.DB_SOCKET ? String(env.DB_SOCKET).trim() : '',
       user: String(env.DB_USER).trim(),
       password: env.DB_PASSWORD || '',

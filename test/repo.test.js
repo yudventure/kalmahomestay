@@ -29,6 +29,11 @@ test('DB settings: trimmed values, optional socket', () => {
   const s = loadConfig({ DB_SOCKET: '/var/lib/mysql/mysql.sock', DB_USER: 'u', DB_NAME: 'n' }).db;
   assert.equal(s.socket, '/var/lib/mysql/mysql.sock');
   assert.equal(loadConfig({ DB_USER: 'u', DB_NAME: 'n' }).db, null);
+  // DB_HOST=3306 (port typed into the host field) → localhost:3306
+  const swapped = loadConfig({ DB_HOST: '3306', DB_PORT: '3306', DB_USER: 'u', DB_NAME: 'n' }).db;
+  assert.equal(swapped.host, 'localhost');
+  assert.equal(swapped.port, 3306);
+  assert.equal(loadConfig({ DB_HOST: ' 3307 ', DB_USER: 'u', DB_NAME: 'n' }).db.port, 3307);
 });
 
 // Falls back from TCP to the local MySQL socket (like on shared hosting). Needs TEST_DATABASE_SOCKET + TEST_DB_USER/PASSWORD/NAME.
