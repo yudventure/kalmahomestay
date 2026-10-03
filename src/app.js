@@ -36,6 +36,24 @@ function photoFinder(dir = path.join(ROOT, 'public/img')) {
   return (name) => (found[name] ? `--img:url(${found[name]})` : '');
 }
 
+/**
+ * Short videos: drop public/video/hero-1.mp4 (and optionally hero-1.webm) and the matching tile plays it.
+ * Returns { mp4, webm } URLs, or null when the slot has no video.
+ */
+function videoFinder(dir = path.join(ROOT, 'public/video')) {
+  const found = {};
+  let files = [];
+  try { files = fs.readdirSync(dir); } catch { /* no videos yet */ }
+  for (const f of files) {
+    const m = /^([a-z0-9-]+)\.(mp4|webm)$/i.exec(f);
+    if (m) (found[m[1]] ||= {})[m[2].toLowerCase()] = '/video/' + f;
+  }
+  return (name) => found[name] || null;
+}
+
+/** Changes on every start (= every deploy) so browsers fetch fresh CSS/JS despite long caching. */
+const ASSET_VERSION = Date.now().toString(36);
+
 const rupiah = (n) => 'Rp ' + n.toLocaleString('id-ID');
 
 /** JSON safe to embed inside <script> */
@@ -72,6 +90,7 @@ function createApp(options = {}) {
   app.use('/css', express.static(path.join(ROOT, 'public/css'), staticOpts));
   app.use('/js', express.static(path.join(ROOT, 'public/js'), staticOpts));
   app.use('/img', express.static(path.join(ROOT, 'public/img'), staticOpts));
+  app.use('/video', express.static(path.join(ROOT, 'public/video'), staticOpts));
   // Only the brand files the site needs are public (not the guideline sources).
   app.use('/brand/assets', express.static(path.join(ROOT, 'brand/assets'), staticOpts));
   app.get('/brand/tokens.css', (req, res) => res.sendFile(path.join(ROOT, 'brand/tokens.css')));
@@ -88,6 +107,8 @@ function createApp(options = {}) {
     res.render('index', {
       lang, t, rupiah,
       photo: photoFinder(),
+      video: videoFinder(),
+      v: ASSET_VERSION,
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
@@ -242,4 +263,4 @@ function createApp(options = {}) {
   return app;
 }
 
-module.exports = { createApp, ah, photoFinder };
+module.exports = { createApp, ah, photoFinder, videoFinder };

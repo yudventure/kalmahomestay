@@ -80,6 +80,22 @@ Kotak foto masih berupa gradasi warna. Cukup simpan foto di `public/img/` dengan
 
 Contoh: `public/img/room-laguna.jpg`.
 
+## Video di hero
+
+Empat kotak di bagian atas bisa memutar video pendek (otomatis, tanpa suara, berulang). Simpan di `public/video/` dengan nama `hero-1` … `hero-4`:
+
+- `hero-1.mp4` (wajib, diputar di semua browser) dan opsional `hero-1.webm` (lebih kecil, dipakai Chrome/Firefox)
+- Foto `public/img/hero-1.jpg` (jika ada) tampil sebagai gambar awal sebelum video siap
+
+Agar ringan: 5–10 detik, potret ±720 px, tanpa audio, di bawah ±1,5 MB per video. Contoh konversi dengan ffmpeg:
+
+```bash
+ffmpeg -i asli.mov -t 8 -vf "scale=-2:720,fps=24" -an -c:v libx264 -crf 28 -preset slow -movflags +faststart public/video/hero-1.mp4
+ffmpeg -i asli.mov -t 8 -vf "scale=-2:720,fps=24" -an -c:v libvpx-vp9 -crf 38 -b:v 0 public/video/hero-1.webm
+```
+
+Video baru dimuat setelah halaman tampil, hanya diputar saat terlihat di layar, dan berhenti saat tab tidak aktif. Untuk pengunjung yang mengaktifkan "kurangi animasi" atau mode hemat data, video tidak diputar dan foto/gradasi tetap tampil.
+
 ## Cerita tamu
 
 Isi `"reviews"` di `content/id.json` dan `content/en.json` dengan ulasan asli (dengan izin tamunya):

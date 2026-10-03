@@ -69,6 +69,41 @@
     a.addEventListener("click", function () { document.getElementById("b-room").value = a.dataset.room; });
   });
 
+  /* ---------------------------------------------------------------- hero video tiles
+     Videos load only when the page is shown and play only while on screen; skipped for
+     reduced-motion and data-saver users (the photo/gradient stays). */
+  var clips = document.querySelectorAll(".tile__video");
+  var conn = navigator.connection || {};
+  var calm = matchMedia("(prefers-reduced-motion: reduce)").matches || conn.saveData;
+  if (clips.length && !calm && "IntersectionObserver" in window) {
+    var load = function (v) {
+      if (v.dataset.loaded) return;
+      v.dataset.loaded = "1";
+      [["webm", "video/webm"], ["mp4", "video/mp4"]].forEach(function (s) {
+        if (!v.dataset[s[0]]) return;
+        var src = document.createElement("source");
+        src.src = v.dataset[s[0]]; src.type = s[1];
+        v.appendChild(src);
+      });
+      v.addEventListener("playing", function () { v.classList.add("is-playing"); }, { once: true });
+      v.load();
+    };
+    var vio = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var v = en.target;
+        if (en.isIntersecting && !document.hidden) { load(v); var p = v.play(); if (p) p.catch(function () {}); }
+        else v.pause();
+      });
+    }, { threshold: 0.2 });
+    clips.forEach(function (v) { v.muted = true; vio.observe(v); });
+    document.addEventListener("visibilitychange", function () {
+      clips.forEach(function (v) {
+        if (document.hidden) v.pause();
+        else if (v.dataset.loaded && v.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p) p.catch(function () {}); }
+      });
+    });
+  }
+
   /* ---------------------------------------------------------------- card carousel arrows */
   document.querySelectorAll(".arrows[data-for]").forEach(function (box) {
     var track = document.getElementById(box.dataset.for);

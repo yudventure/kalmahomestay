@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { createApp, photoFinder } = require('../src/app');
+const { createApp, photoFinder, videoFinder } = require('../src/app');
 const { todayISO, replyLink } = require('../src/inquiry');
 
 let server, base, dataDir, repo;
@@ -73,6 +73,24 @@ test('photo slots use real photos from the image folder when present', () => {
   assert.equal(photo('hero-2'), '');
   assert.equal(photoFinder(path.join(dir, 'missing'))('hero-1'), '');
   fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('video slots pair mp4 and webm files by name', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-vid-'));
+  for (const f of ['hero-1.mp4', 'hero-1.webm', 'hero-2.MP4', 'notes.txt']) fs.writeFileSync(path.join(dir, f), '');
+  const video = videoFinder(dir);
+  assert.deepEqual(video('hero-1'), { mp4: '/video/hero-1.mp4', webm: '/video/hero-1.webm' });
+  assert.deepEqual(video('hero-2'), { mp4: '/video/hero-2.MP4' });
+  assert.equal(video('hero-3'), null);
+  assert.equal(videoFinder(path.join(dir, 'missing'))('hero-1'), null);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test('hero has no video players until clips are added, and assets are versioned', async () => {
+  const html = await (await fetch(base + '/')).text();
+  assert.doesNotMatch(html, /<video/);
+  assert.match(html, /href="\/css\/home\.css\?v=[a-z0-9]+"/);
+  assert.match(html, /src="\/js\/main\.js\?v=[a-z0-9]+"/);
 });
 
 test('static assets and brand files are served, guideline sources are not', async () => {
