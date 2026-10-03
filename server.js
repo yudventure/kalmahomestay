@@ -8,22 +8,44 @@ const { createApp } = require('./src/app');
 const app = createApp();
 const { port, siteUrl, adminPassword } = app.locals.config;
 const repo = app.locals.repo;
+const status = app.locals.dbStatus;
 
-(async () => {
-  await repo.init(); // runs database migrations when using MySQL
-  const server = app.listen(port, () => {
-    console.log(`Kalma Raja Ampat running at http://localhost:${port} (SITE_URL=${siteUrl})`);
-    console.log(repo.kind === 'mysql' ? 'Storage: MySQL database' : `Storage: JSON file (${repo.file}) — set database settings for production`);
-    if (!adminPassword) console.log('Admin page disabled: set ADMIN_PASSWORD to enable /admin');
-  });
+/** Explain common database errors in plain words (no secrets). */
+function hint(e) {
+  const code = e && e.code;
+  if (code === 'ER_ACCESS_DENIED_ERROR') return 'DB_USER atau DB_PASSWORD salah';
+  if (code === 'ER_BAD_DB_ERROR') return 'DB_NAME tidak ditemukan';
+  if (code === 'ER_DBACCESS_DENIED_ERROR') return 'DB_NAME salah, atau DB_USER belum diberi akses ke database ini';
+  if (code === 'ECONNREFUSED' || code === 'ENOTFOUND' || code === 'ETIMEDOUT' || code === 'EHOSTUNREACH') return 'DB_HOST/DB_PORT tidak bisa dihubungi';
+  return code ? `database error (${code})` : 'database error';
+}
 
-  const shutdown = () => {
-    server.close(() => repo.close().finally(() => process.exit(0)));
-    setTimeout(() => process.exit(0), 5000).unref();
-  };
-  process.on('SIGTERM', shutdown);
-  process.on('SIGINT', shutdown);
-})().catch((e) => {
-  console.error('Failed to start:', e.message);
-  process.exit(1);
+// Prepare storage (database migrations) without blocking the website:
+// if the database is unreachable the site still serves pages and retries in the background.
+async function initStorage(attempt = 1) {
+  try {
+    await repo.init();
+    status.ready = true;
+    status.error = '';
+    console.log(repo.kind === 'mysql' ? 'Storage: MySQL database ready' : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
+  } catch (e) {
+    status.ready = false;
+    status.error = hint(e);
+    const wait = Math.min(300, 15 * attempt);
+    console.error(`Storage not ready (${status.error}); retrying in ${wait}s`);
+    setTimeout(() => initStorage(attempt + 1), wait * 1000).unref();
+  }
+}
+
+const server = app.listen(port, () => {
+  console.log(`Kalma Raja Ampat running on port ${port} (SITE_URL=${siteUrl})`);
+  if (!adminPassword) console.log('Admin page disabled: set ADMIN_PASSWORD to enable /admin');
+  initStorage();
 });
+
+const shutdown = () => {
+  server.close(() => repo.close().finally(() => process.exit(0)));
+  setTimeout(() => process.exit(0), 5000).unref();
+};
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

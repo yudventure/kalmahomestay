@@ -195,10 +195,15 @@ function createApp(options = {}) {
       `  <url><loc>${u}/en</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
       '</urlset>\n');
   });
+  // set by server.js while it prepares the database; error is a plain-language hint, never a secret
+  const dbStatus = { ready: true, error: '' };
   app.get('/healthz', ah(async (req, res) => {
     let db = 'ok';
     try { await repo.ping(); } catch { db = 'error'; }
-    res.status(db === 'ok' ? 200 : 503).json({ ok: db === 'ok', storage: repo.kind, db });
+    if (!dbStatus.ready) db = 'error';
+    const body = { ok: db === 'ok', storage: repo.kind, db };
+    if (db === 'error' && dbStatus.error) body.hint = dbStatus.error;
+    res.status(db === 'ok' ? 200 : 503).json(body);
   }));
 
   app.use((req, res) => {
@@ -215,6 +220,7 @@ function createApp(options = {}) {
 
   app.locals.config = config;
   app.locals.repo = repo;
+  app.locals.dbStatus = dbStatus;
   return app;
 }
 

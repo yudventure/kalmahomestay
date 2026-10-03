@@ -320,6 +320,20 @@ test('health check reports storage', async () => {
   assert.deepEqual(await r.json(), { ok: true, storage: 'file', db: 'ok' });
 });
 
+test('health check reports a database problem without taking the site down', async () => {
+  const app = createApp({ dataDir, db: null });
+  app.locals.dbStatus.ready = false;
+  app.locals.dbStatus.error = 'DB_USER atau DB_PASSWORD salah';
+  const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });
+  const b = `http://127.0.0.1:${s.address().port}`;
+  const h = await fetch(b + '/healthz');
+  const home = await fetch(b + '/');
+  s.close();
+  assert.equal(h.status, 503);
+  assert.deepEqual(await h.json(), { ok: false, storage: 'file', db: 'error', hint: 'DB_USER atau DB_PASSWORD salah' });
+  assert.equal(home.status, 200);
+});
+
 test('404, robots and sitemap', async () => {
   const r = await fetch(base + '/en/nothing');
   assert.equal(r.status, 404);
