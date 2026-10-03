@@ -1,0 +1,124 @@
+/* English copy for the Kalma website.
+   Bahasa Indonesia is the text written in index.html; it is read from the page at load,
+   so only English needs to live here. Keys match data-i18n / data-i18n-html / data-i18n-attr. */
+window.KALMA_EN = {
+  "skip": "Skip to content",
+  "nav.rooms": "Rooms", "nav.exp": "Experiences", "nav.day": "A day at Kalma", "nav.loc": "Getting here", "nav.faq": "FAQ", "nav.book": "Book",
+
+  "hero.eyebrow": "Homestay · Raja Ampat",
+  "hero.title": "Wake up to the sound of waves.",
+  "hero.lead": "A wooden house on the lagoon, meals with a local family, and coral reef right outside your room. Let the sea plan the rest.",
+  "hero.hint": "We reply on WhatsApp, usually the same day.",
+  "hero.badge": "Snorkel straight from your terrace",
+
+  "facts.1a": "3 meals", "facts.1b": "included every day",
+  "facts.2a": "0 meters", "facts.2b": "from your room to the reef",
+  "facts.3a": "±2 hours", "facts.3b": "fast boat Sorong–Waisai",
+  "facts.4a": "Local family", "facts.4b": "hosts from the village",
+
+  "story.eyebrow": "About Kalma",
+  "story.title": "We don't sell luxury. We offer a pause.",
+  "story.p1": "“Kalma” comes from <em>calm</em>. That's what we protect: a simple wooden house by clear water, run by a village family that has lived from Raja Ampat's sea for generations.",
+  "story.p2": "Here, the day follows the tides and the sun. Snorkel from the steps of your room, join the fishermen at dawn, or simply sit on the pier with no plans at all.",
+  "v.1a": "Calm", "v.1b": "Never in a rush; room to breathe.",
+  "v.2a": "Warm", "v.2b": "Guests are welcomed like family.",
+  "v.3a": "Honest", "v.3b": "As it is: power, signal, travel time.",
+  "v.4a": "Caring", "v.4b": "Keeping the sea, reef and village thriving.",
+
+  "rooms.eyebrow": "Rooms",
+  "rooms.title": "Three ways to stay by the sea",
+  "rooms.lead": "All prices are per person per night and include 3 meals, drinking water, coffee & tea, and pick-up from Waisai.",
+  "rooms.note": "The Raja Ampat Environmental Service Card (required for every visitor) is paid separately.",
+  "r.meals": "3 meals", "r.per": "/ person / night", "r.book": "Book",
+  "r1.badge": "Overwater", "r1.name": "Lagoon Bungalow",
+  "r1.desc": "Double bed, mosquito net and a private terrace with steps straight into the sea. Closest to the reef.",
+  "r1.m1": "2 guests", "r1.m2": "Private bathroom", "r1.m3": "Fan",
+  "r2.badge": "On the sand", "r2.name": "Beach House",
+  "r2.desc": "A stilt house under the coconut palms, a few steps from the water. For those who like sand between their toes.",
+  "r2.m1": "2–3 guests", "r2.m2": "Private bathroom", "r2.m3": "Hammock terrace",
+  "r3.badge": "For groups", "r3.name": "Family House",
+  "r3.desc": "Two bedrooms with a shared living area. Perfect for families or friends traveling together.",
+  "r3.m1": "4–5 guests", "r3.m2": "2 bedrooms", "r3.m3": "Living area",
+
+  "exp.eyebrow": "Experiences",
+  "exp.title": "The sea in front, the forest behind",
+  "exp.lead": "Activities can be arranged the day before with your hosts. Boats and guides come from our own village.",
+  "e1.t": "House reef snorkeling", "e1.d": "Step off your room's ladder and meet reef fish, giant clams and sometimes turtles. Free, any time.",
+  "e2.t": "Island hopping", "e2.d": "Boat trips to karst islands, hidden lagoons and Raja Ampat's iconic viewpoints.",
+  "e3.t": "Mantas & dive sites", "e3.d": "We take you to nearby snorkel and dive spots. For diving, we connect you with a licensed dive operator.",
+  "e4.t": "Birds of paradise", "e4.d": "Leave before dawn for the forest to watch the birds of paradise dance with a local guide.",
+  "e5.t": "Village visit", "e5.d": "Join church or school, or learn to weave noken bags and cook papeda with the village mamas.",
+  "e6.t": "Sunset kayak", "e6.d": "Paddle slowly along the shore as the sun goes down and the sea changes color.",
+
+  "day.eyebrow": "A day at Kalma",
+  "day.title": "No schedule. Just rhythm.",
+  "day.lead": "An example of a day with us. Everything is optional, except dinner together. That's the part we look forward to most.",
+  "t1.t": "Birds of paradise dance", "t1.d": "For early risers.",
+  "t2.t": "Sunrise on the pier", "t2.d": "Hot coffee, the sea still quiet.",
+  "t3.t": "Breakfast", "t3.d": "Banana fritters, bread, eggs, fruit.",
+  "t4.t": "Boat & snorkeling", "t4.d": "When the water is clearest.",
+  "t5.t": "Lunch", "t5.d": "Fresh fish from the morning catch.",
+  "t6.t": "Nap or kayak", "t6.d": "Hammock included.",
+  "t7.t": "Sunset & power on", "t7.d": "Time to charge your phone.",
+  "t8.t": "Dinner together", "t8.d": "Village stories, guitar and stars.",
+
+  "food.eyebrow": "Mama's kitchen",
+  "food.title": "What's cooked today depends on the sea today.",
+  "food.p": "The menu follows the village fishermen's catch and the garden behind the house. Let us know if you're vegetarian, have allergies or don't eat fish; mama will adapt.",
+  "f1.t": "Grilled fish & colo-colo", "f1.d": "Fresh Moluccan–Papuan chili relish",
+  "f2.t": "Papeda & yellow fish soup", "f2.d": "Soft sago with turmeric broth",
+  "f3.t": "Ganemo greens", "f3.d": "Melinjo leaves with papaya flowers",
+  "f4.t": "Fruit & afternoon cakes", "f4.d": "Banana, papaya, sago cakes",
+
+  "gal.eyebrow": "Gallery", "gal.title": "Glimpses from the pier", "gal.ig": "See more on Instagram →",
+
+  "loc.eyebrow": "Getting here",
+  "loc.title": "Far? Yes. Worth it? Absolutely.",
+  "loc.lead": "The journey to Raja Ampat is part of the experience. We take care of you from Waisai all the way to our pier.",
+  "l1.t": "Fly to Sorong", "l1.d": "Domine Eduard Osok Airport (SOQ), with connecting flights from Jakarta, Makassar or Manado.",
+  "l2.t": "Fast boat to Waisai", "l2.d": "About 2 hours from Sorong harbor to Waisai, Raja Ampat's capital. Get your Environmental Service Card here.",
+  "l3.t": "We pick you up", "l3.d": "Kalma's boat waits at Waisai harbor and brings you straight to the homestay.",
+  "loc.tip": "<b>Tip:</b> plan to land in Sorong before noon so you can catch the boat to Waisai the same day. Send us your flight times and we'll help with the timing.",
+
+  "faq.title": "Frequently asked",
+  "faq.lead": "We'd rather be honest from the start, so there are no surprises on the island.",
+  "q1.q": "Is there electricity?", "q1.a": "Yes, from a generator/solar panels in the evening (around 6 p.m.–6 a.m.). Bring a power bank for daytime.",
+  "q2.q": "What about signal and internet?", "q2.a": "Signal is limited and usually only available in certain spots, like the pier. Think of it as a chance to truly switch off.",
+  "q3.q": "How do I pay?", "q3.a": "A deposit by bank transfer secures your dates; the rest is paid in cash on arrival. Bring enough cash from Sorong or Waisai.",
+  "q4.q": "What should I bring?", "q4.a": "Reef-safe sunscreen, seasickness tablets, a flashlight, your own snorkel gear (we also rent), and quick-dry clothes.",
+  "q5.q": "Is it suitable for children?", "q5.a": "Yes, with supervision. The houses sit over and beside the water, so young children should always be accompanied. Life jackets are available.",
+  "q6.q": "What is the cancellation policy?", "q6.a": "Contact us as soon as possible. We'll explain the deposit refund terms when confirming your booking.",
+
+  "book.eyebrow": "Book",
+  "book.title": "Ready to slow down?",
+  "book.lead": "Fill in this short form. Your message opens in WhatsApp and goes straight to Kalma's hosts.",
+  "book.wa": "WhatsApp",
+  "form.checkin": "Check-in", "form.checkout": "Check-out", "form.guests": "Guests", "form.check": "Check availability",
+  "form.name": "Name", "form.country": "Country / city", "form.room": "Room", "form.any": "Not sure yet / any",
+  "form.msg": "Message (optional)", "form.msg_ph": "Flight times, dietary needs, activities you're interested in…",
+  "form.send": "Send via WhatsApp", "form.or": "or", "form.mail": "send by email",
+
+  "foot.tag": "Slow down, Raja Ampat style.",
+  "foot.reef": "We protect the reef: no standing, no touching, no taking home.",
+  "foot.credit": "Website by"
+};
+
+/* Short strings used by main.js (validation messages and the WhatsApp message). */
+window.KALMA_UI = {
+  id: {
+    errDates: "Isi tanggal check-in dan check-out dulu, ya.",
+    errOrder: "Tanggal check-out harus setelah check-in.",
+    errName: "Boleh tahu namamu?",
+    hello: "Halo Kalma! Saya ingin menanyakan ketersediaan kamar.",
+    name: "Nama", from: "Asal", dates: "Tanggal", guests: "Tamu", room: "Kamar", note: "Catatan", any: "bebas",
+    subject: "Pertanyaan ketersediaan"
+  },
+  en: {
+    errDates: "Please fill in your check-in and check-out dates.",
+    errOrder: "Check-out must be after check-in.",
+    errName: "May we have your name?",
+    hello: "Hi Kalma! I'd like to ask about availability.",
+    name: "Name", from: "From", dates: "Dates", guests: "Guests", room: "Room", note: "Note", any: "any",
+    subject: "Availability inquiry"
+  }
+};
