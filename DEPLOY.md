@@ -125,5 +125,11 @@ Hostinger otomatis deploy ulang dari `main`. Perubahan struktur database ditamba
 
 - **Build gagal**: pastikan Node version 22 dan entry file `server.js`.
 - **Build sukses tapi situs error / `Failed to start`**: cek log aplikasi. Biasanya `DB_*` salah (`Access denied` = user/password, `ECONNREFUSED`/`ENOTFOUND` = host).
-- **`/healthz` menampilkan `"db":"error"`**: database tidak bisa dihubungi; periksa kembali langkah 1 dan 4.
+- **Halaman 503 setelah deploy**: buka **Log build** dan log aplikasi di hPanel; pastikan entry file `server.js` dan Node 20.12+ / 22.
+- **`/healthz` menampilkan `"db":"error"`**: website tetap jalan, tapi data belum tersimpan ke database. Lihat isi `hint`:
+  - `DB_USER atau DB_PASSWORD salah` → cek user & password di hPanel → MySQL Databases
+  - `DB_NAME tidak ditemukan` / `DB_NAME salah…` → pakai nama lengkap dengan awalan, mis. `u865185815_kalma`
+  - `DB_HOST/DB_PORT tidak bisa dihubungi` → coba `DB_HOST=localhost` atau host yang tertulis di hPanel, `DB_PORT=3306`
+
+  Setelah environment variable diperbaiki, deploy ulang. Aplikasi juga mencoba menghubungi database lagi secara otomatis setiap beberapa menit.
 - **Tamu tetap bisa memesan** walaupun database sedang bermasalah: mereka tetap mendapat link WhatsApp, hanya pencatatan di admin yang terlewat (tercatat di log).
