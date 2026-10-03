@@ -1,0 +1,41 @@
+<%- include('_top') %>
+<% var f = form || customer; %>
+<p class="crumb"><a href="/admin/customers">← Semua customer</a></p>
+<h1><%= customer.name %></h1>
+<p class="muted">Customer sejak <%= fmtDateTime(customer.created_at) %> · <%= customer.inquiries.length %> permintaan</p>
+<div class="grid2">
+  <section class="panel">
+    <h2>Data customer</h2>
+    <% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+    <form method="post" action="/admin/customers/<%= customer.id %>" class="stack">
+      <div class="field"><label for="name">Nama</label><input id="name" name="name" required maxlength="120" value="<%= f.name %>"></div>
+      <div class="row2">
+        <div class="field"><label for="phone">WhatsApp/HP</label><input id="phone" name="phone" maxlength="32" value="<%= form ? f.phone : phoneDisplay(f.phone) %>" placeholder="+62…"></div>
+        <div class="field"><label for="email">Email</label><input id="email" name="email" type="email" maxlength="190" value="<%= f.email || '' %>"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="other_contact">Kontak lain</label><input id="other_contact" name="other_contact" maxlength="100" value="<%= f.other_contact || '' %>" placeholder="Instagram, dll."></div>
+        <div class="field"><label for="country">Asal</label><input id="country" name="country" maxlength="80" value="<%= f.country || '' %>"></div>
+      </div>
+      <div class="field"><label for="notes">Catatan internal</label><textarea id="notes" name="notes" rows="4" maxlength="5000" placeholder="Preferensi makanan, alergi, tamu langganan, dll."><%= f.notes || '' %></textarea></div>
+      <button class="btn btn--primary" type="submit">Simpan</button>
+    </form>
+    <% var r = reply(customer); if (r) { %><p><a class="btn btn--cta btn--sm" href="<%= r.href %>" target="_blank" rel="noopener"><%= r.label %></a></p><% } %>
+  </section>
+  <section class="panel">
+    <h2>Riwayat permintaan</h2>
+    <% if (!customer.inquiries.length) { %><p class="muted">Belum ada permintaan.</p><% } else { %>
+    <ul class="list">
+      <% customer.inquiries.forEach(function (it) { %>
+      <li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %></b>
+        <span><%= it.guests %> tamu · <%= roomName(it.room) %> · <%- include('_status', { s: it.status }) %></span>
+        <small>Masuk <%= fmtDateTime(it.created_at) %></small></a></li>
+      <% }) %>
+    </ul><% } %>
+  </section>
+</div>
+<form method="post" action="/admin/customers/<%= customer.id %>/delete" class="danger" onsubmit="return confirm('Hapus customer ini beserta SEMUA permintaannya? Tidak bisa dibatalkan.')">
+  <p class="muted">Hapus data pribadi customer ini jika ia memintanya (hak penghapusan data menurut UU PDP).</p>
+  <button class="btn btn--danger btn--sm" type="submit">Hapus customer &amp; semua datanya</button>
+</form>
+<%- include('_bottom') %>

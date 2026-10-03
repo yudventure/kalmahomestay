@@ -154,6 +154,7 @@
   "foot.credit": "Website oleh",
   "form.msg_ph": "Jadwal penerbangan, kebutuhan makanan, aktivitas yang diminati…",
   "form.contact": "WhatsApp / email kamu",
+  "form.privacy": "Data kamu hanya dipakai Kalma untuk menanggapi pemesanan ini dan tidak dibagikan ke pihak lain. Minta hapus kapan saja lewat WhatsApp atau email.",
   "ui": {
     "errDates": "Isi tanggal check-in dan check-out dulu, ya.",
     "errOrder": "Tanggal check-out harus setelah check-in.",

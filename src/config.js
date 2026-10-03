@@ -13,6 +13,8 @@ function loadConfig(env = process.env) {
     siteUrl: String(env.SITE_URL || `http://localhost:${port}`).replace(/\/+$/, ''),
     dataDir: env.DATA_DIR || require('path').join(__dirname, '..', 'data'),
     adminPassword: env.ADMIN_PASSWORD || '',
+    db: loadDb(env),
+    dbAutoMigrate: env.DB_AUTO_MIGRATE !== 'false',
     contact: {
       whatsapp,
       whatsappDisplay: env.WHATSAPP_DISPLAY || '+' + whatsapp,
@@ -21,6 +23,15 @@ function loadConfig(env = process.env) {
       instagramUrl: 'https://instagram.com/' + instagram.replace(/^@/, ''),
     },
   };
+}
+
+/** MySQL settings from DATABASE_URL (mysql://user:pass@host:3306/name) or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME. */
+function loadDb(env) {
+  if (env.DATABASE_URL) return { url: env.DATABASE_URL };
+  if (env.DB_HOST && env.DB_USER && env.DB_NAME) {
+    return { host: env.DB_HOST, port: Number(env.DB_PORT) || 3306, user: env.DB_USER, password: env.DB_PASSWORD || '', name: env.DB_NAME };
+  }
+  return null;
 }
 
 /** Rooms: prices are per person per night in IDR. Names/descriptions live in content/<lang>.json. */

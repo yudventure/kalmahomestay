@@ -1,0 +1,36 @@
+<%- include('_top') %>
+<h1>Ringkasan</h1>
+<div class="cards">
+  <a class="card-stat card-stat--new" href="/admin/inquiries?status=new"><b><%= stats.counts.new %></b><span>Permintaan baru</span></a>
+  <a class="card-stat" href="/admin/inquiries?status=contacted"><b><%= stats.counts.contacted %></b><span>Sudah dihubungi</span></a>
+  <a class="card-stat" href="/admin/inquiries?status=confirmed"><b><%= stats.counts.confirmed %></b><span>Terkonfirmasi</span></a>
+  <a class="card-stat" href="/admin/customers"><b><%= stats.customers %></b><span>Total customer</span></a>
+</div>
+
+<div class="grid2">
+  <section class="panel">
+    <div class="panel__head"><h2>Permintaan baru</h2><a class="link" href="/admin/inquiries?status=new">Semua (<%= newTotal %>) →</a></div>
+    <% if (!recent.length) { %><p class="muted">Tidak ada permintaan baru. 🌊</p><% } else { %>
+    <ul class="list">
+      <% recent.forEach(function (it) { %>
+      <li><a href="/admin/inquiries/<%= it.id %>"><b><%= it.name %></b><span><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %> · <%= it.guests %> tamu · <%= roomName(it.room) %></span><small><%= fmtDateTime(it.created_at) %></small></a></li>
+      <% }) %>
+    </ul><% } %>
+  </section>
+  <section class="panel">
+    <div class="panel__head"><h2>Kedatangan terdekat</h2><a class="link" href="/admin/inquiries?status=confirmed">Terkonfirmasi →</a></div>
+    <% if (!stats.upcoming.length) { %><p class="muted">Belum ada tamu terkonfirmasi yang akan datang.</p><% } else { %>
+    <ul class="list">
+      <% stats.upcoming.forEach(function (it) { %>
+      <li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> · <%= it.name %></b><span><%= nights(it.checkin, it.checkout) %> malam · <%= it.guests %> tamu · <%= roomName(it.room) %></span></a></li>
+      <% }) %>
+    </ul><% } %>
+  </section>
+</div>
+
+<section class="panel">
+  <div class="panel__head"><h2>Ekspor data</h2></div>
+  <p class="muted">Unduh sebagai CSV, bisa dibuka di Excel atau Google Sheets.</p>
+  <div class="btns"><a class="btn btn--ghost btn--sm" href="/admin/export/customers.csv">Customer (.csv)</a><a class="btn btn--ghost btn--sm" href="/admin/export/inquiries.csv">Permintaan (.csv)</a></div>
+</section>
+<%- include('_bottom') %>

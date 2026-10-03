@@ -271,6 +271,7 @@ em { font-style: italic; }
 .bform__ok .btn { margin: var(--space-3) 0; }
 .bform.is-sent > :not(.bform__ok) { display: none; }
 .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
+.bform__privacy { font-size: var(--text-xs); color: var(--color-text-muted); margin: var(--space-3) 0 0; text-align: center; line-height: 1.5; }
 .bform__alt { text-align: center; font-size: var(--text-sm); color: var(--color-text-muted); margin: var(--space-4) 0 0; }
 @media (max-width: 900px) { .book__in { grid-template-columns: 1fr; gap: var(--space-6); } }
 @media (max-width: 520px) { .bform { padding: var(--space-5); } .bform__row { grid-template-columns: 1fr; gap: 0; } }
@@ -302,19 +303,3 @@ em { font-style: italic; }
 .nf { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--space-7) 16px; }
 .nf img { width: 220px; margin-bottom: var(--space-6); }
 .nf .lead { margin: 0 auto var(--space-5); }
-
-/* admin */
-.admin { background: var(--kalma-shell); }
-.admin__head { background: var(--kalma-sand); border-bottom: 1px solid var(--color-border); }
-.admin__bar { display: flex; align-items: center; gap: var(--space-4); height: 64px; font-weight: 600; color: var(--kalma-deep-sea); }
-.admin__bar img { height: 30px; width: auto; }
-.admin__bar .link { margin-left: auto; font-size: var(--text-sm); }
-.admin__main { padding-top: var(--space-6); padding-bottom: var(--space-8); }
-.admin__main h1 { font-size: var(--text-3xl); }
-.admin__table { overflow-x: auto; background: #fff; border: 1px solid #E8DDBB; border-radius: var(--radius-md); }
-.admin__table table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
-.admin__table th, .admin__table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #EFE7CF; vertical-align: top; }
-.admin__table th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--color-text-muted); white-space: nowrap; }
-.admin__table tr:last-child td { border-bottom: 0; }
-.admin__table small { color: var(--color-text-muted); }
-.admin__msg { max-width: 320px; white-space: pre-wrap; }

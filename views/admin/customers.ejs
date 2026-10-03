@@ -1,0 +1,29 @@
+<%- include('_top') %>
+<h1>Customer <small class="muted">(<%= result.total %>)</small></h1>
+<form class="filters" method="get">
+  <input type="search" name="q" value="<%= q %>" placeholder="Cari nama, HP, email, negara…" aria-label="Cari">
+  <button class="btn btn--primary btn--sm" type="submit">Cari</button>
+  <% if (q) { %><a class="link" href="/admin/customers">Reset</a><% } %>
+  <a class="link filters__right" href="/admin/export/customers.csv">Unduh CSV</a>
+</form>
+<% if (!result.items.length) { %><p class="muted">Belum ada customer<%= q ? ' yang cocok' : '' %>.</p><% } else { %>
+<div class="table">
+<table>
+  <thead><tr><th>Nama</th><th>WhatsApp/HP</th><th>Email</th><th>Asal</th><th>Permintaan</th><th>Terakhir</th></tr></thead>
+  <tbody>
+  <% result.items.forEach(function (c) { %>
+    <tr>
+      <td><a href="/admin/customers/<%= c.id %>"><b><%= c.name %></b></a><% if (c.notes) { %> <span class="dot" title="Ada catatan">●</span><% } %></td>
+      <td><%= phoneDisplay(c.phone) || '—' %></td>
+      <td><%= c.email || '—' %></td>
+      <td><%= c.country || '—' %></td>
+      <td><%= c.inquiry_count %></td>
+      <td><%= fmtDateTime(c.last_inquiry_at || c.created_at) %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('_pager', { params: { q: q } }) %>
+<% } %>
+<%- include('_bottom') %>

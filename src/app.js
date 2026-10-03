@@ -1,10 +1,11 @@
 'use strict';
 
 const path = require('path');
-const crypto = require('crypto');
 const express = require('express');
 const { loadConfig, ROOMS, GUEST_OPTIONS } = require('./config');
-const { normalize, validate, buildMessage, createStore, replyLink } = require('./inquiry');
+const { normalize, validate, buildMessage } = require('./inquiry');
+const { createRepo } = require('./db');
+const { createAdminRouter } = require('./admin');
 
 const ROOT = path.join(__dirname, '..');
 const CONTENT = {
@@ -23,9 +24,16 @@ const rupiah = (n) => 'Rp ' + n.toLocaleString('id-ID');
 /** JSON safe to embed inside <script> */
 const embedJSON = (obj) => JSON.stringify(obj).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 
+/** Wrap async route handlers so errors reach Express' error handler. */
+const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+/**
+ * Build the Express app. Call `await app.locals.repo.init()` before listening
+ * (server.js does this) so database migrations run first.
+ */
 function createApp(options = {}) {
   const config = { ...loadConfig(), ...options };
-  const store = createStore(config.dataDir);
+  const repo = options.repo || createRepo(config);
   const app = express();
 
   app.disable('x-powered-by');
@@ -52,7 +60,7 @@ function createApp(options = {}) {
   app.get('/brand/tokens.css', (req, res) => res.sendFile(path.join(ROOT, 'brand/tokens.css')));
   app.get('/favicon.ico', (req, res) => res.sendFile(path.join(ROOT, 'brand/assets/favicon.ico')));
 
-  app.use(express.urlencoded({ extended: false, limit: '10kb' }));
+  app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(express.json({ limit: '10kb' }));
 
   function renderHome(res, lang, extra = {}) {
@@ -77,7 +85,6 @@ function createApp(options = {}) {
 
   app.get('/', (req, res) => renderHome(res, 'id'));
   app.get('/en', (req, res) => renderHome(res, 'en'));
-  app.get('/en/', (req, res) => res.redirect(301, '/en'));
 
   /* ---------- booking inquiries ---------- */
   const hits = new Map(); // simple per-IP rate limit: 10 inquiries / 10 min
@@ -86,10 +93,11 @@ function createApp(options = {}) {
     const list = (hits.get(ip) || []).filter((ts) => now - ts < 10 * 60 * 1000);
     list.push(now);
     hits.set(ip, list);
+    if (hits.size > 5000) hits.clear();
     return list.length > 10;
   }
 
-  function handleInquiry(lang, req) {
+  async function handleInquiry(lang, req) {
     const t = translator(lang);
     const values = normalize(req.body);
     if (req.body && req.body.website) return { status: 200, values, spam: true }; // honeypot
@@ -98,9 +106,9 @@ function createApp(options = {}) {
     if (errKey) return { status: 400, values, error: t('ui')[errKey] };
     const message = buildMessage(values, lang, t);
     try {
-      store.add({ lang, ...values });
+      await repo.addInquiry({ lang, ...values });
     } catch (e) {
-      // Never block a guest because the disk is read-only or full: they still get the WhatsApp link.
+      // Never block a guest because the database is down: they still get the WhatsApp link.
       console.error('Could not save inquiry:', e.message);
     }
     return {
@@ -111,49 +119,38 @@ function createApp(options = {}) {
   }
 
   // JSON endpoint used by the page's JavaScript
-  app.post(['/api/inquiry', '/en/api/inquiry'], (req, res) => {
+  app.post(['/api/inquiry', '/en/api/inquiry'], ah(async (req, res) => {
     const lang = req.path.startsWith('/en') || (req.body && req.body.lang === 'en') ? 'en' : 'id';
-    const r = handleInquiry(lang, req);
+    const r = await handleInquiry(lang, req);
     if (r.spam) return res.status(200).json({ ok: true });
     if (r.error) return res.status(r.status).json({ ok: false, error: r.error });
     res.status(201).json({ ok: true, whatsappUrl: r.whatsappUrl, mailtoUrl: r.mailtoUrl });
-  });
+  }));
 
   // Plain form POST (works without JavaScript): redirect straight to WhatsApp
-  app.post(['/inquiry', '/en/inquiry'], (req, res) => {
+  app.post(['/inquiry', '/en/inquiry'], ah(async (req, res) => {
     const lang = req.path.startsWith('/en') ? 'en' : 'id';
-    const r = handleInquiry(lang, req);
+    const r = await handleInquiry(lang, req);
     if (r.spam) return res.redirect(303, lang === 'en' ? '/en' : '/');
     if (r.error) {
       res.status(r.status);
       return renderHome(res, lang, { values: r.values, formError: r.error });
     }
     res.redirect(303, r.whatsappUrl);
-  });
+  }));
 
-  /* ---------- admin: list inquiries (HTTP Basic auth, user "admin") ---------- */
-  function requireAdmin(req, res, next) {
-    if (!config.adminPassword) return res.status(404).send('Not found');
-    const [scheme, encoded] = (req.get('authorization') || '').split(' ');
-    const [user, pass] = scheme === 'Basic' && encoded ? Buffer.from(encoded, 'base64').toString().split(/:(.*)/s) : [];
-    const a = Buffer.from(String(pass || '')), b = Buffer.from(config.adminPassword);
-    if (user === 'admin' && a.length === b.length && crypto.timingSafeEqual(a, b)) return next();
-    res.set('WWW-Authenticate', 'Basic realm="Kalma admin", charset="UTF-8"').status(401).send('Login required');
-  }
-
-  app.get('/admin', requireAdmin, (req, res) => {
-    res.set('Cache-Control', 'no-store');
-    res.render('admin', { items: store.list(), rooms: ROOMS, t: translator('id'), replyLink });
-  });
-  app.get('/admin/inquiries.json', requireAdmin, (req, res) => {
-    res.set('Cache-Control', 'no-store').json(store.list());
-  });
+  /* ---------- admin ---------- */
+  app.use('/admin', createAdminRouter({ repo, config, t: translator('id') }));
 
   app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${config.siteUrl}/sitemap.xml\n`));
   app.get('/sitemap.xml', (req, res) => res.type('application/xml').send(
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     `<url><loc>${config.siteUrl}/</loc></url>\n<url><loc>${config.siteUrl}/en</loc></url>\n</urlset>\n`));
-  app.get('/healthz', (req, res) => res.json({ ok: true }));
+  app.get('/healthz', ah(async (req, res) => {
+    let db = 'ok';
+    try { await repo.ping(); } catch { db = 'error'; }
+    res.status(db === 'ok' ? 200 : 503).json({ ok: db === 'ok', storage: repo.kind, db });
+  }));
 
   app.use((req, res) => {
     const lang = req.path.startsWith('/en') ? 'en' : 'id';
@@ -168,8 +165,8 @@ function createApp(options = {}) {
   });
 
   app.locals.config = config;
-  app.locals.store = store;
+  app.locals.repo = repo;
   return app;
 }
 
-module.exports = { createApp };
+module.exports = { createApp, ah };

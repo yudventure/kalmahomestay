@@ -330,6 +330,7 @@
         <textarea id="b-msg" name="msg" rows="3" maxlength="1000" placeholder="<%= t('form.msg_ph') %>"><%= values.msg %></textarea></div>
       <p class="bform__err" role="alert" aria-live="polite"><%= formError %></p>
       <button type="submit" class="btn btn--cta btn--block"><%- t('form.send') %></button>
+      <p class="bform__privacy"><%- t('form.privacy') %></p>
       <p class="bform__alt"><span><%- t('form.or') %></span> <a href="mailto:<%= contact.email %>" class="js-mail"><%- t('form.mail') %></a></p>
     </form>
   </div>

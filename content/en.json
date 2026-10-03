@@ -154,6 +154,7 @@
   "foot.reef": "We protect the reef: no standing, no touching, no taking home.",
   "foot.credit": "Website by",
   "form.contact": "Your WhatsApp / email",
+  "form.privacy": "Your details are used only by Kalma to reply to this request and are never shared. Ask us to delete them anytime via WhatsApp or email.",
   "ui": {
     "errDates": "Please fill in your check-in and check-out dates.",
     "errOrder": "Check-out must be after check-in.",

@@ -1,0 +1,33 @@
+<%- include('_top') %>
+<h1>Permintaan <small class="muted">(<%= result.total %>)</small></h1>
+<form class="filters" method="get">
+  <input type="search" name="q" value="<%= q %>" placeholder="Cari nama, HP, email, pesan…" aria-label="Cari">
+  <select name="status" aria-label="Status">
+    <option value="">Semua status</option>
+    <% STATUSES.forEach(function (s) { %><option value="<%= s.id %>"<%= s.id === status ? ' selected' : '' %>><%= s.label %></option><% }) %>
+  </select>
+  <button class="btn btn--primary btn--sm" type="submit">Terapkan</button>
+  <% if (q || status) { %><a class="link" href="/admin/inquiries">Reset</a><% } %>
+</form>
+<% if (!result.items.length) { %><p class="muted">Tidak ada permintaan yang cocok.</p><% } else { %>
+<div class="table">
+<table>
+  <thead><tr><th>#</th><th>Masuk</th><th>Customer</th><th>Menginap</th><th>Tamu</th><th>Kamar</th><th>Status</th></tr></thead>
+  <tbody>
+  <% result.items.forEach(function (it) { %>
+    <tr>
+      <td><a href="/admin/inquiries/<%= it.id %>">#<%= it.id %></a></td>
+      <td><%= fmtDateTime(it.created_at) %></td>
+      <td><a href="/admin/customers/<%= it.customer_id %>"><b><%= it.name %></b></a><br><small><%= phoneDisplay(it.phone) || it.email || it.other_contact || '' %></small></td>
+      <td><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %><br><small><%= nights(it.checkin, it.checkout) %> malam</small></td>
+      <td><%= it.guests %></td>
+      <td><%= roomName(it.room) %></td>
+      <td><%- include('_status', { s: it.status }) %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('_pager', { params: { q: q, status: status } }) %>
+<% } %>
+<%- include('_bottom') %>
