@@ -68,11 +68,29 @@ Semua data homestay (harga, kapasitas, jam listrik, sinyal, pembayaran, pembatal
 
 ## Mengganti foto
 
-Kotak foto masih berupa gradasi warna. Simpan foto di `public/img/`, lalu di `views/index.ejs` tambahkan `--img`:
+Kotak foto masih berupa gradasi warna. Cukup simpan foto di `public/img/` dengan nama berikut (JPG, PNG, WebP, atau AVIF); halaman langsung memakainya tanpa mengubah kode:
 
-```html
-<div class="photo ph-lagoon" style="--img:url(/img/bungalow-laguna.jpg)" …></div>
+| Nama file | Tempat |
+|---|---|
+| `hero-1` … `hero-4` | Mozaik foto di bagian atas |
+| `exp-1` … `exp-6` | Lingkaran pengalaman (snorkeling, island hopping, selam, cendrawasih, kampung, kayak) |
+| `room-laguna`, `room-pantai`, `room-keluarga` | Kartu kamar |
+| `feature` | Foto besar di samping daftar keunggulan |
+| `review` | Lingkaran di bagian "Kata tamu" |
+
+Contoh: `public/img/room-laguna.jpg`.
+
+## Cerita tamu
+
+Isi `"reviews"` di `content/id.json` dan `content/en.json` dengan ulasan asli (dengan izin tamunya):
+
+```json
+"reviews": [
+  { "quote": "Tempat paling tenang yang pernah kami datangi.", "name": "Nama Tamu", "from": "Jakarta", "rating": 5 }
+]
 ```
+
+Selama masih kosong, bagian ini menampilkan ajakan untuk mengirim cerita lewat WhatsApp.
 
 Lebar sekitar 1600 px, JPG/WebP, di bawah 300 KB.
 
