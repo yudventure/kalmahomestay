@@ -149,9 +149,10 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
           customerId = res.insertId;
         }
         const [ins] = await conn.query(
-          `INSERT INTO inquiries (customer_id, checkin, checkout, guests, room, message, lang, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-          [customerId, v.checkin, v.checkout, v.guests, v.room || null, v.msg || null, v.lang, t, t]);
+          `INSERT INTO inquiries (customer_id, checkin, checkout, guests, room, message, lang, order_id, amount, total, payment_status, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [customerId, v.checkin, v.checkout, v.guests, v.room || null, v.msg || null, v.lang,
+            v.orderId || null, v.amount || null, v.total || null, v.orderId ? 'pending' : null, t, t]);
         await conn.commit();
         return { customerId, inquiryId: ins.insertId };
       } catch (e) {
@@ -190,6 +191,24 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
       if (!sets.length) return false;
       sets.push('updated_at = ?'); args.push(now());
       const [res] = await pool.query(`UPDATE inquiries SET ${sets.join(', ')} WHERE id = ?`, [...args, id]);
+      return res.affectedRows > 0;
+    },
+
+    async getInquiryByOrder(orderId) {
+      const [[row]] = await pool.query(
+        `SELECT i.*, c.name, c.phone, c.email, c.other_contact, c.country
+         FROM inquiries i JOIN customers c ON c.id = i.customer_id WHERE i.order_id = ?`, [orderId]);
+      return row || null;
+    },
+
+    /** Record a payment update from the gateway; a paid booking becomes "confirmed". */
+    async setPayment(orderId, { status, type, paidAt }) {
+      const t = now();
+      const [res] = await pool.query(
+        `UPDATE inquiries SET payment_status = ?, payment_type = COALESCE(?, payment_type), paid_at = COALESCE(?, paid_at),
+           status = IF(? = 'paid' AND status IN ('new','contacted'), 'confirmed', status), updated_at = ?
+         WHERE order_id = ?`,
+        [status, type || null, paidAt || null, status, t, orderId]);
       return res.affectedRows > 0;
     },
 
@@ -259,7 +278,8 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
     async exportInquiries() {
       const [rows] = await pool.query(
         `SELECT i.id, i.created_at, i.status, c.name, c.phone, c.email, c.other_contact, c.country,
-                i.checkin, i.checkout, i.guests, i.room, i.message, i.admin_note, i.lang, i.customer_id
+                i.checkin, i.checkout, i.guests, i.room, i.message, i.admin_note, i.lang, i.customer_id,
+                i.order_id, i.total, i.amount, i.payment_status, i.payment_type, i.paid_at
          FROM inquiries i JOIN customers c ON c.id = i.customer_id ORDER BY i.id`);
       return rows;
     },

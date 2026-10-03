@@ -13,6 +13,16 @@
       <dt>Bahasa</dt><dd><%= item.lang === 'en' ? 'English' : 'Indonesia' %></dd>
       <dt>Masuk</dt><dd><%= fmtDateTime(item.created_at) %></dd>
     </dl>
+    <% if (item.order_id) { %>
+    <h2>Pembayaran online</h2>
+    <dl class="dl">
+      <dt>Status</dt><dd><%- include('_pay', { p: item.payment_status }) %></dd>
+      <dt>Order ID</dt><dd><code><%= item.order_id %></code></dd>
+      <dt>Dibayar online</dt><dd>Rp <%= Number(item.amount || 0).toLocaleString('id-ID') %><% if (item.total && Number(item.total) !== Number(item.amount)) { %> dari total Rp <%= Number(item.total).toLocaleString('id-ID') %><% } %></dd>
+      <% if (item.payment_type) { %><dt>Metode</dt><dd><%= item.payment_type %></dd><% } %>
+      <% if (item.paid_at) { %><dt>Lunas pada</dt><dd><%= fmtDateTime(item.paid_at) %></dd><% } %>
+    </dl>
+    <% } %>
   </section>
   <section class="panel">
     <h2>Customer</h2>

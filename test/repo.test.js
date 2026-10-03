@@ -202,6 +202,24 @@ for (const [kind, make] of backends) {
       assert.equal((await repo.allSurveyResponses()).length, 1);
     });
 
+    test('online orders carry a payment that can be marked paid', async () => {
+      const { inquiryId, customerId } = await repo.addInquiry(base({ contact: 'pay@example.com', orderId: 'KALMA-T1', amount: 1530000, total: 5100000 }));
+      let i = await repo.getInquiryByOrder('KALMA-T1');
+      assert.equal(i.id, inquiryId);
+      assert.equal(Number(i.amount), 1530000);
+      assert.equal(Number(i.total), 5100000);
+      assert.equal(i.payment_status, 'pending');
+      assert.equal(await repo.setPayment('KALMA-T1', { status: 'paid', type: 'bank_transfer', paidAt: new Date('2030-01-01T02:00:00Z') }), true);
+      i = await repo.getInquiryByOrder('KALMA-T1');
+      assert.equal(i.payment_status, 'paid');
+      assert.equal(i.payment_type, 'bank_transfer');
+      assert.equal(i.status, 'confirmed');
+      assert.equal(new Date(i.paid_at).toISOString(), '2030-01-01T02:00:00.000Z');
+      assert.equal(await repo.setPayment('KALMA-NOPE', { status: 'paid' }), false);
+      assert.equal(await repo.getInquiryByOrder('KALMA-NOPE'), null);
+      await repo.deleteCustomer(customerId);
+    });
+
     test('data survives reopening the store', async () => {
       if (kind !== 'file') return;
       const again = createFileRepo(path.dirname(repo.file));

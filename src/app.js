@@ -7,6 +7,8 @@ const { normalize, validate, buildMessage } = require('./inquiry');
 const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
 const survey = require('./survey');
+const payments = require('./payments');
+const { parseContact } = require('./db/shared');
 const fs = require('fs');
 const compression = require('compression');
 
@@ -109,10 +111,15 @@ function createApp(options = {}) {
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));
   app.use(express.json({ limit: '10kb' }));
 
+  const pay = config.payments || { enabled: false, percent: 100 };
+
   function renderHome(res, lang, extra = {}) {
     const t = translator(lang);
     const base = lang === 'en' ? '/en' : '';
+    const values = extra.values || EMPTY_VALUES;
     res.render('index', {
+      pay,
+      checkoutOpen: Boolean(extra.formError || extra.bookRoom),
       lang, t, rupiah,
       photo: photoFinder(),
       video: videoFinder(),
@@ -127,13 +134,20 @@ function createApp(options = {}) {
       year: new Date().getFullYear(),
       values: EMPTY_VALUES,
       formError: '',
-      clientConfig: embedJSON({ lang, base, whatsapp: config.contact.whatsapp, email: config.contact.email, ui: t('ui') }),
+      clientConfig: embedJSON({
+        lang, base, whatsapp: config.contact.whatsapp, email: config.contact.email, ui: t('ui'),
+        rooms: ROOMS.map((r) => ({ id: r.id, name: t(r.nameKey), price: r.price, maxGuests: r.maxGuests })),
+        payments: pay.enabled ? { enabled: true, clientKey: pay.clientKey, snapJs: pay.snapJs, percent: pay.percent } : { enabled: false, percent: 100 },
+      }),
       ...extra,
+      values: extra.bookRoom ? { ...values, room: extra.bookRoom } : values,
     });
   }
 
-  app.get('/', (req, res) => renderHome(res, 'id'));
-  app.get('/en', (req, res) => renderHome(res, 'en'));
+  // ?book=<room> opens the booking dialog for that room (also works without JavaScript)
+  const bookParam = (req) => (ROOMS.some((r) => r.id === req.query.book) ? { bookRoom: req.query.book } : {});
+  app.get('/', (req, res) => renderHome(res, 'id', bookParam(req)));
+  app.get('/en', (req, res) => renderHome(res, 'en', bookParam(req)));
 
   /* ---------- booking inquiries ---------- */
   const hits = new Map(); // simple per-IP rate limit: 10 inquiries / 10 min
@@ -187,6 +201,75 @@ function createApp(options = {}) {
       return renderHome(res, lang, { values: r.values, formError: r.error });
     }
     res.redirect(303, r.whatsappUrl);
+  }));
+
+  /* ---------- online booking & payment (Midtrans Snap) ---------- */
+  function rupiahOrder(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); }
+
+  app.post(['/api/checkout', '/en/api/checkout'], ah(async (req, res) => {
+    const lang = req.path.startsWith('/en') || (req.body && req.body.lang === 'en') ? 'en' : 'id';
+    const t = translator(lang);
+    const ui = t('ui');
+    if (req.body && req.body.website) return res.status(200).json({ ok: true }); // honeypot
+    if (rateLimited(req.ip, 'checkout')) return res.status(429).json({ ok: false, error: ui.errRate });
+    const values = normalize(req.body);
+    const errKey = validate(values) || (!values.contact ? 'errContact' : '');
+    if (errKey) return res.status(400).json({ ok: false, error: ui[errKey] });
+    const q = payments.quote(values, pay.enabled ? pay.percent : 100);
+    if (q.error) return res.status(400).json({ ok: false, error: String(ui[q.error] || ui.errServer).replace('{n}', q.max) });
+
+    const message = buildMessage(values, lang, t) + `\n${ui.total}: ${rupiahOrder(q.total)} (${q.nights} ${ui.nights})`;
+    const whatsappUrl = `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`;
+    const viaWhatsapp = async () => {
+      try { await repo.addInquiry({ lang, ...values }); } catch (e) { console.error('Could not save inquiry:', e.message); }
+      return res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
+    };
+    if (!pay.enabled) return viaWhatsapp();
+
+    const orderId = payments.newOrderId();
+    try {
+      await repo.addInquiry({ lang, ...values, orderId, amount: q.amount, total: q.total });
+    } catch (e) {
+      // Without a saved order we could not match the payment, so take the booking over WhatsApp instead.
+      console.error('Could not save order, falling back to WhatsApp:', e.message);
+      return res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
+    }
+    const contact = parseContact(values.contact);
+    try {
+      const snap = await payments.createSnapTransaction(pay, {
+        orderId,
+        amount: q.amount,
+        itemName: `${t(q.room.nameKey)} · ${q.nights} ${ui.nights}`,
+        name: values.name,
+        email: contact.email,
+        phone: contact.phone,
+        finishUrl: `${config.siteUrl}${lang === 'en' ? '/en' : '/'}`,
+      });
+      res.status(201).json({ ok: true, mode: 'pay', token: snap.token, redirectUrl: snap.redirectUrl, orderId, amount: q.amount, total: q.total, nights: q.nights, whatsappUrl });
+    } catch (e) {
+      console.error('Midtrans error, falling back to WhatsApp:', e.message);
+      await repo.setPayment(orderId, { status: 'failed' }).catch(() => {});
+      res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
+    }
+  }));
+
+  // Midtrans "Payment Notification URL": https://<domain>/api/payments/midtrans
+  app.post('/api/payments/midtrans', ah(async (req, res) => {
+    if (!pay.enabled) return res.status(404).json({ ok: false });
+    const n = req.body || {};
+    if (!payments.verifyNotification(pay, n)) return res.status(403).json({ ok: false, error: 'bad signature' });
+    const item = await repo.getInquiryByOrder(String(n.order_id));
+    if (!item) return res.status(200).json({ ok: true, ignored: 'unknown order' }); // e.g. Midtrans dashboard test
+    if (Math.round(Number(n.gross_amount)) !== Number(item.amount)) return res.status(400).json({ ok: false, error: 'amount mismatch' });
+    const status = payments.paymentStatus(n);
+    if (status) {
+      await repo.setPayment(item.order_id, {
+        status,
+        type: n.payment_type ? String(n.payment_type).slice(0, 40) : null,
+        paidAt: status === 'paid' ? payments.midtransTime(n.settlement_time || n.transaction_time) || new Date() : null,
+      });
+    }
+    res.json({ ok: true });
   }));
 
   /* ---------- traveler survey ---------- */

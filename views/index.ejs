@@ -66,7 +66,7 @@
         <a href="/" hreflang="id" lang="id"<%- lang === 'id' ? ' aria-current="page"' : '' %>>ID</a>
         <a href="/en" hreflang="en" lang="en"<%- lang === 'en' ? ' aria-current="page"' : '' %>>EN</a>
       </div>
-      <a href="#pesan" class="btn btn--cta btn--sm nav__cta"><%- t('nav.book') %></a>
+      <a href="#kamar" class="btn btn--cta btn--sm nav__cta"><%- t('nav.book') %></a>
       <button class="nav__burger" type="button" aria-controls="menu" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
     </div>
   </div>
@@ -180,7 +180,7 @@
           <p class="card__desc"><%- t(k + '.desc') %></p>
           <div class="card__foot">
             <div><b><%= rupiah(r.price) %></b><span><%- t('r.per') %></span></div>
-            <a href="#pesan" class="btn btn--soft btn--sm" data-room="<%= r.id %>"><%- t('r.book') %></a>
+            <a href="<%= base || '' %>/?book=<%= r.id %>#checkout" class="btn btn--soft btn--sm" data-room="<%= r.id %>"><%- t('r.book') %></a>
           </div>
         </div>
       </article>
@@ -285,57 +285,54 @@
     </div>
     <div class="faq__list">
       <% for (let i = 1; i <= 6; i++) { %>
-      <details class="reveal"><summary><%- t('q' + i + '.q') %></summary><p><%- t('q' + i + '.a') %></p></details>
+      <details class="reveal"><summary><%- t('q' + i + '.q') %></summary><p><%- t('q' + i + '.a' + (i === 3 && pay.enabled ? '_online' : '')) %></p></details>
       <% } %>
     </div>
   </div>
 </section>
 
-<!-- ============================== BOOK ============================== -->
-<section class="sec sec--tight" id="pesan">
-  <div class="wrap">
-    <div class="book reveal">
-      <div class="book__text">
-        <p class="eyebrow"><%- t('book.eyebrow') %></p>
-        <h2><%- t('book.title') %></h2>
-        <p class="sub"><%- t('book.lead') %></p>
-        <ul class="contact">
-          <li><span><%- t('book.wa') %></span><a href="https://wa.me/<%= contact.whatsapp %>" target="_blank" rel="noopener"><%= contact.whatsappDisplay %></a></li>
-          <li><span>Email</span><a href="mailto:<%= contact.email %>"><%= contact.email %></a></li>
-          <li><span>Instagram</span><a href="<%= contact.instagramUrl %>" target="_blank" rel="noopener"><%= contact.instagram %></a></li>
-        </ul>
+<!-- ============================== BOOK & PAY (dialog) ============================== -->
+<% const coRoom = rooms.find(function (r) { return r.id === values.room; }) || rooms[0]; %>
+<dialog class="checkout" id="checkout" aria-labelledby="co-title"<%- checkoutOpen ? ' open' : '' %>>
+  <form class="co" id="co-form" method="post" action="<%= base %>/inquiry" novalidate>
+    <div class="co__head">
+      <div>
+        <p class="eyebrow"><%- t('co.eyebrow') %></p>
+        <h3 id="co-title"><%- t(coRoom.nameKey) %></h3>
+        <p class="co__price"><b id="co-price"><%= rupiah(coRoom.price) %></b> <span><%- t('r.per') %></span></p>
       </div>
-      <form class="bform" id="bform" method="post" action="<%= base %>/inquiry#pesan" novalidate>
-        <div class="bform__ok" hidden></div>
-        <div class="hp" aria-hidden="true"><label for="b-website">Website</label><input id="b-website" name="website" tabindex="-1" autocomplete="off"></div>
-        <div class="bform__row">
-          <div class="field"><label for="b-name"><%- t('form.name') %></label><input id="b-name" name="name" autocomplete="name" maxlength="80" required value="<%= values.name %>"></div>
-          <div class="field"><label for="b-contact"><%- t('form.contact') %></label><input id="b-contact" name="contact" maxlength="100" autocomplete="tel" inputmode="email" value="<%= values.contact %>"></div>
-        </div>
-        <div class="field"><label for="b-country"><%- t('form.country') %></label><input id="b-country" name="country" maxlength="80" value="<%= values.country %>"></div>
-        <div class="bform__row">
-          <div class="field"><label for="b-in"><%- t('form.checkin') %></label><input id="b-in" type="date" name="checkin" required value="<%= values.checkin %>"></div>
-          <div class="field"><label for="b-out"><%- t('form.checkout') %></label><input id="b-out" type="date" name="checkout" required value="<%= values.checkout %>"></div>
-        </div>
-        <div class="bform__row">
-          <div class="field"><label for="b-guests"><%- t('form.guests') %></label>
-            <select id="b-guests" name="guests"><% guestOptions.forEach(function (g) { %><option<%= g === values.guests ? ' selected' : '' %>><%= g %></option><% }) %></select></div>
-          <div class="field"><label for="b-room"><%- t('form.room') %></label>
-            <select id="b-room" name="room">
-              <option value=""><%- t('form.any') %></option>
-              <% rooms.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === values.room ? ' selected' : '' %>><%- t(r.nameKey) %></option><% }) %>
-            </select></div>
-        </div>
-        <div class="field"><label for="b-msg"><%- t('form.msg') %></label>
-          <textarea id="b-msg" name="msg" rows="3" maxlength="1000" placeholder="<%= t('form.msg_ph') %>"><%= values.msg %></textarea></div>
-        <p class="bform__err" role="alert" aria-live="polite"><%= formError %></p>
-        <button type="submit" class="btn btn--cta btn--block"><%- t('form.send') %></button>
-        <p class="bform__privacy"><%- t('form.privacy') %></p>
-        <p class="bform__alt"><span><%- t('form.or') %></span> <a href="mailto:<%= contact.email %>" class="js-mail"><%- t('form.mail') %></a></p>
-      </form>
+      <a class="co__x" href="#kamar" data-close aria-label="<%= t('co.close') %>">×</a>
     </div>
-  </div>
-</section>
+    <div class="hp" aria-hidden="true"><label for="co-website">Website</label><input id="co-website" name="website" tabindex="-1" autocomplete="off"></div>
+    <div class="bform__row">
+      <div class="field"><label for="co-room"><%- t('form.room') %></label>
+        <select id="co-room" name="room"><% rooms.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === coRoom.id ? ' selected' : '' %>><%- t(r.nameKey) %></option><% }) %></select></div>
+      <div class="field"><label for="co-guests"><%- t('form.guests') %></label>
+        <select id="co-guests" name="guests"><% guestOptions.forEach(function (g) { %><option<%= g === values.guests ? ' selected' : '' %>><%= g %></option><% }) %></select></div>
+    </div>
+    <div class="bform__row">
+      <div class="field"><label for="co-in"><%- t('form.checkin') %></label><input id="co-in" type="date" name="checkin" required value="<%= values.checkin %>"></div>
+      <div class="field"><label for="co-out"><%- t('form.checkout') %></label><input id="co-out" type="date" name="checkout" required value="<%= values.checkout %>"></div>
+    </div>
+    <div class="bform__row">
+      <div class="field"><label for="co-name"><%- t('form.name') %></label><input id="co-name" name="name" autocomplete="name" maxlength="80" required value="<%= values.name %>"></div>
+      <div class="field"><label for="co-contact"><%- t('form.contact') %></label><input id="co-contact" name="contact" maxlength="100" autocomplete="tel" inputmode="email" required value="<%= values.contact %>"></div>
+    </div>
+    <div class="field"><label for="co-country"><%- t('form.country') %></label><input id="co-country" name="country" maxlength="80" value="<%= values.country %>"></div>
+    <div class="field"><label for="co-msg"><%- t('form.msg') %></label>
+      <textarea id="co-msg" name="msg" rows="2" maxlength="1000" placeholder="<%= t('form.msg_ph') %>"><%= values.msg %></textarea></div>
+    <div class="co__sum" id="co-sum" hidden>
+      <span id="co-calc"></span>
+      <b id="co-total"></b>
+      <small id="co-dp" hidden></small>
+    </div>
+    <p class="bform__err" role="alert" aria-live="polite"><%= formError %></p>
+    <button type="submit" class="btn btn--cta btn--block" id="co-submit"><%- pay.enabled ? t('ui').payNow : t('form.send') %></button>
+    <p class="co__note"><%- pay.enabled ? t('co.secure') : t('co.whatsappNote') %></p>
+    <p class="bform__privacy"><%- t('form.privacy') %></p>
+  </form>
+  <div class="co__done" id="co-done" hidden></div>
+</dialog>
 
 </main>
 

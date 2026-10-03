@@ -212,7 +212,7 @@ function createAdminRouter({ repo, config, t }) {
   router.get('/export/inquiries.csv', ah(async (req, res) => {
     const rows = (await repo.exportInquiries()).map((r) => ({ ...r, room: r.room ? roomName(r.room) : '' }));
     res.type('text/csv').attachment(`kalma-inquiries-${stamp()}.csv`)
-      .send(toCSV(rows, ['id', 'created_at', 'status', 'name', 'phone', 'email', 'other_contact', 'country', 'checkin', 'checkout', 'guests', 'room', 'message', 'admin_note', 'lang', 'customer_id']));
+      .send(toCSV(rows, ['id', 'created_at', 'status', 'name', 'phone', 'email', 'other_contact', 'country', 'checkin', 'checkout', 'guests', 'room', 'message', 'admin_note', 'lang', 'customer_id', 'order_id', 'total', 'amount', 'payment_status', 'payment_type', 'paid_at']));
   }));
 
   router.use((req, res) => res.status(404).render('admin/notfound', { title: 'Tidak ditemukan' }));
