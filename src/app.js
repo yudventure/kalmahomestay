@@ -60,6 +60,8 @@ function createApp(options = {}) {
   // Only the brand files the site needs are public (not the guideline sources).
   app.use('/brand/assets', express.static(path.join(ROOT, 'brand/assets'), staticOpts));
   app.get('/brand/tokens.css', (req, res) => res.sendFile(path.join(ROOT, 'brand/tokens.css')));
+  // Site ownership files (e.g. Google Search Console googleXXXX.html) served from the site root.
+  app.use(express.static(path.join(ROOT, 'public/verify'), { index: false }));
   app.get('/favicon.ico', (req, res) => res.sendFile(path.join(ROOT, 'brand/assets/favicon.ico')));
 
   app.use(express.urlencoded({ extended: false, limit: '20kb' }));

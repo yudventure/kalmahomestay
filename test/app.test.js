@@ -339,5 +339,6 @@ test('404, robots and sitemap', async () => {
   assert.equal(r.status, 404);
   assert.match(await r.text(), /This page drifted away\./);
   assert.match(await (await fetch(base + '/robots.txt')).text(), /Disallow: \/admin/);
+  assert.equal(await (await fetch(base + '/google32888c7e38348c1f.html')).text(), 'google-site-verification: google32888c7e38348c1f.html');
   assert.match(await (await fetch(base + '/sitemap.xml')).text(), /https:\/\/kalma\.test\/en/);
 });
