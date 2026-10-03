@@ -104,6 +104,61 @@
     });
   }
 
+  /* ---------------------------------------------------------------- hermit crab walking along the wave
+     The wave SVG stretches with the screen, so the crab follows the curve's real shape:
+     sample the curve once, then place the crab (and tilt it to the slope) on every frame. */
+  var shore = document.querySelector(".shore");
+  var crab = shore && shore.querySelector(".crab");
+  var line = shore && shore.querySelector(".shore__line");
+  if (crab && line && line.getTotalLength) {
+    var VB_W = 1440, VB_H = 90, pts = [], total = line.getTotalLength();
+    for (var i = 0; i <= 240; i++) { var pt = line.getPointAtLength(total * i / 240); pts.push([pt.x, pt.y]); }
+    var yAt = function (x) {
+      for (var j = 1; j < pts.length; j++) {
+        if (pts[j][0] >= x) { var a = pts[j - 1], b = pts[j]; return a[1] + (b[1] - a[1]) * ((x - a[0]) / ((b[0] - a[0]) || 1)); }
+      }
+      return pts[pts.length - 1][1];
+    };
+    var pos = 0.14, dir = 1, last = 0, raf = 0, walkLeft = 7, restLeft = 0;
+    var place = function () {
+      var w = shore.clientWidth, h = shore.clientHeight, x = pos * VB_W;
+      var dy = (yAt(Math.min(VB_W, x + 10)) - yAt(Math.max(0, x - 10))) / VB_H * h;
+      var ang = Math.atan2(dy, 20 / VB_W * w) * 180 / Math.PI;
+      crab.style.transform = "translate(" + (pos * w - 26) + "px," + (yAt(x) / VB_H * h - 37) + "px) rotate(" + ang.toFixed(1) + "deg)" + (dir < 0 ? " scaleX(-1)" : "");
+      crab.classList.add("is-on");
+    };
+    var tick = function (t) {
+      var dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
+      last = t;
+      if (restLeft > 0) {
+        restLeft -= dt;
+        if (restLeft <= 0) { crab.classList.remove("is-resting"); walkLeft = 5 + Math.random() * 6; }
+      } else {
+        pos += dir * 26 * dt / (shore.clientWidth || 1);   // about 26 px per second on any screen
+        if (pos > 0.95) { pos = 0.95; dir = -1; }
+        if (pos < 0.05) { pos = 0.05; dir = 1; }
+        walkLeft -= dt;
+        if (walkLeft <= 0) { crab.classList.add("is-resting"); restLeft = 1.2 + Math.random() * 2; }
+        place();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    var start = function () { if (!raf) { last = 0; raf = requestAnimationFrame(tick); } };
+    var stop = function () { cancelAnimationFrame(raf); raf = 0; };
+    place();
+    window.addEventListener("resize", place);
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
+      crab.classList.add("is-resting");
+    } else {
+      var seen = false;
+      new IntersectionObserver(function (entries) {
+        seen = entries[0].isIntersecting;
+        if (seen && !document.hidden) start(); else stop();
+      }).observe(shore);
+      document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else if (seen) start(); });
+    }
+  }
+
   /* ---------------------------------------------------------------- card carousel arrows */
   document.querySelectorAll(".arrows[data-for]").forEach(function (box) {
     var track = document.getElementById(box.dataset.for);

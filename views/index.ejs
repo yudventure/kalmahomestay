@@ -108,10 +108,23 @@
       <p class="search__hint"><%- t('hero.hint') %></p>
     </form>
   </div>
-  <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 50 C 240 10, 520 10, 760 44 S 1220 96, 1440 36 L1440 90 L0 90 Z" fill="#4B8AA5"/>
-    <path d="M0 70 C 280 40, 560 46, 820 68 S 1260 100, 1440 62 L1440 90 L0 90 Z" fill="#224866"/>
-  </svg>
+  <div class="shore" aria-hidden="true">
+    <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none">
+      <path d="M0 50 C 240 10, 520 10, 760 44 S 1220 96, 1440 36 L1440 90 L0 90 Z" fill="#4B8AA5"/>
+      <path d="M0 70 C 280 40, 560 46, 820 68 S 1260 100, 1440 62 L1440 90 L0 90 Z" fill="#224866"/>
+      <path class="shore__line" d="M0 50 C 240 10, 520 10, 760 44 S 1220 96, 1440 36" fill="none"/>
+    </svg>
+    <svg class="crab" viewBox="0 0 64 48" width="52" height="39">
+      <g class="crab__legs crab__legs--a" fill="none" stroke="#E07A5F" stroke-width="2.6" stroke-linecap="round"><path d="M30 36 L24 46"/><path d="M41 37 L43 46"/></g>
+      <g class="crab__legs crab__legs--b" fill="none" stroke="#E07A5F" stroke-width="2.6" stroke-linecap="round"><path d="M35 37 L31 46"/><path d="M46 36 L51 45"/></g>
+      <path d="M36 38 C44 41 52 38 54 32 C50 27 42 27 37 30 Z" fill="#E07A5F" stroke="#224866" stroke-width="2" stroke-linejoin="round"/>
+      <path class="crab__claw" d="M51 32 C56 25 63 29 61 35 C59 40 52 39 52 34" fill="#E07A5F" stroke="#224866" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M46 29 L47 19 M50 29 L54 20" stroke="#224866" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="47" cy="18" r="2.3" fill="#224866"/><circle cx="54.5" cy="19" r="2.3" fill="#224866"/>
+      <path d="M8 35 C4 19 16 6 30 8 C43 10 48 24 41 35 Z" fill="#EDE0B5" stroke="#224866" stroke-width="2.2" stroke-linejoin="round"/>
+      <path d="M25 31 C17 29 17 18 25 16 C32 15 35 22 30 25 C27 27 24 24 26 22" fill="none" stroke="#224866" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div>
 </section>
 
 <section class="facts" aria-label="<%= t('hero.eyebrow') %>">
