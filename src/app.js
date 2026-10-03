@@ -21,6 +21,21 @@ function translator(lang) {
   return (key) => (key in dict ? dict[key] : CONTENT.id[key] != null ? CONTENT.id[key] : key);
 }
 
+/**
+ * Real photos: drop e.g. public/img/hero-1.jpg and every `photo('hero-1')` slot uses it;
+ * slots without a file keep their gradient placeholder. Read per request so new files show up without a restart.
+ */
+function photoFinder(dir = path.join(ROOT, 'public/img')) {
+  const found = {};
+  let files = [];
+  try { files = fs.readdirSync(dir); } catch { /* no photos yet */ }
+  for (const f of files.sort()) {
+    const m = /^([a-z0-9-]+)\.(jpe?g|png|webp|avif)$/i.exec(f);
+    if (m && !found[m[1]]) found[m[1]] = '/img/' + f;
+  }
+  return (name) => (found[name] ? `--img:url(${found[name]})` : '');
+}
+
 const rupiah = (n) => 'Rp ' + n.toLocaleString('id-ID');
 
 /** JSON safe to embed inside <script> */
@@ -72,6 +87,7 @@ function createApp(options = {}) {
     const base = lang === 'en' ? '/en' : '';
     res.render('index', {
       lang, t, rupiah,
+      photo: photoFinder(),
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
@@ -226,4 +242,4 @@ function createApp(options = {}) {
   return app;
 }
 
-module.exports = { createApp, ah };
+module.exports = { createApp, ah, photoFinder };

@@ -5,7 +5,7 @@ const assert = require('node:assert/strict');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const { createApp } = require('../src/app');
+const { createApp, photoFinder } = require('../src/app');
 const { todayISO, replyLink } = require('../src/inquiry');
 
 let server, base, dataDir, repo;
@@ -40,7 +40,7 @@ test('home page renders in Indonesian with contact settings', async () => {
   assert.equal(res.status, 200);
   const html = await res.text();
   assert.match(html, /<html lang="id">/);
-  assert.match(html, /Bangun dengan suara ombak\./);
+  assert.match(html, /Bangun dengan suara <em>ombak<\/em>\./);
   assert.match(html, /Rp 850\.000/);
   assert.match(html, /wa\.me\/6281111111111/);
   assert.match(html, /<link rel="canonical" href="https:\/\/kalma\.test\/">/);
@@ -51,13 +51,33 @@ test('home page renders in Indonesian with contact settings', async () => {
 test('English page renders at /en', async () => {
   const html = await (await fetch(base + '/en')).text();
   assert.match(html, /<html lang="en">/);
-  assert.match(html, /Wake up to the sound of waves\./);
+  assert.match(html, /Wake up to the sound of <em>waves<\/em>\./);
   assert.match(html, /Lagoon Bungalow/);
   assert.match(html, /href="\/en" hreflang="en" lang="en" aria-current="page"/);
 });
 
+test('homepage shows the guest-story invite when there are no reviews yet', async () => {
+  const html = await (await fetch(base + '/')).text();
+  assert.match(html, /class="quote__empty"/);
+  assert.doesNotMatch(html, /class="quote__item"/);
+});
+
+test('photo slots use real photos from the image folder when present', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-img-'));
+  fs.writeFileSync(path.join(dir, 'hero-1.jpg'), '');
+  fs.writeFileSync(path.join(dir, 'room-laguna.webp'), '');
+  fs.writeFileSync(path.join(dir, 'bad name.jpg'), '');
+  const photo = photoFinder(dir);
+  assert.equal(photo('hero-1'), '--img:url(/img/hero-1.jpg)');
+  assert.equal(photo('room-laguna'), '--img:url(/img/room-laguna.webp)');
+  assert.equal(photo('hero-2'), '');
+  assert.equal(photoFinder(path.join(dir, 'missing'))('hero-1'), '');
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
 test('static assets and brand files are served, guideline sources are not', async () => {
   assert.equal((await fetch(base + '/css/style.css')).status, 200);
+  assert.equal((await fetch(base + '/css/home.css')).status, 200);
   assert.equal((await fetch(base + '/js/main.js')).status, 200);
   assert.equal((await fetch(base + '/brand/tokens.css')).status, 200);
   assert.equal((await fetch(base + '/brand/assets/kalma-wordmark.png')).status, 200);

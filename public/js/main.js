@@ -69,6 +69,39 @@
     a.addEventListener("click", function () { document.getElementById("b-room").value = a.dataset.room; });
   });
 
+  /* ---------------------------------------------------------------- card carousel arrows */
+  document.querySelectorAll(".arrows[data-for]").forEach(function (box) {
+    var track = document.getElementById(box.dataset.for);
+    var prev = box.querySelector('[data-dir="-1"]'), next = box.querySelector('[data-dir="1"]');
+    function update() {
+      var max = track.scrollWidth - track.clientWidth;
+      box.hidden = max < 4;
+      prev.disabled = track.scrollLeft < 4;
+      next.disabled = track.scrollLeft > max - 4;
+    }
+    box.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-dir]");
+      if (!b) return;
+      var card = track.firstElementChild;
+      var step = card ? card.getBoundingClientRect().width + 20 : track.clientWidth;
+      track.scrollBy({ left: step * Number(b.dataset.dir) });
+    });
+    track.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    update();
+  });
+
+  /* ---------------------------------------------------------------- guest stories */
+  var slides = document.querySelectorAll(".quote__item");
+  var current = 0;
+  document.querySelectorAll("[data-q]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      slides[current].hidden = true;
+      current = (current + Number(b.dataset.q) + slides.length) % slides.length;
+      slides[current].hidden = false;
+    });
+  });
+
   /* ---------------------------------------------------------------- booking form → server → WhatsApp */
   var form = document.getElementById("bform");
   var err = form.querySelector(".bform__err");
