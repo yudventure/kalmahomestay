@@ -79,8 +79,8 @@ em { font-style: italic; }
 .nav__links a:hover::after { transform: scaleX(1); }
 .nav__right { display: flex; align-items: center; gap: var(--space-3); }
 .lang { display: flex; border: 1.5px solid var(--kalma-driftwood); border-radius: var(--radius-pill); padding: 2px; }
-.lang button { border: 0; background: none; font: 600 12px/1 var(--font-body); color: var(--kalma-deep-sea); padding: 7px 10px; border-radius: var(--radius-pill); cursor: pointer; letter-spacing: .05em; }
-.lang button[aria-pressed="true"] { background: var(--kalma-deep-sea); color: var(--kalma-shell); }
+.lang a { font: 600 12px/1 var(--font-body); color: var(--kalma-deep-sea); padding: 7px 10px; border-radius: var(--radius-pill); letter-spacing: .05em; text-decoration: none; }
+.lang a[aria-current="page"] { background: var(--kalma-deep-sea); color: var(--kalma-shell); }
 .nav__burger { display: none; width: 44px; height: 44px; border: 0; background: none; cursor: pointer; position: relative; }
 .nav__burger span { position: absolute; left: 11px; right: 11px; height: 2px; background: var(--kalma-deep-sea); border-radius: 2px; transition: transform var(--dur-base) var(--ease-tide), top var(--dur-base); }
 .nav__burger span:first-child { top: 17px; } .nav__burger span:last-child { top: 25px; }
@@ -264,6 +264,13 @@ em { font-style: italic; }
 .field.is-invalid input { border-color: var(--color-danger); }
 .bform__err { color: var(--color-danger); font-size: var(--text-sm); font-weight: 600; min-height: 0; margin: 0 0 var(--space-3); }
 .bform__err:empty { display: none; }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.bform__ok { text-align: center; padding: var(--space-5) 0; }
+.bform__ok h3 { margin-bottom: var(--space-2); color: var(--kalma-deep-sea); }
+.bform__ok p { color: var(--color-text-muted); }
+.bform__ok .btn { margin: var(--space-3) 0; }
+.bform.is-sent > :not(.bform__ok) { display: none; }
+.btn[disabled] { opacity: .6; cursor: progress; transform: none; }
 .bform__alt { text-align: center; font-size: var(--text-sm); color: var(--color-text-muted); margin: var(--space-4) 0 0; }
 @media (max-width: 900px) { .book__in { grid-template-columns: 1fr; gap: var(--space-6); } }
 @media (max-width: 520px) { .bform { padding: var(--space-5); } .bform__row { grid-template-columns: 1fr; gap: 0; } }
@@ -290,3 +297,24 @@ em { font-style: italic; }
 .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity var(--dur-slow) var(--ease-tide), transform var(--dur-slow) var(--ease-tide); }
 .js .reveal.is-in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .js .reveal { opacity: 1; transform: none; } }
+
+/* 404 page */
+.nf { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--space-7) 16px; }
+.nf img { width: 220px; margin-bottom: var(--space-6); }
+.nf .lead { margin: 0 auto var(--space-5); }
+
+/* admin */
+.admin { background: var(--kalma-shell); }
+.admin__head { background: var(--kalma-sand); border-bottom: 1px solid var(--color-border); }
+.admin__bar { display: flex; align-items: center; gap: var(--space-4); height: 64px; font-weight: 600; color: var(--kalma-deep-sea); }
+.admin__bar img { height: 30px; width: auto; }
+.admin__bar .link { margin-left: auto; font-size: var(--text-sm); }
+.admin__main { padding-top: var(--space-6); padding-bottom: var(--space-8); }
+.admin__main h1 { font-size: var(--text-3xl); }
+.admin__table { overflow-x: auto; background: #fff; border: 1px solid #E8DDBB; border-radius: var(--radius-md); }
+.admin__table table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.admin__table th, .admin__table td { text-align: left; padding: 12px 14px; border-bottom: 1px solid #EFE7CF; vertical-align: top; }
+.admin__table th { font-size: var(--text-xs); text-transform: uppercase; letter-spacing: .1em; color: var(--color-text-muted); white-space: nowrap; }
+.admin__table tr:last-child td { border-bottom: 0; }
+.admin__table small { color: var(--color-text-muted); }
+.admin__msg { max-width: 320px; white-space: pre-wrap; }

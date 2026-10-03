@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= t('meta.title') %></title>
+<meta name="description" content="<%= t('meta.desc') %>">
+<link rel="canonical" href="<%= siteUrl %><%= path %>">
+<link rel="alternate" hreflang="id" href="<%= siteUrl %>/">
+<link rel="alternate" hreflang="en" href="<%= siteUrl %>/en">
+<link rel="alternate" hreflang="x-default" href="<%= siteUrl %>/">
+<meta name="theme-color" content="#EDE0B5">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kalma Raja Ampat · Slow down, Raja Ampat style.">
+<meta property="og:url" content="<%= siteUrl %><%= path %>">
+<meta property="og:locale" content="<%= lang === 'en' ? 'en_US' : 'id_ID' %>">
+<meta property="og:description" content="<%= t('hero.lead') %>">
+<meta property="og:image" content="<%= siteUrl %>/brand/assets/kalma-logo-original.png">
+<link rel="icon" href="/brand/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="apple-touch-icon" href="/brand/assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,100;1,9..144,300..700,100&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/brand/tokens.css">
+<link rel="stylesheet" href="/css/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LodgingBusiness",
+  "name": "Kalma Raja Ampat",
+  "description": "<%= t('meta.desc') %>",
+  "image": "<%= siteUrl %>/brand/assets/kalma-logo-original.png",
+  "url": "<%= siteUrl %>/",
+  "telephone": "+<%= contact.whatsapp %>",
+  "email": "<%= contact.email %>",
+  "address": { "@type": "PostalAddress", "addressRegion": "Papua Barat Daya", "addressLocality": "Raja Ampat", "addressCountry": "ID" }
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main"><%- t('skip') %></a>
+
+<!-- ============================== NAV ============================== -->
+<header class="nav" id="top">
+  <div class="wrap nav__in">
+    <a href="<%= home %>" class="nav__logo" aria-label="Kalma Raja Ampat"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="110" height="53"></a>
+    <nav class="nav__links" id="menu" aria-label="Menu utama">
+      <a href="#kamar"><%- t('nav.rooms') %></a>
+      <a href="#pengalaman"><%- t('nav.exp') %></a>
+      <a href="#sehari"><%- t('nav.day') %></a>
+      <a href="#lokasi"><%- t('nav.loc') %></a>
+      <a href="#faq"><%- t('nav.faq') %></a>
+    </nav>
+    <div class="nav__right">
+      <div class="lang" role="group" aria-label="Bahasa / Language">
+        <a href="/" hreflang="id" lang="id"<%- lang === 'id' ? ' aria-current="page"' : '' %>>ID</a>
+        <a href="/en" hreflang="en" lang="en"<%- lang === 'en' ? ' aria-current="page"' : '' %>>EN</a>
+      </div>
+      <a href="#pesan" class="btn btn--cta btn--sm nav__cta"><%- t('nav.book') %></a>
+      <button class="nav__burger" type="button" aria-controls="menu" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============================== HERO ============================== -->
+<section class="hero">
+  <div class="wrap hero__in">
+    <div class="hero__text reveal">
+      <p class="eyebrow"><%- t('hero.eyebrow') %></p>
+      <h1><%- t('hero.title') %></h1>
+      <p class="lead"><%- t('hero.lead') %></p>
+      <form class="quick" id="quick" novalidate>
+        <div class="quick__f"><label for="q-in"><%- t('form.checkin') %></label><input id="q-in" type="date" required></div>
+        <div class="quick__f"><label for="q-out"><%- t('form.checkout') %></label><input id="q-out" type="date" required></div>
+        <div class="quick__f"><label for="q-g"><%- t('form.guests') %></label>
+          <select id="q-g"><% guestOptions.forEach(function (g) { %><option<%= g === '2' ? ' selected' : '' %>><%= g %></option><% }) %></select></div>
+        <button class="btn btn--cta" type="submit"><%- t('form.check') %></button>
+      </form>
+      <p class="hint"><%- t('hero.hint') %></p>
+    </div>
+    <div class="hero__media reveal">
+      <div class="photo photo--arch ph-sunrise" role="img" aria-label="Foto: dermaga Kalma saat matahari terbit" data-photo="hero"></div>
+      <div class="hero__badge"><img src="/brand/assets/kalma-icon-sand.png" alt="" width="56" height="56"><span><%- t('hero.badge') %></span></div>
+    </div>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 50 C 240 10, 520 10, 760 44 S 1220 96, 1440 36 L1440 90 L0 90 Z" fill="#4B8AA5"/>
+    <path d="M0 70 C 280 40, 560 46, 820 68 S 1260 100, 1440 62 L1440 90 L0 90 Z" fill="#224866"/>
+  </svg>
+</section>
+
+<section class="facts" aria-label="Sekilas">
+  <div class="wrap facts__in">
+    <div><b><%- t('facts.1a') %></b><span><%- t('facts.1b') %></span></div>
+    <div><b><%- t('facts.2a') %></b><span><%- t('facts.2b') %></span></div>
+    <div><b><%- t('facts.3a') %></b><span><%- t('facts.3b') %></span></div>
+    <div><b><%- t('facts.4a') %></b><span><%- t('facts.4b') %></span></div>
+  </div>
+</section>
+
+<!-- ============================== STORY ============================== -->
+<section class="sec sec--shell" id="cerita">
+  <div class="wrap story">
+    <div class="story__media reveal">
+      <div class="photo ph-house" role="img" aria-label="Foto: rumah kayu Kalma di atas air" data-photo="story"></div>
+      <div class="photo photo--blob ph-reef" role="img" aria-label="Foto: terumbu karang di depan homestay" data-photo="story-2"></div>
+    </div>
+    <div class="story__text reveal">
+      <p class="eyebrow"><%- t('story.eyebrow') %></p>
+      <h2><%- t('story.title') %></h2>
+      <p><%- t('story.p1') %></p>
+      <p><%- t('story.p2') %></p>
+      <ul class="values">
+        <li><b><%- t('v.1a') %></b><span><%- t('v.1b') %></span></li>
+        <li><b><%- t('v.2a') %></b><span><%- t('v.2b') %></span></li>
+        <li><b><%- t('v.3a') %></b><span><%- t('v.3b') %></span></li>
+        <li><b><%- t('v.4a') %></b><span><%- t('v.4b') %></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== ROOMS ============================== -->
+<section class="sec" id="kamar">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('rooms.eyebrow') %></p>
+      <h2><%- t('rooms.title') %></h2>
+      <p class="lead"><%- t('rooms.lead') %></p>
+    </div>
+    <div class="rooms">
+      <article class="room reveal">
+        <div class="photo ph-lagoon" role="img" aria-label="Foto: Bungalow Laguna" data-photo="room-1"></div>
+        <div class="room__body">
+          <div class="badges"><span class="badge badge--lagoon"><%- t('r1.badge') %></span><span class="badge badge--sand"><%- t('r.meals') %></span></div>
+          <h3><%- t('r1.name') %></h3>
+          <p><%- t('r1.desc') %></p>
+          <ul class="room__meta"><li><%- t('r1.m1') %></li><li><%- t('r1.m2') %></li><li><%- t('r1.m3') %></li></ul>
+          <div class="room__price"><div><b><%= rupiah(rooms[0].price) %></b><span><%- t('r.per') %></span></div><a href="#pesan" class="btn btn--primary btn--sm" data-room="<%= rooms[0].id %>"><%- t('r.book') %></a></div>
+        </div>
+      </article>
+      <article class="room reveal">
+        <div class="photo ph-beach" role="img" aria-label="Foto: Rumah Pantai" data-photo="room-2"></div>
+        <div class="room__body">
+          <div class="badges"><span class="badge badge--jungle"><%- t('r2.badge') %></span><span class="badge badge--sand"><%- t('r.meals') %></span></div>
+          <h3><%- t('r2.name') %></h3>
+          <p><%- t('r2.desc') %></p>
+          <ul class="room__meta"><li><%- t('r2.m1') %></li><li><%- t('r2.m2') %></li><li><%- t('r2.m3') %></li></ul>
+          <div class="room__price"><div><b><%= rupiah(rooms[1].price) %></b><span><%- t('r.per') %></span></div><a href="#pesan" class="btn btn--primary btn--sm" data-room="<%= rooms[1].id %>"><%- t('r.book') %></a></div>
+        </div>
+      </article>
+      <article class="room reveal">
+        <div class="photo ph-family" role="img" aria-label="Foto: Rumah Keluarga" data-photo="room-3"></div>
+        <div class="room__body">
+          <div class="badges"><span class="badge badge--coral"><%- t('r3.badge') %></span><span class="badge badge--sand"><%- t('r.meals') %></span></div>
+          <h3><%- t('r3.name') %></h3>
+          <p><%- t('r3.desc') %></p>
+          <ul class="room__meta"><li><%- t('r3.m1') %></li><li><%- t('r3.m2') %></li><li><%- t('r3.m3') %></li></ul>
+          <div class="room__price"><div><b><%= rupiah(rooms[2].price) %></b><span><%- t('r.per') %></span></div><a href="#pesan" class="btn btn--primary btn--sm" data-room="<%= rooms[2].id %>"><%- t('r.book') %></a></div>
+        </div>
+      </article>
+    </div>
+    <p class="note"><%- t('rooms.note') %></p>
+  </div>
+</section>
+
+<!-- ============================== EXPERIENCES ============================== -->
+<section class="sec sec--deep" id="pengalaman">
+  <div class="pattern" aria-hidden="true"></div>
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('exp.eyebrow') %></p>
+      <h2><%- t('exp.title') %></h2>
+      <p class="lead"><%- t('exp.lead') %></p>
+    </div>
+    <div class="exps">
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><path d="M2 12c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 17c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/><path d="M2 7c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/></svg></div>
+        <h3><%- t('e1.t') %></h3><p><%- t('e1.d') %></p></article>
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><path d="M3 18c3 0 4-3 9-3s6 3 9 3"/><path d="M12 15V4"/><path d="M12 4l6 7H12"/></svg></div>
+        <h3><%- t('e2.t') %></h3><p><%- t('e2.d') %></p></article>
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><path d="M12 3c-3 4-7 6-9 6 2 3 5 4 9 4s7-1 9-4c-2 0-6-2-9-6z"/><path d="M12 13v8"/></svg></div>
+        <h3><%- t('e3.t') %></h3><p><%- t('e3.d') %></p></article>
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><path d="M5 19c8 0 14-6 14-14-8 0-14 6-14 14z"/><path d="M5 19l8-8"/></svg></div>
+        <h3><%- t('e4.t') %></h3><p><%- t('e4.d') %></p></article>
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></div>
+        <h3><%- t('e5.t') %></h3><p><%- t('e5.d') %></p></article>
+      <article class="exp reveal"><div class="exp__ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></div>
+        <h3><%- t('e6.t') %></h3><p><%- t('e6.d') %></p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== A DAY ============================== -->
+<section class="sec" id="sehari">
+  <div class="wrap day">
+    <div class="day__intro reveal">
+      <p class="eyebrow"><%- t('day.eyebrow') %></p>
+      <h2><%- t('day.title') %></h2>
+      <p class="lead"><%- t('day.lead') %></p>
+      <div class="photo ph-dusk" role="img" aria-label="Foto: senja dari dermaga" data-photo="day"></div>
+    </div>
+    <ol class="timeline">
+      <li class="reveal"><time>05.30</time><div><b><%- t('t1.t') %></b><span><%- t('t1.d') %></span></div></li>
+      <li class="reveal"><time>06.15</time><div><b><%- t('t2.t') %></b><span><%- t('t2.d') %></span></div></li>
+      <li class="reveal"><time>07.30</time><div><b><%- t('t3.t') %></b><span><%- t('t3.d') %></span></div></li>
+      <li class="reveal"><time>09.00</time><div><b><%- t('t4.t') %></b><span><%- t('t4.d') %></span></div></li>
+      <li class="reveal"><time>12.30</time><div><b><%- t('t5.t') %></b><span><%- t('t5.d') %></span></div></li>
+      <li class="reveal"><time>15.00</time><div><b><%- t('t6.t') %></b><span><%- t('t6.d') %></span></div></li>
+      <li class="reveal"><time>18.00</time><div><b><%- t('t7.t') %></b><span><%- t('t7.d') %></span></div></li>
+      <li class="reveal"><time>19.00</time><div><b><%- t('t8.t') %></b><span><%- t('t8.d') %></span></div></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================== FOOD ============================== -->
+<section class="sec sec--shell" id="makan">
+  <div class="wrap food">
+    <div class="food__text reveal">
+      <p class="eyebrow"><%- t('food.eyebrow') %></p>
+      <h2><%- t('food.title') %></h2>
+      <p><%- t('food.p') %></p>
+      <ul class="dishes">
+        <li><b><%- t('f1.t') %></b><span><%- t('f1.d') %></span></li>
+        <li><b><%- t('f2.t') %></b><span><%- t('f2.d') %></span></li>
+        <li><b><%- t('f3.t') %></b><span><%- t('f3.d') %></span></li>
+        <li><b><%- t('f4.t') %></b><span><%- t('f4.d') %></span></li>
+      </ul>
+    </div>
+    <div class="food__media reveal">
+      <div class="photo ph-food" role="img" aria-label="Foto: makan malam bersama di rumah panggung" data-photo="food"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== GALLERY ============================== -->
+<section class="sec" id="galeri">
+  <div class="wrap">
+    <div class="sec__head sec__head--row reveal">
+      <div><p class="eyebrow"><%- t('gal.eyebrow') %></p><h2><%- t('gal.title') %></h2></div>
+      <a class="link" href="<%= contact.instagramUrl %>" target="_blank" rel="noopener"><%- t('gal.ig') %></a>
+    </div>
+    <div class="gallery">
+      <div class="photo ph-sunrise g1 reveal" role="img" aria-label="Foto galeri 1" data-photo="g1"></div>
+      <div class="photo ph-reef g2 reveal" role="img" aria-label="Foto galeri 2" data-photo="g2"></div>
+      <div class="photo ph-karst g3 reveal" role="img" aria-label="Foto galeri 3" data-photo="g3"></div>
+      <div class="photo ph-house g4 reveal" role="img" aria-label="Foto galeri 4" data-photo="g4"></div>
+      <div class="photo ph-food g5 reveal" role="img" aria-label="Foto galeri 5" data-photo="g5"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== GETTING THERE ============================== -->
+<section class="sec sec--shell" id="lokasi">
+  <div class="wrap">
+    <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('loc.eyebrow') %></p>
+      <h2><%- t('loc.title') %></h2>
+      <p class="lead"><%- t('loc.lead') %></p>
+    </div>
+    <ol class="route">
+      <li class="reveal"><span class="route__n">1</span><h3><%- t('l1.t') %></h3><p><%- t('l1.d') %></p></li>
+      <li class="reveal"><span class="route__n">2</span><h3><%- t('l2.t') %></h3><p><%- t('l2.d') %></p></li>
+      <li class="reveal"><span class="route__n">3</span><h3><%- t('l3.t') %></h3><p><%- t('l3.d') %></p></li>
+    </ol>
+    <div class="tip reveal">
+      <img src="/brand/assets/kalma-icon-deepsea.png" alt="" width="48" height="48">
+      <p><%- t('loc.tip') %></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== FAQ ============================== -->
+<section class="sec" id="faq">
+  <div class="wrap faq">
+    <div class="sec__head reveal">
+      <p class="eyebrow">FAQ</p>
+      <h2><%- t('faq.title') %></h2>
+      <p class="lead"><%- t('faq.lead') %></p>
+    </div>
+    <div class="faq__list">
+      <details class="reveal"><summary><%- t('q1.q') %></summary><p><%- t('q1.a') %></p></details>
+      <details class="reveal"><summary><%- t('q2.q') %></summary><p><%- t('q2.a') %></p></details>
+      <details class="reveal"><summary><%- t('q3.q') %></summary><p><%- t('q3.a') %></p></details>
+      <details class="reveal"><summary><%- t('q4.q') %></summary><p><%- t('q4.a') %></p></details>
+      <details class="reveal"><summary><%- t('q5.q') %></summary><p><%- t('q5.a') %></p></details>
+      <details class="reveal"><summary><%- t('q6.q') %></summary><p><%- t('q6.a') %></p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== BOOK ============================== -->
+<section class="sec sec--deep book" id="pesan">
+  <div class="pattern" aria-hidden="true"></div>
+  <div class="wrap book__in">
+    <div class="book__text reveal">
+      <p class="eyebrow"><%- t('book.eyebrow') %></p>
+      <h2><%- t('book.title') %></h2>
+      <p class="lead"><%- t('book.lead') %></p>
+      <ul class="contact">
+        <li><span><%- t('book.wa') %></span><a href="https://wa.me/<%= contact.whatsapp %>" target="_blank" rel="noopener"><%= contact.whatsappDisplay %></a></li>
+        <li><span>Email</span><a href="mailto:<%= contact.email %>"><%= contact.email %></a></li>
+        <li><span>Instagram</span><a href="<%= contact.instagramUrl %>" target="_blank" rel="noopener"><%= contact.instagram %></a></li>
+      </ul>
+    </div>
+    <form class="bform reveal" id="bform" method="post" action="<%= base %>/inquiry#pesan" novalidate>
+      <div class="bform__ok" hidden></div>
+      <div class="hp" aria-hidden="true"><label for="b-website">Website</label><input id="b-website" name="website" tabindex="-1" autocomplete="off"></div>
+      <div class="bform__row">
+        <div class="field"><label for="b-name"><%- t('form.name') %></label><input id="b-name" name="name" autocomplete="name" maxlength="80" required value="<%= values.name %>"></div>
+        <div class="field"><label for="b-contact"><%- t('form.contact') %></label><input id="b-contact" name="contact" maxlength="100" autocomplete="tel" inputmode="email" value="<%= values.contact %>"></div>
+      </div>
+      <div class="field"><label for="b-country"><%- t('form.country') %></label><input id="b-country" name="country" maxlength="80" value="<%= values.country %>"></div>
+      <div class="bform__row">
+        <div class="field"><label for="b-in"><%- t('form.checkin') %></label><input id="b-in" type="date" name="checkin" required value="<%= values.checkin %>"></div>
+        <div class="field"><label for="b-out"><%- t('form.checkout') %></label><input id="b-out" type="date" name="checkout" required value="<%= values.checkout %>"></div>
+      </div>
+      <div class="bform__row">
+        <div class="field"><label for="b-guests"><%- t('form.guests') %></label>
+          <select id="b-guests" name="guests"><% guestOptions.forEach(function (g) { %><option<%= g === values.guests ? ' selected' : '' %>><%= g %></option><% }) %></select></div>
+        <div class="field"><label for="b-room"><%- t('form.room') %></label>
+          <select id="b-room" name="room">
+            <option value=""><%- t('form.any') %></option>
+            <% rooms.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === values.room ? ' selected' : '' %>><%- t(r.nameKey) %></option><% }) %>
+          </select></div>
+      </div>
+      <div class="field"><label for="b-msg"><%- t('form.msg') %></label>
+        <textarea id="b-msg" name="msg" rows="3" maxlength="1000" placeholder="<%= t('form.msg_ph') %>"><%= values.msg %></textarea></div>
+      <p class="bform__err" role="alert" aria-live="polite"><%= formError %></p>
+      <button type="submit" class="btn btn--cta btn--block"><%- t('form.send') %></button>
+      <p class="bform__alt"><span><%- t('form.or') %></span> <a href="mailto:<%= contact.email %>" class="js-mail"><%- t('form.mail') %></a></p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<!-- ============================== FOOTER ============================== -->
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div class="foot__brand">
+      <img src="/brand/assets/kalma-logo-white.png" alt="Kalma Raja Ampat" width="170" height="100">
+      <p><%- t('foot.tag') %></p>
+    </div>
+    <nav class="foot__nav" aria-label="Footer">
+      <a href="#kamar"><%- t('nav.rooms') %></a><a href="#pengalaman"><%- t('nav.exp') %></a>
+      <a href="#lokasi"><%- t('nav.loc') %></a><a href="#faq">FAQ</a><a href="#pesan"><%- t('nav.book') %></a>
+    </nav>
+    <p class="foot__reef"><%- t('foot.reef') %></p>
+  </div>
+  <div class="wrap foot__bottom">
+    <span>© <%= year %> Kalma Raja Ampat</span>
+    <span class="credit"><span><%- t('foot.credit') %></span> <b>Team Dampier</b></span>
+  </div>
+</footer>
+
+<a href="https://wa.me/<%= contact.whatsapp %>" class="wa-float" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 3.5A11 11 0 0 0 3.2 17.1L2 22l5-1.3A11 11 0 0 0 20.5 3.5zM12 20a8.9 8.9 0 0 1-4.6-1.3l-.3-.2-3 .8.8-2.9-.2-.3A9 9 0 1 1 12 20zm4.9-6.7c-.3-.1-1.6-.8-1.8-.9s-.4-.1-.6.1-.7.9-.8 1-.3.2-.6.1a7.3 7.3 0 0 1-3.6-3.2c-.3-.5.3-.4.8-1.4.1-.2 0-.3 0-.5l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.3.8 3.2.7a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.6-.3z"/></svg>
+</a>
+
+<script id="kalma-config" type="application/json"><%- clientConfig %></script>
+<script src="/js/main.js" defer></script>
+</body>
+</html>

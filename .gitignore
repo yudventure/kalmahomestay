@@ -1,3 +1,6 @@
 # Generated exports (standalone HTML/ZIP); sources live in brand/
 deliverables/
 __pycache__/
+node_modules/
+.env
+data/
