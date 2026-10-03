@@ -26,6 +26,15 @@
 .btn--soft:hover { background: var(--tint-2); }
 .home .photo { background-color: var(--tint-2); }
 
+/* ------------------------------------------------ faint sea pattern in the side margins (waves, fish, starfish, hermit crab, shells) */
+#main { position: relative; }
+.sea { position: absolute; inset: 0; pointer-events: none; z-index: 3; overflow: hidden; --content: 1200px; }
+.sea__side { position: absolute; top: 0; bottom: 0; width: max(0px, calc((100% - var(--content)) / 2)); background-repeat: repeat-y; background-size: 150px auto; opacity: .16; }
+.sea__side--l { left: 0; background-image: url(/img/sea-left.svg); background-position: center 40px; }
+.sea__side--r { right: 0; background-image: url(/img/sea-right.svg); background-position: center 260px; }
+@media (min-width: 1600px) { .sea { --content: 1440px; } .sea__side { background-size: 170px auto; } }
+@media (max-width: 1279px) { .sea { display: none; } }
+
 /* ------------------------------------------------ nav */
 .nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color var(--dur-base); }
 .nav.is-scrolled { border-bottom-color: var(--color-border); }
