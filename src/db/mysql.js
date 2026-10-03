@@ -7,6 +7,15 @@ const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', '..', 'migrations');
 
+// Node resolves "localhost" to IPv6 ::1 first on many hosts, where MySQL often only listens on IPv4
+// (on Hostinger this shows up as "connect EINVAL"). Prefer IPv4 so localhost means 127.0.0.1.
+require('dns').setDefaultResultOrder('ipv4first');
+
+/** Usual MySQL/MariaDB socket locations, tried when a TCP connection to localhost fails. */
+const SOCKET_CANDIDATES = ['/var/lib/mysql/mysql.sock', '/var/run/mysqld/mysqld.sock', '/run/mysqld/mysqld.sock', '/tmp/mysql.sock', '/var/mysql/mysql.sock'];
+const NETWORK_CODES = new Set(['EINVAL', 'EAFNOSUPPORT', 'EADDRNOTAVAIL', 'ENETUNREACH', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'ENOTFOUND', 'ECONNRESET', 'PROTOCOL_CONNECTION_LOST']);
+const isLocalHost = (h) => !h || ['localhost', '127.0.0.1', '::1'].includes(String(h).trim());
+
 const like = (q) => '%' + String(q).replace(/[\\%_]/g, (m) => '\\' + m) + '%';
 const now = () => new Date();
 
@@ -18,9 +27,12 @@ function poolOptions(db) {
     timezone: 'Z',            // store and read DATETIME as UTC
     dateStrings: ['DATE'],    // check-in/out stay 'YYYY-MM-DD'
     multipleStatements: false,
+    connectTimeout: 10000,
   };
   if (db.url) return { uri: db.url, ...base };
-  return { host: db.host, port: db.port, user: db.user, password: db.password, database: db.name, ...base };
+  const auth = { user: db.user, password: db.password, database: db.name };
+  if (db.socket) return { socketPath: db.socket, ...auth, ...base };
+  return { host: db.host, port: db.port, ...auth, ...base };
 }
 
 /** Run migrations/*.sql that haven't been applied yet, in filename order. */
@@ -57,8 +69,33 @@ function parseSurveyRow(r) {
   return { ...r, answers };
 }
 
-function createMysqlRepo(db, { autoMigrate = true } = {}) {
-  const pool = mysql.createPool(poolOptions(db));
+function createMysqlRepo(db, { autoMigrate = true, socketCandidates = SOCKET_CANDIDATES } = {}) {
+  let pool = mysql.createPool(poolOptions(db));
+
+  /** If TCP to localhost fails (IPv6, firewall, socket-only MySQL), try the local MySQL socket instead. */
+  async function connect() {
+    try {
+      await pool.query('SELECT 1');
+      return;
+    } catch (e) {
+      if (db.url || db.socket || !isLocalHost(db.host) || !NETWORK_CODES.has(e.code)) throw e;
+      for (const socket of socketCandidates) {
+        if (!fs.existsSync(socket)) continue;
+        const candidate = mysql.createPool(poolOptions({ ...db, socket }));
+        try {
+          await candidate.query('SELECT 1');
+          await pool.end().catch(() => {});
+          pool = candidate;
+          db = { ...db, socket };
+          console.log(`MySQL: connected through socket ${socket}`);
+          return;
+        } catch {
+          await candidate.end().catch(() => {});
+        }
+      }
+      throw e;
+    }
+  }
 
   function dupError(e) {
     if (e && e.code === 'ER_DUP_ENTRY') return new DuplicateError(/email/.test(e.message) ? 'email' : 'phone');
@@ -68,7 +105,10 @@ function createMysqlRepo(db, { autoMigrate = true } = {}) {
   const repo = {
     kind: 'mysql',
 
-    async init() { if (autoMigrate) await migrate(pool); },
+    async init() {
+      await connect();
+      if (autoMigrate) await migrate(pool);
+    },
     async close() { await pool.end(); },
     async ping() { await pool.query('SELECT 1'); return true; },
 
@@ -233,7 +273,8 @@ function createMysqlRepo(db, { autoMigrate = true } = {}) {
       return res.affectedRows > 0;
     },
   };
-  repo._pool = pool;
+  Object.defineProperty(repo, '_pool', { get: () => pool });
+  Object.defineProperty(repo, 'connection', { get: () => (db.url ? 'url' : db.socket ? `socket ${db.socket}` : `tcp ${db.host}:${db.port}`) });
   return repo;
 }
 

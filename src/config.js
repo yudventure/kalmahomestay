@@ -26,11 +26,18 @@ function loadConfig(env = process.env) {
   };
 }
 
-/** MySQL settings from DATABASE_URL (mysql://user:pass@host:3306/name) or DB_HOST/DB_USER/DB_PASSWORD/DB_NAME. */
+/** MySQL settings from DATABASE_URL (mysql://user:pass@host:3306/name) or DB_HOST(/DB_SOCKET)/DB_USER/DB_PASSWORD/DB_NAME. */
 function loadDb(env) {
   if (env.DATABASE_URL) return { url: env.DATABASE_URL };
-  if (env.DB_HOST && env.DB_USER && env.DB_NAME) {
-    return { host: env.DB_HOST, port: Number(env.DB_PORT) || 3306, user: env.DB_USER, password: env.DB_PASSWORD || '', name: env.DB_NAME };
+  if ((env.DB_HOST || env.DB_SOCKET) && env.DB_USER && env.DB_NAME) {
+    return {
+      host: String(env.DB_HOST || 'localhost').trim(),
+      port: Number(env.DB_PORT) || 3306,
+      socket: env.DB_SOCKET ? String(env.DB_SOCKET).trim() : '',
+      user: String(env.DB_USER).trim(),
+      password: env.DB_PASSWORD || '',
+      name: String(env.DB_NAME).trim(),
+    };
   }
   return null;
 }
