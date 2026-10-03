@@ -6,7 +6,9 @@
  */
 function loadConfig(env = process.env) {
   const whatsapp = String(env.WHATSAPP_NUMBER || '6281234567890').replace(/\D/g, '');
-  const instagram = env.INSTAGRAM_HANDLE || 'kalma.rajaampat';
+  // Accept "kalma", "@kalma" or a full profile URL such as https://www.instagram.com/kalma/
+  const instagram = String(env.INSTAGRAM_HANDLE || 'kalma.rajaampat').trim()
+    .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '').replace(/[/?#].*$/, '').replace(/^@/, '') || 'kalma.rajaampat';
   const port = Number(env.PORT) || 3000;
   return {
     port,
@@ -16,6 +18,7 @@ function loadConfig(env = process.env) {
     googleVerification: env.GOOGLE_SITE_VERIFICATION || '',
     db: loadDb(env),
     dbAutoMigrate: env.DB_AUTO_MIGRATE !== 'false',
+    payments: loadPayments(env),
     contact: {
       whatsapp,
       whatsappDisplay: env.WHATSAPP_DISPLAY || '+' + whatsapp,
@@ -23,6 +26,27 @@ function loadConfig(env = process.env) {
       instagram: '@' + instagram.replace(/^@/, ''),
       instagramUrl: 'https://instagram.com/' + instagram.replace(/^@/, ''),
     },
+  };
+}
+
+/**
+ * Online payment through Midtrans Snap (cards, bank virtual accounts, QRIS, e-wallets).
+ * Disabled (bookings fall back to WhatsApp) until both keys are set.
+ */
+function loadPayments(env) {
+  const serverKey = String(env.MIDTRANS_SERVER_KEY || '').trim();
+  const clientKey = String(env.MIDTRANS_CLIENT_KEY || '').trim();
+  const production = env.MIDTRANS_IS_PRODUCTION === 'true';
+  const percent = Math.min(100, Math.max(1, Math.round(Number(env.PAYMENT_DEPOSIT_PERCENT) || 100)));
+  return {
+    enabled: Boolean(serverKey && clientKey),
+    provider: 'midtrans',
+    serverKey,
+    clientKey,
+    production,
+    percent,              // share of the total paid online (100 = full payment, e.g. 30 = deposit)
+    snapUrl: production ? 'https://app.midtrans.com/snap/v1/transactions' : 'https://app.sandbox.midtrans.com/snap/v1/transactions',
+    snapJs: production ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js',
   };
 }
 
@@ -52,9 +76,9 @@ function loadDb(env) {
 
 /** Rooms: prices are per person per night in IDR. Names/descriptions live in content/<lang>.json. */
 const ROOMS = [
-  { id: 'laguna', nameKey: 'r1.name', price: 850000 },
-  { id: 'pantai', nameKey: 'r2.name', price: 750000 },
-  { id: 'keluarga', nameKey: 'r3.name', price: 700000 },
+  { id: 'laguna', nameKey: 'r1.name', price: 850000, maxGuests: 2 },
+  { id: 'pantai', nameKey: 'r2.name', price: 750000, maxGuests: 3 },
+  { id: 'keluarga', nameKey: 'r3.name', price: 700000, maxGuests: 5 },
 ];
 
 const GUEST_OPTIONS = ['1', '2', '3', '4', '5', '6+'];

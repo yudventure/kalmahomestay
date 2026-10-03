@@ -57,7 +57,9 @@ function createFileRepo(dataDir) {
         db.customers.push(c);
       }
       const i = { id: ++db.seq.inquiry, customer_id: c.id, checkin: v.checkin, checkout: v.checkout, guests: v.guests,
-        room: v.room || null, message: v.msg || null, lang: v.lang, status: 'new', admin_note: null, created_at: t, updated_at: t };
+        room: v.room || null, message: v.msg || null, lang: v.lang, status: 'new', admin_note: null,
+        order_id: v.orderId || null, amount: v.amount || null, total: v.total || null, payment_status: v.orderId ? 'pending' : null,
+        payment_type: null, paid_at: null, created_at: t, updated_at: t };
       db.inquiries.push(i);
       save();
       return { customerId: c.id, inquiryId: i.id };
@@ -82,6 +84,23 @@ function createFileRepo(dataDir) {
       if (!i) return false;
       if (status !== undefined) { if (!STATUS_IDS.includes(status)) throw new Error('invalid status'); i.status = status; }
       if (adminNote !== undefined) i.admin_note = adminNote || null;
+      i.updated_at = iso();
+      save();
+      return true;
+    },
+
+    async getInquiryByOrder(orderId) {
+      const i = db.inquiries.find((x) => x.order_id === orderId);
+      return i ? joined(i) : null;
+    },
+
+    async setPayment(orderId, { status, type, paidAt }) {
+      const i = db.inquiries.find((x) => x.order_id === orderId);
+      if (!i) return false;
+      i.payment_status = status;
+      if (type) i.payment_type = type;
+      if (paidAt) i.paid_at = new Date(paidAt).toISOString();
+      if (status === 'paid' && ['new', 'contacted'].includes(i.status)) i.status = 'confirmed';
       i.updated_at = iso();
       save();
       return true;
@@ -153,7 +172,9 @@ function createFileRepo(dataDir) {
         const c = cust(i.customer_id) || {};
         return { id: i.id, created_at: new Date(i.created_at), status: i.status, name: c.name, phone: c.phone, email: c.email,
           other_contact: c.other_contact, country: c.country, checkin: i.checkin, checkout: i.checkout, guests: i.guests,
-          room: i.room, message: i.message, admin_note: i.admin_note, lang: i.lang, customer_id: i.customer_id };
+          room: i.room, message: i.message, admin_note: i.admin_note, lang: i.lang, customer_id: i.customer_id,
+          order_id: i.order_id || null, total: i.total || null, amount: i.amount || null, payment_status: i.payment_status || null,
+          payment_type: i.payment_type || null, paid_at: i.paid_at ? new Date(i.paid_at) : null };
       });
     },
 

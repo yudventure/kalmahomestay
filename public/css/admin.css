@@ -103,3 +103,10 @@
 .small { font-size: var(--text-xs); }
 .dl--wide { grid-template-columns: minmax(200px, 1fr) 1.2fr; }
 @media (max-width: 640px) { .bars li { grid-template-columns: 1fr 70px; } .bars__track { grid-column: 1 / -1; grid-row: 2; } .dl--wide { grid-template-columns: 1fr; } }
+
+/* online payment chips */
+.pay { display: inline-block; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 999px; background: #EEF2F4; color: #4A5A66; }
+.pay--paid { background: #DCE8DF; color: #3F6B4E; }
+.pay--pending { background: #FBEFD5; color: #8A6116; }
+.pay--failed, .pay--expired { background: #F8DDD4; color: #A84A33; }
+.pay--refunded { background: #E6E1F2; color: #5B4B8A; }

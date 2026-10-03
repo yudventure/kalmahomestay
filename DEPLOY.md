@@ -51,6 +51,10 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `DB_SOCKET` | `/var/lib/mysql/mysql.sock` | Opsional, hanya jika koneksi lewat host gagal |
 | `NODE_ENV` | `production` | Aktifkan cache file statis |
 | `GOOGLE_SITE_VERIFICATION` | `AbC123…` | Kode verifikasi Search Console (langkah 8) |
+| `MIDTRANS_SERVER_KEY` | `SB-Mid-server-…` | Pembayaran online (langkah 10). Rahasia, jangan dibagikan |
+| `MIDTRANS_CLIENT_KEY` | `SB-Mid-client-…` | Pembayaran online (langkah 10) |
+| `MIDTRANS_IS_PRODUCTION` | `false` | `true` setelah akun Midtrans aktif (production) |
+| `PAYMENT_DEPOSIT_PERCENT` | `100` | Opsional: `30` = tamu bayar DP 30% online |
 
 `PORT` **tidak perlu** diisi; Hostinger mengaturnya sendiri.
 
@@ -134,3 +138,20 @@ Hostinger otomatis deploy ulang dari `main`. Perubahan struktur database ditamba
 
   Setelah environment variable diperbaiki, deploy ulang. Aplikasi juga mencoba menghubungi database lagi secara otomatis setiap beberapa menit.
 - **Tamu tetap bisa memesan** walaupun database sedang bermasalah: mereka tetap mendapat link WhatsApp, hanya pencatatan di admin yang terlewat (tercatat di log).
+
+## 10. Pembayaran online (Midtrans)
+
+Tamu memilih layanan di **Our Services / Layanan Kami** → klik **Pesan** → isi tanggal, jumlah tamu, nama, dan WhatsApp/email → **Bayar sekarang**. Harga dihitung di server (harga per orang per malam × tamu × malam), lalu jendela pembayaran Midtrans terbuka: kartu kredit/debit, transfer bank (virtual account), QRIS, GoPay, ShopeePay.
+
+1. Daftar di [dashboard.midtrans.com](https://dashboard.midtrans.com). Mulai di mode **Sandbox** untuk uji coba.
+2. **Settings → Access Keys**: salin **Server Key** dan **Client Key** ke environment variable `MIDTRANS_SERVER_KEY` dan `MIDTRANS_CLIENT_KEY`, lalu deploy ulang.
+3. **Settings → Configuration → Payment Notification URL**: isi `https://halokalma.com/api/payments/midtrans` lalu simpan.
+4. Uji di sandbox dengan [kartu/VA simulator Midtrans](https://docs.midtrans.com/docs/testing-payment-on-sandbox). Pesanan muncul di `/admin` dengan status pembayaran **Menunggu bayar** → **Lunas**; pesanan yang lunas otomatis menjadi **Terkonfirmasi**.
+5. Setelah akun Midtrans disetujui untuk production: ganti kedua key dengan key **Production**, set `MIDTRANS_IS_PRODUCTION=true`, ulangi langkah 3 di dashboard production.
+
+Catatan:
+- Selama key belum diisi, tombol berubah menjadi **Kirim lewat WhatsApp** (pesanan tetap tercatat di admin).
+- Jika Midtrans sedang bermasalah, tamu otomatis diarahkan ke WhatsApp.
+- Status pembayaran hanya berubah lewat notifikasi Midtrans yang tanda tangannya (signature) cocok dengan Server Key dan jumlahnya sama dengan pesanan.
+- Pembayaran tidak memeriksa ketersediaan kamar secara otomatis; cek pesanan baru di `/admin` dan hubungi tamu bila tanggal penuh (refund lewat dashboard Midtrans).
+
