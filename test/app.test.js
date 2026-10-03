@@ -150,6 +150,18 @@ test('admin is disabled when no password is configured', async () => {
   assert.equal(res.status, 404);
 });
 
+test('inquiry still works when saving fails', async () => {
+  const blocker = path.join(dataDir, 'not-a-dir');
+  fs.writeFileSync(blocker, 'x'); // a file where a directory is expected → mkdir/append fails
+  const app = createApp({ dataDir: path.join(blocker, 'sub') });
+  const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });
+  const origError = console.error; console.error = () => {};
+  const res = await fetch(`http://127.0.0.1:${s.address().port}/api/inquiry`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid()) });
+  console.error = origError; s.close();
+  assert.equal(res.status, 201);
+  assert.ok((await res.json()).whatsappUrl);
+});
+
 test('replyLink handles phones and emails', () => {
   assert.match(replyLink('+62 812-3456-7890', 'A'), /^https:\/\/wa\.me\/6281234567890\?/);
   assert.match(replyLink('tamu@mail.com', 'A'), /^mailto:tamu@mail\.com\?/);

@@ -97,7 +97,12 @@ function createApp(options = {}) {
     const errKey = validate(values);
     if (errKey) return { status: 400, values, error: t('ui')[errKey] };
     const message = buildMessage(values, lang, t);
-    store.add({ lang, ...values });
+    try {
+      store.add({ lang, ...values });
+    } catch (e) {
+      // Never block a guest because the disk is read-only or full: they still get the WhatsApp link.
+      console.error('Could not save inquiry:', e.message);
+    }
     return {
       status: 201, values, message,
       whatsappUrl: `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`,

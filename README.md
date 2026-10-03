@@ -70,11 +70,10 @@ Buka `/admin` (user `admin`, password dari `ADMIN_PASSWORD`) untuk melihat dafta
 
 ## Online
 
-Butuh hosting yang menjalankan Node.js, misalnya **Railway, Render, Fly.io**, atau VPS:
+Website ini di-deploy ke **Hostinger (paket Business, Node.js Web App)** langsung dari GitHub; setiap `git push` otomatis deploy ulang.
+Langkah lengkap, pengaturan build, dan environment variables ada di **[DEPLOY.md](DEPLOY.md)**.
 
-- Build command: `npm install` · Start command: `npm start`
-- Atur environment variables sesuai `.env.example` (terutama `SITE_URL`, `WHATSAPP_NUMBER`, `ADMIN_PASSWORD`)
-- `data/` harus berada di disk yang permanen (persistent volume) agar pertanyaan tidak hilang saat deploy ulang; atur lewat `DATA_DIR`
+Bisa juga dijalankan di hosting Node.js lain (Railway, Render, VPS): start command `npm start`, isi environment variables sesuai `.env.example`.
 
 ---
 Website & brand identity oleh **Team Dampier**.
