@@ -9,7 +9,7 @@
 <link rel="alternate" hreflang="id" href="<%= siteUrl %>/">
 <link rel="alternate" hreflang="en" href="<%= siteUrl %>/en">
 <link rel="alternate" hreflang="x-default" href="<%= siteUrl %>/">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#EDE0B5">
 <% if (googleVerification) { %><meta name="google-site-verification" content="<%= googleVerification %>"><% } %>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kalma Raja Ampat · Slow down, Raja Ampat style.">
@@ -66,7 +66,7 @@
         <a href="/" hreflang="id" lang="id"<%- lang === 'id' ? ' aria-current="page"' : '' %>>ID</a>
         <a href="/en" hreflang="en" lang="en"<%- lang === 'en' ? ' aria-current="page"' : '' %>>EN</a>
       </div>
-      <a href="#pesan" class="btn btn--blue btn--sm nav__cta"><%- t('nav.book') %></a>
+      <a href="#pesan" class="btn btn--cta btn--sm nav__cta"><%- t('nav.book') %></a>
       <button class="nav__burger" type="button" aria-controls="menu" aria-expanded="false" aria-label="Menu"><span></span><span></span></button>
     </div>
   </div>
@@ -104,9 +104,19 @@
         <label for="q-g"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4 4-6 8-6s7 2 8 6"/></svg><%- t('form.guests') %></label>
         <select id="q-g"><% guestOptions.forEach(function (g) { %><option<%= g === '2' ? ' selected' : '' %>><%= g %></option><% }) %></select>
       </div>
-      <button class="btn btn--blue" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><%- t('form.check') %></button>
+      <button class="btn btn--cta" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><%- t('form.check') %></button>
       <p class="search__hint"><%- t('hero.hint') %></p>
     </form>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 90" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 50 C 240 10, 520 10, 760 44 S 1220 96, 1440 36 L1440 90 L0 90 Z" fill="#4B8AA5"/>
+    <path d="M0 70 C 280 40, 560 46, 820 68 S 1260 100, 1440 62 L1440 90 L0 90 Z" fill="#224866"/>
+  </svg>
+</section>
+
+<section class="facts" aria-label="<%= t('hero.eyebrow') %>">
+  <div class="wrap facts__in">
+    <% for (let i = 1; i <= 4; i++) { %><div><b><%- t('facts.' + i + 'a') %></b><span><%- t('facts.' + i + 'b') %></span></div><% } %>
   </div>
 </section>
 
@@ -114,6 +124,7 @@
 <section class="sec" id="pengalaman">
   <div class="wrap">
     <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('exp.eyebrow') %></p>
       <h2><%- t('exp.title') %></h2>
       <p class="sub"><%- t('exp.lead') %></p>
     </div>
@@ -134,7 +145,8 @@
   <div class="wrap">
     <div class="sec__head sec__head--row reveal">
       <div>
-        <h2><%- t('rooms.title') %></h2>
+        <p class="eyebrow"><%- t('rooms.eyebrow') %></p>
+      <h2><%- t('rooms.title') %></h2>
         <p class="sub"><%- t('rooms.lead') %></p>
       </div>
       <div class="arrows" data-for="rooms-track">
@@ -192,6 +204,7 @@
 <section class="sec" id="ulasan">
   <div class="wrap">
     <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('rev.eyebrow') %></p>
       <h2><%- t('rev.title') %></h2>
       <p class="sub"><%- t('rev.lead') %></p>
     </div>
@@ -232,6 +245,7 @@
 <section class="sec sec--tint" id="lokasi">
   <div class="wrap">
     <div class="sec__head reveal">
+      <p class="eyebrow"><%- t('loc.eyebrow') %></p>
       <h2><%- t('loc.title') %></h2>
       <p class="sub"><%- t('loc.lead') %></p>
     </div>
@@ -251,6 +265,7 @@
 <section class="sec" id="faq">
   <div class="wrap faq">
     <div class="sec__head reveal">
+      <p class="eyebrow">FAQ</p>
       <h2><%- t('faq.title') %></h2>
       <p class="sub"><%- t('faq.lead') %></p>
     </div>
@@ -300,7 +315,7 @@
         <div class="field"><label for="b-msg"><%- t('form.msg') %></label>
           <textarea id="b-msg" name="msg" rows="3" maxlength="1000" placeholder="<%= t('form.msg_ph') %>"><%= values.msg %></textarea></div>
         <p class="bform__err" role="alert" aria-live="polite"><%= formError %></p>
-        <button type="submit" class="btn btn--blue btn--block"><%- t('form.send') %></button>
+        <button type="submit" class="btn btn--cta btn--block"><%- t('form.send') %></button>
         <p class="bform__privacy"><%- t('form.privacy') %></p>
         <p class="bform__alt"><span><%- t('form.or') %></span> <a href="mailto:<%= contact.email %>" class="js-mail"><%- t('form.mail') %></a></p>
       </form>
