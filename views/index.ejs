@@ -23,9 +23,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..700,100;1,9..144,300..700,100&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/brand/tokens.css">
-<link rel="stylesheet" href="/css/style.css">
-<link rel="stylesheet" href="/css/home.css">
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/home.css?v=<%= v %>">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -75,21 +75,20 @@
 <main id="main">
 
 <!-- ============================== HERO ============================== -->
+<div class="fold">
 <section class="hero">
   <div class="wrap hero__in">
     <div class="hero__text reveal">
-      <p class="eyebrow"><%- t('hero.eyebrow') %></p>
       <h1><%- t('hero.title') %></h1>
       <p class="lead"><%- t('hero.lead') %></p>
-      <svg class="hero__plane" viewBox="0 0 120 80" aria-hidden="true"><path class="dash" d="M4 76 C 30 70, 50 54, 70 40"/><path class="plane" d="M78 24 L112 8 L96 42 L88 32 Z M88 32 L112 8"/></svg>
     </div>
     <div class="mosaic reveal" aria-hidden="true">
       <span class="mosaic__blob"></span>
-      <div class="photo ph-karst m1" style="<%= photo('hero-1') %>"></div>
-      <div class="photo ph-house m2" style="<%= photo('hero-2') %>"></div>
-      <div class="photo ph-reef m3" style="<%= photo('hero-3') %>"></div>
-      <div class="photo ph-sunrise m4" style="<%= photo('hero-4') %>"></div>
-      <svg class="mosaic__swirl" viewBox="0 0 60 60"><path d="M10 6 C 40 0, 56 18, 40 30 S 20 50, 50 56"/></svg>
+      <% ['ph-karst', 'ph-house', 'ph-reef', 'ph-sunrise'].forEach(function (ph, i) { const slot = 'hero-' + (i + 1), clip = video(slot); %>
+      <div class="photo <%= ph %> m<%= i + 1 %>" style="<%= photo(slot) %>">
+        <% if (clip) { %><video class="tile__video" muted loop playsinline preload="none" disablepictureinpicture<% if (clip.webm) { %> data-webm="<%= clip.webm %>"<% } %><% if (clip.mp4) { %> data-mp4="<%= clip.mp4 %>"<% } %>></video><% } %>
+      </div>
+      <% }) %>
     </div>
     <form class="search reveal" id="quick" novalidate>
       <div class="search__f">
@@ -119,6 +118,7 @@
     <% for (let i = 1; i <= 4; i++) { %><div><b><%- t('facts.' + i + 'a') %></b><span><%- t('facts.' + i + 'b') %></span></div><% } %>
   </div>
 </section>
+</div>
 
 <!-- ============================== EXPERIENCES (categories) ============================== -->
 <section class="sec" id="pengalaman">
@@ -359,6 +359,6 @@
 </a>
 
 <script id="kalma-config" type="application/json"><%- clientConfig %></script>
-<script src="/js/main.js" defer></script>
+<script src="/js/main.js?v=<%= v %>" defer></script>
 </body>
 </html>
