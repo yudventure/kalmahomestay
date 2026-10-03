@@ -70,47 +70,40 @@
   });
 
   /* ---------------------------------------------------------------- hero video tiles
-     Videos load only when the page is shown and play only while on screen; skipped for
-     reduced-motion and data-saver users (the photo/gradient stays). */
-  var clips = document.querySelectorAll(".tile__video");
+     The browser starts them itself (autoplay muted) for the fastest start; here we only pause
+     them for reduced-motion / data-saver visitors, when scrolled away, or in a background tab. */
+  var clips = Array.prototype.slice.call(document.querySelectorAll(".tile__video"));
   var conn = navigator.connection || {};
   var calm = matchMedia("(prefers-reduced-motion: reduce)").matches || conn.saveData;
-  if (clips.length && !calm && "IntersectionObserver" in window) {
-    var load = function (v) {
-      if (v.dataset.loaded) return;
-      v.dataset.loaded = "1";
-      [["webm", "video/webm"], ["mp4", "video/mp4"]].forEach(function (s) {
-        if (!v.dataset[s[0]]) return;
-        var src = document.createElement("source");
-        src.src = v.dataset[s[0]]; src.type = s[1];
-        v.appendChild(src);
-      });
-      v.addEventListener("playing", function () { v.classList.add("is-playing"); }, { once: true });
-      v.load();
-    };
-    var vio = new IntersectionObserver(function (entries) {
-      entries.forEach(function (en) {
-        var v = en.target;
-        if (en.isIntersecting && !document.hidden) { load(v); var p = v.play(); if (p) p.catch(function () {}); }
-        else v.pause();
-      });
-    }, { threshold: 0.2 });
-    clips.forEach(function (v) { v.muted = true; vio.observe(v); });
-    document.addEventListener("visibilitychange", function () {
-      clips.forEach(function (v) {
-        if (document.hidden) v.pause();
-        else if (v.dataset.loaded && v.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p) p.catch(function () {}); }
-      });
+  var playAll = function (on) {
+    clips.forEach(function (v) {
+      if (on) { var p = v.play(); if (p) p.catch(function () {}); } else v.pause();
     });
+  };
+  if (clips.length) {
+    if (calm) {
+      clips.forEach(function (v) { v.removeAttribute("autoplay"); v.preload = "none"; v.pause(); });
+    } else {
+      var heroSeen = true;
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          heroSeen = entries[0].isIntersecting;
+          playAll(heroSeen && !document.hidden);
+        }).observe(document.querySelector(".mosaic"));
+      }
+      document.addEventListener("visibilitychange", function () { playAll(heroSeen && !document.hidden); });
+    }
   }
 
   /* ---------------------------------------------------------------- hermit crab walking along the wave
-     The wave SVG stretches with the screen, so the crab follows the curve's real shape:
-     sample the curve once, then place the crab (and tilt it to the slope) on every frame. */
+     It walks back and forth under the booking box. The wave SVG stretches with the screen, so we
+     sample the real curve once and hand the whole walk to the Web Animations API: after that it
+     runs on the compositor with no JavaScript per frame. Rebuilt only when the size changes. */
   var shore = document.querySelector(".shore");
   var crab = shore && shore.querySelector(".crab");
   var line = shore && shore.querySelector(".shore__line");
-  if (crab && line && line.getTotalLength) {
+  var track = document.querySelector(".search");
+  if (crab && line && line.getTotalLength && crab.animate) {
     var VB_W = 1440, VB_H = 90, pts = [], total = line.getTotalLength();
     for (var i = 0; i <= 240; i++) { var pt = line.getPointAtLength(total * i / 240); pts.push([pt.x, pt.y]); }
     var yAt = function (x) {
@@ -119,43 +112,47 @@
       }
       return pts[pts.length - 1][1];
     };
-    var pos = 0.14, dir = 1, last = 0, raf = 0, walkLeft = 7, restLeft = 0;
-    var place = function () {
-      var w = shore.clientWidth, h = shore.clientHeight, x = pos * VB_W;
-      var dy = (yAt(Math.min(VB_W, x + 10)) - yAt(Math.max(0, x - 10))) / VB_H * h;
-      var ang = Math.atan2(dy, 20 / VB_W * w) * 180 / Math.PI;
-      crab.style.transform = "translate(" + (pos * w - 26) + "px," + (yAt(x) / VB_H * h - 37) + "px) rotate(" + ang.toFixed(1) + "deg)" + (dir < 0 ? " scaleX(-1)" : "");
+    var walk = null, builtFor = "";
+    var build = function () {
+      var w = shore.clientWidth, h = shore.clientHeight;
+      if (!w || !h) return;
+      var sr = shore.getBoundingClientRect(), tr = track ? track.getBoundingClientRect() : null;
+      var from = tr ? tr.left - sr.left + 40 : w * 0.1;
+      var to = tr ? tr.right - sr.left - 40 : w * 0.45;
+      from = Math.max(30, from); to = Math.min(w - 30, Math.max(from + 80, to));
+      var key = w + "x" + h + ":" + Math.round(from) + "-" + Math.round(to);
+      if (key === builtFor) return;
+      builtFor = key;
+      var at = function (px, face) {
+        var x = px / w * VB_W;
+        var dy = (yAt(Math.min(VB_W, x + 10)) - yAt(Math.max(0, x - 10))) / VB_H * h;
+        var ang = Math.atan2(dy, 20 / VB_W * w) * 180 / Math.PI;
+        return "translate(" + (px - 26).toFixed(1) + "px," + (yAt(x) / VB_H * h - 37).toFixed(1) + "px) rotate(" + ang.toFixed(2) + "deg) scaleX(" + face + ")";
+      };
+      // forward walk, short pause, turn, walk back, short pause
+      var steps = 24, walkT = (to - from) / 24, pause = 1.4, cycle = 2 * walkT + 2 * pause, frames = [];
+      for (var k = 0; k <= steps; k++) frames.push({ transform: at(from + (to - from) * k / steps, 1), offset: (walkT * k / steps) / cycle });
+      frames.push({ transform: at(to, 1), offset: (walkT + pause * 0.8) / cycle });
+      for (k = 0; k <= steps; k++) frames.push({ transform: at(to - (to - from) * k / steps, -1), offset: (walkT + pause + walkT * k / steps) / cycle });
+      frames.push({ transform: at(from, -1), offset: (2 * walkT + pause * 1.8) / cycle });
+      frames.push({ transform: at(from, 1), offset: 1 });
+      var keep = walk ? walk.currentTime : 0;
+      if (walk) walk.cancel();
+      walk = crab.animate(frames, { duration: cycle * 1000, iterations: Infinity, easing: "linear" });
+      walk.currentTime = keep % (cycle * 1000);
       crab.classList.add("is-on");
+      if (calm) walk.pause();
     };
-    var tick = function (t) {
-      var dt = last ? Math.min(0.1, (t - last) / 1000) : 0;
-      last = t;
-      if (restLeft > 0) {
-        restLeft -= dt;
-        if (restLeft <= 0) { crab.classList.remove("is-resting"); walkLeft = 5 + Math.random() * 6; }
-      } else {
-        pos += dir * 26 * dt / (shore.clientWidth || 1);   // about 26 px per second on any screen
-        if (pos > 0.95) { pos = 0.95; dir = -1; }
-        if (pos < 0.05) { pos = 0.05; dir = 1; }
-        walkLeft -= dt;
-        if (walkLeft <= 0) { crab.classList.add("is-resting"); restLeft = 1.2 + Math.random() * 2; }
-        place();
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    var start = function () { if (!raf) { last = 0; raf = requestAnimationFrame(tick); } };
-    var stop = function () { cancelAnimationFrame(raf); raf = 0; };
-    place();
-    window.addEventListener("resize", place);
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) {
-      crab.classList.add("is-resting");
-    } else {
-      var seen = false;
+    build();
+    var rt;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(build, 150); });
+    if (calm) crab.classList.add("is-resting");
+    else if ("IntersectionObserver" in window) {
       new IntersectionObserver(function (entries) {
-        seen = entries[0].isIntersecting;
-        if (seen && !document.hidden) start(); else stop();
+        if (!walk) return;
+        if (entries[0].isIntersecting) { walk.play(); crab.classList.remove("is-resting"); }
+        else { walk.pause(); crab.classList.add("is-resting"); }
       }).observe(shore);
-      document.addEventListener("visibilitychange", function () { if (document.hidden) stop(); else if (seen) start(); });
     }
   }
 

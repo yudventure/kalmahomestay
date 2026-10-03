@@ -36,7 +36,7 @@
 @media (max-width: 1279px) { .sea { display: none; } }
 
 /* ------------------------------------------------ nav */
-.nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color var(--dur-base); }
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(255, 255, 255, .97); border-bottom: 1px solid transparent; transition: border-color var(--dur-base); }
 .nav.is-scrolled { border-bottom-color: var(--color-border); }
 .nav__in { display: flex; align-items: center; gap: var(--space-5); height: 72px; }
 .nav__logo img { height: 34px; width: auto; }
@@ -70,7 +70,7 @@
 .hero .shore { position: absolute; left: 0; right: 0; bottom: -1px; height: 90px; z-index: 0; pointer-events: none; }
 .hero .wave { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 /* Hermit crab walking along the top of the wave (positioned by main.js) */
-.crab { position: absolute; left: 0; top: 0; width: 52px; height: 39px; transform-origin: 50% 100%; visibility: hidden; will-change: transform; }
+.crab { position: absolute; left: 0; top: 0; width: 52px; height: 39px; transform-origin: 50% 100%; visibility: hidden; will-change: transform; contain: layout paint; }
 .crab.is-on { visibility: visible; }
 .crab__legs { transform-box: fill-box; transform-origin: 50% 0; animation: crab-step .32s ease-in-out infinite alternate; }
 .crab__legs--b { animation-delay: -.16s; }
@@ -112,8 +112,7 @@
 .mosaic .m3 { grid-column: 2; grid-row: 3; }
 .mosaic .m4 { grid-column: 3; grid-row: 2 / 4; margin-top: -40px; }
 .mosaic__blob { position: absolute; left: -6%; top: -12%; width: 70%; height: 80%; background: var(--tint); border-radius: var(--radius-blob); z-index: -1; }
-.tile__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity var(--dur-slow) var(--ease-tide); }
-.tile__video.is-playing { opacity: 1; }
+.tile__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 
 .search {
   grid-area: search; position: relative; z-index: 2; align-self: start;
