@@ -303,3 +303,5 @@ em { font-style: italic; }
 .nf { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--space-7) 16px; }
 .nf img { width: 220px; margin-bottom: var(--space-6); }
 .nf .lead { margin: 0 auto var(--space-5); }
+.foot__survey { color: var(--kalma-sand); font-weight: 600; text-decoration: none; }
+.foot__survey:hover { text-decoration: underline; }

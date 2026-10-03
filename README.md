@@ -5,6 +5,8 @@ Website Kalma Homestay dengan **Node.js + Express**, dibangun dari brand identit
 - Halaman dirender di server dalam dua bahasa: `/` (Indonesia) dan `/en` (English)
 - Form pemesanan disimpan ke **database MySQL** lalu diteruskan ke WhatsApp dengan pesan yang sudah terisi
 - Halaman `/admin` (pakai password) untuk mengelola **customer & permintaan**: status, catatan, riwayat, ekspor CSV, hapus data
+- **Survei tamu** di `/en/survey` dan `/survey`, direkap di `/admin/survey`
+- **SEO**: `sitemap.xml` dengan hreflang, `robots.txt`, verifikasi Google Search Console
 - Tetap berfungsi walau JavaScript di browser mati
 
 ## Menjalankan
@@ -35,13 +37,15 @@ server.js              Titik masuk: memuat .env lalu menjalankan server
 src/app.js             Rute Express: halaman, form pemesanan, admin, sitemap
 src/config.js          Pengaturan dari .env + data kamar (harga)
 src/inquiry.js         Validasi form & pesan WhatsApp
-src/admin.js           Halaman admin: ringkasan, permintaan, customer, ekspor CSV
+src/admin.js           Halaman admin: ringkasan, permintaan, customer, survei, ekspor CSV
+src/survey.js          Daftar pertanyaan survei (EN & ID), validasi, rekap
 src/db/                Penyimpanan: mysql.js (produksi), file.js (development), shared.js
 migrations/            Struktur tabel database (dijalankan otomatis)
 content/id.json        Semua teks Bahasa Indonesia
 content/en.json        Semua teks English (key sama dengan id.json)
 views/index.ejs        Template halaman utama
 views/admin/           Template halaman admin
+views/survey.ejs       Halaman survei tamu
 views/404.ejs          Halaman tidak ditemukan
 public/css, public/js  Tampilan dan interaksi di browser
 public/img/            Taruh foto asli di sini
@@ -58,6 +62,7 @@ data/                  File JSON saat tanpa MySQL (tidak masuk git)
 | Harga kamar | `src/config.js` → `ROOMS` |
 | Semua teks (judul, deskripsi kamar, FAQ, jadwal harian, menu) | `content/id.json` dan `content/en.json` |
 | Tampilan | `public/css/style.css` (warna & font dari `brand/tokens.css`) |
+| Pertanyaan survei | `src/survey.js` (teks EN & ID; ID pertanyaan jangan diubah setelah ada jawaban) |
 
 Semua data homestay (harga, kapasitas, jam listrik, sinyal, pembayaran, pembatalan) saat ini **placeholder**. Ganti dengan data asli sebelum online.
 

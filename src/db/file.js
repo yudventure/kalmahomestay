@@ -10,10 +10,12 @@ const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError
 
 function createFileRepo(dataDir) {
   const file = path.join(dataDir, 'kalma-db.json');
-  let db = { seq: { customer: 0, inquiry: 0 }, customers: [], inquiries: [] };
+  let db = { seq: { customer: 0, inquiry: 0, survey: 0 }, customers: [], inquiries: [], survey: [] };
 
   function load() {
     if (fs.existsSync(file)) db = JSON.parse(fs.readFileSync(file, 'utf8'));
+    db.survey = db.survey || [];
+    db.seq.survey = db.seq.survey || 0;
   }
   function save() {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -153,6 +155,30 @@ function createFileRepo(dataDir) {
           other_contact: c.other_contact, country: c.country, checkin: i.checkin, checkout: i.checkout, guests: i.guests,
           room: i.room, message: i.message, admin_note: i.admin_note, lang: i.lang, customer_id: i.customer_id };
       });
+    },
+
+    /* ---------- survey ---------- */
+    async addSurveyResponse({ lang, answers, contact }) {
+      const r = { id: ++db.seq.survey, lang, answers, contact: contact || null, created_at: iso() };
+      db.survey.push(r);
+      save();
+      return r.id;
+    },
+
+    async listSurveyResponses({ page: p } = {}) {
+      const rows = db.survey.slice().sort(newestFirst).map((r) => ({ ...r, created_at: new Date(r.created_at) }));
+      return page(rows, p);
+    },
+
+    async allSurveyResponses() {
+      return db.survey.slice().sort(newestFirst).map((r) => ({ ...r, created_at: new Date(r.created_at) }));
+    },
+
+    async deleteSurveyResponse(id) {
+      const n = db.survey.length;
+      db.survey = db.survey.filter((r) => r.id !== Number(id));
+      save();
+      return db.survey.length < n;
     },
   };
 }

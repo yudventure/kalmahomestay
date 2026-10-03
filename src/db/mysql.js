@@ -51,6 +51,12 @@ async function migrate(pool, log = console.log) {
   }
 }
 
+function parseSurveyRow(r) {
+  let answers = {};
+  try { answers = typeof r.answers === 'string' ? JSON.parse(r.answers) : r.answers || {}; } catch { answers = {}; }
+  return { ...r, answers };
+}
+
 function createMysqlRepo(db, { autoMigrate = true } = {}) {
   const pool = mysql.createPool(poolOptions(db));
 
@@ -201,6 +207,30 @@ function createMysqlRepo(db, { autoMigrate = true } = {}) {
                 i.checkin, i.checkout, i.guests, i.room, i.message, i.admin_note, i.lang, i.customer_id
          FROM inquiries i JOIN customers c ON c.id = i.customer_id ORDER BY i.id`);
       return rows;
+    },
+
+    /* ---------- survey ---------- */
+    async addSurveyResponse({ lang, answers, contact }) {
+      const [res] = await pool.query('INSERT INTO survey_responses (lang, answers, contact, created_at) VALUES (?, ?, ?, ?)',
+        [lang, JSON.stringify(answers), contact || null, now()]);
+      return res.insertId;
+    },
+
+    async listSurveyResponses({ page } = {}) {
+      const { perPage, offset, page: p } = paging(page);
+      const [[{ total }]] = await pool.query('SELECT COUNT(*) AS total FROM survey_responses');
+      const [rows] = await pool.query('SELECT * FROM survey_responses ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?', [perPage, offset]);
+      return { items: rows.map(parseSurveyRow), total: Number(total), page: p, perPage };
+    },
+
+    async allSurveyResponses() {
+      const [rows] = await pool.query('SELECT * FROM survey_responses ORDER BY created_at DESC, id DESC');
+      return rows.map(parseSurveyRow);
+    },
+
+    async deleteSurveyResponse(id) {
+      const [res] = await pool.query('DELETE FROM survey_responses WHERE id = ?', [id]);
+      return res.affectedRows > 0;
     },
   };
   repo._pool = pool;

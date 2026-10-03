@@ -87,3 +87,19 @@
   .grid2, .row2 { grid-template-columns: 1fr; }
   .admin__site { margin-left: 0; }
 }
+
+/* survey summary */
+.sv-sec { font-size: var(--text-2xl) !important; margin: var(--space-6) 0 var(--space-4) !important; display: flex; align-items: center; gap: 10px; }
+.sv-sec span { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--kalma-deep-sea); color: var(--kalma-sand); font-size: var(--text-sm); }
+.sv-q { font-family: var(--font-body); font-weight: 600; font-size: var(--text-base); color: var(--kalma-deep-sea); margin: 0 0 var(--space-3); line-height: 1.4; }
+.bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bars li { display: grid; grid-template-columns: minmax(140px, 260px) 1fr 80px; gap: 12px; align-items: center; font-size: var(--text-sm); }
+.bars__track { height: 12px; background: #F1EADA; border-radius: 999px; overflow: hidden; }
+.bars__fill { display: block; height: 100%; background: var(--kalma-lagoon); border-radius: 999px; min-width: 2px; }
+.bars__val { text-align: right; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
+.quotes { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.quotes li { border-left: 3px solid var(--kalma-sand); padding: 4px 0 4px 12px; font-size: var(--text-sm); }
+.quotes q { quotes: "“" "”"; }
+.small { font-size: var(--text-xs); }
+.dl--wide { grid-template-columns: minmax(200px, 1fr) 1.2fr; }
+@media (max-width: 640px) { .bars li { grid-template-columns: 1fr 70px; } .bars__track { grid-column: 1 / -1; grid-row: 2; } .dl--wide { grid-template-columns: 1fr; } }

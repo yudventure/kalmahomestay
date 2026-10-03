@@ -13,6 +13,7 @@ function loadConfig(env = process.env) {
     siteUrl: String(env.SITE_URL || `http://localhost:${port}`).replace(/\/+$/, ''),
     dataDir: env.DATA_DIR || require('path').join(__dirname, '..', 'data'),
     adminPassword: env.ADMIN_PASSWORD || '',
+    googleVerification: env.GOOGLE_SITE_VERIFICATION || '',
     db: loadDb(env),
     dbAutoMigrate: env.DB_AUTO_MIGRATE !== 'false',
     contact: {

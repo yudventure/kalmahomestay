@@ -21,11 +21,12 @@
       <a href="/admin"<%- current === '/' ? ' aria-current="page"' : '' %>>Ringkasan</a>
       <a href="/admin/inquiries"<%- current.startsWith('/inquiries') ? ' aria-current="page"' : '' %>>Permintaan</a>
       <a href="/admin/customers"<%- current.startsWith('/customers') ? ' aria-current="page"' : '' %>>Customer</a>
+      <a href="/admin/survey"<%- current.startsWith('/survey') ? ' aria-current="page"' : '' %>>Survei</a>
     </nav>
     <a class="admin__site" href="/" target="_blank" rel="noopener">Lihat website ↗</a>
   </div>
 </header>
 <main class="wrap admin__main">
 <% if (storage === 'file') { %><p class="alert alert--warn">Mode pengembangan: data disimpan di file JSON lokal. Di server produksi isi pengaturan database MySQL (lihat DEPLOY.md).</p><% } %>
-<% var flashText = { 'saved': 'Perubahan tersimpan.', 'customer-deleted': 'Data customer dan semua permintaannya sudah dihapus.', 'inquiry-deleted': 'Permintaan sudah dihapus.' }[flash]; %>
+<% var flashText = { 'saved': 'Perubahan tersimpan.', 'customer-deleted': 'Data customer dan semua permintaannya sudah dihapus.', 'inquiry-deleted': 'Permintaan sudah dihapus.', 'survey-deleted': 'Jawaban survei sudah dihapus.' }[flash]; %>
 <% if (flashText) { %><p class="alert alert--ok" role="status"><%= flashText %></p><% } %>

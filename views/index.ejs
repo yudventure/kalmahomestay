@@ -10,6 +10,7 @@
 <link rel="alternate" hreflang="en" href="<%= siteUrl %>/en">
 <link rel="alternate" hreflang="x-default" href="<%= siteUrl %>/">
 <meta name="theme-color" content="#EDE0B5">
+<% if (googleVerification) { %><meta name="google-site-verification" content="<%= googleVerification %>"><% } %>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Kalma Raja Ampat · Slow down, Raja Ampat style.">
 <meta property="og:url" content="<%= siteUrl %><%= path %>">
@@ -349,7 +350,10 @@
       <a href="#kamar"><%- t('nav.rooms') %></a><a href="#pengalaman"><%- t('nav.exp') %></a>
       <a href="#lokasi"><%- t('nav.loc') %></a><a href="#faq">FAQ</a><a href="#pesan"><%- t('nav.book') %></a>
     </nav>
-    <p class="foot__reef"><%- t('foot.reef') %></p>
+    <div>
+      <p class="foot__reef"><%- t('foot.reef') %></p>
+      <p><a class="foot__survey" href="<%= base %>/survey"><%- t('survey.footer') %> →</a></p>
+    </div>
   </div>
   <div class="wrap foot__bottom">
     <span>© <%= year %> Kalma Raja Ampat</span>

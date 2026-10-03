@@ -40,7 +40,7 @@ for (const [kind, make] of backends) {
       ({ repo, cleanup } = make());
       if (kind === 'mysql') {
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 0');
-        for (const tname of ['inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
+        for (const tname of ['survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 1');
       }
       await repo.init();
@@ -139,6 +139,22 @@ for (const [kind, make] of backends) {
       assert.equal(await repo.getCustomer(rina), null);
       assert.equal((await repo.listInquiries({})).total, 5);
       assert.equal(await repo.deleteCustomer(rina), false);
+    });
+
+    test('survey responses are stored, listed newest first and deleted', async () => {
+      const a = await repo.addSurveyResponse({ lang: 'en', answers: { q1: 'planning', q4: ['diving'], q8: 'Ferry “timing” 🌊' }, contact: 'x@y.com' });
+      const b = await repo.addSurveyResponse({ lang: 'id', answers: { q1: 'curious', q8: 'Sinyal' }, contact: '' });
+      const all = await repo.allSurveyResponses();
+      assert.equal(all.length, 2);
+      assert.equal(all[0].id, b);
+      assert.deepEqual(all[1].answers, { q1: 'planning', q4: ['diving'], q8: 'Ferry “timing” 🌊' }, 'unicode/emoji round-trips');
+      assert.equal(all[1].contact, 'x@y.com');
+      assert.equal(all[0].contact, null);
+      assert.ok(all[0].created_at instanceof Date);
+      const page = await repo.listSurveyResponses({});
+      assert.equal(page.total, 2);
+      assert.equal(await repo.deleteSurveyResponse(a), true);
+      assert.equal((await repo.allSurveyResponses()).length, 1);
     });
 
     test('data survives reopening the store', async () => {

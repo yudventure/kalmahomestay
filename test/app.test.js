@@ -17,7 +17,7 @@ function addDays(n) {
 before(async () => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-test-'));
   const app = createApp({
-    dataDir, db: null, adminPassword: 'rahasia',
+    dataDir, db: null, adminPassword: 'rahasia', googleVerification: 'abc123verify',
     siteUrl: 'https://kalma.test',
     contact: { whatsapp: '6281111111111', whatsappDisplay: '+62 811', email: 'host@kalma.test', instagram: '@kalma', instagramUrl: 'https://instagram.com/kalma' },
   });
@@ -240,6 +240,78 @@ test('replyLink handles phones and emails', () => {
   assert.match(replyLink('+62 812-3456-7890', 'A'), /^https:\/\/wa\.me\/6281234567890\?/);
   assert.match(replyLink('tamu@mail.com', 'A'), /^mailto:tamu@mail\.com\?/);
   assert.equal(replyLink('besok', 'A'), '');
+});
+
+const surveyPost = (p, body) => fetch(base + p, { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+
+test('survey pages render in both languages, noindex', async () => {
+  const en = await (await fetch(base + '/en/survey')).text();
+  assert.match(en, /Help us make Raja Ampat easier to visit/);
+  assert.match(en, /most frustrating part of a trip to Raja Ampat/);
+  assert.match(en, /<meta name="robots" content="noindex, follow">/);
+  const id = await (await fetch(base + '/survey')).text();
+  assert.match(id, /paling bikin repot/);
+  assert.match(await (await fetch(base + '/')).text(), /href="\/survey"/, 'homepage footer links to the survey');
+});
+
+test('survey requires q1 and q8, keeps answers on error', async () => {
+  const r = await surveyPost('/en/survey', 'q1=planning&q4=diving&q8=');
+  assert.equal(r.status, 400);
+  const html = await r.text();
+  assert.match(html, /Please answer the questions marked \*/);
+  assert.match(html, /value="planning" checked/);
+  assert.match(html, /value="diving" checked/);
+});
+
+test('survey saves valid answers, caps multi choices, ignores unknown values', async () => {
+  const body = new URLSearchParams();
+  body.append('q1', 'yes_once'); body.append('q2', 'Australia');
+  ['diving', 'snorkeling', 'views', 'hacked'].forEach((v) => body.append('q4', v)); // max 2
+  ['cash', 'signal', 'nope'].forEach((v) => body.append('q9', v));
+  body.append('q8', 'The ferry schedule was confusing');
+  body.append('q15', 'bogus');
+  body.append('q23', 'tom@mail.com');
+  const r = await surveyPost('/en/survey', body);
+  assert.equal(r.status, 303);
+  assert.equal(r.headers.get('location'), '/en/survey?thanks=1');
+  assert.match(await (await fetch(base + '/en/survey?thanks=1')).text(), /Thank you so much!/);
+  const [saved] = await repo.allSurveyResponses();
+  assert.deepEqual(saved.answers, { q1: 'yes_once', q2: 'Australia', q4: ['diving', 'snorkeling'], q8: 'The ferry schedule was confusing', q9: ['cash', 'signal'] });
+  assert.equal(saved.contact, 'tom@mail.com');
+  assert.equal(saved.lang, 'en');
+});
+
+test('survey honeypot is not stored', async () => {
+  const before = (await repo.allSurveyResponses()).length;
+  const r = await surveyPost('/survey', 'q1=curious&q8=spam&website=x');
+  assert.equal(r.status, 303);
+  assert.equal((await repo.allSurveyResponses()).length, before);
+});
+
+test('admin survey summary, single response, CSV and delete', async () => {
+  let html = await (await adminGet('/admin/survey')).text();
+  assert.match(html, /Survei tamu/);
+  assert.match(html, /The ferry schedule was confusing/);
+  assert.match(html, /Hanya tunai \/ tidak ada ATM/);
+  const [r] = await repo.allSurveyResponses();
+  html = await (await adminGet(`/admin/survey/${r.id}`)).text();
+  assert.match(html, /tom@mail\.com/);
+  const csv = Buffer.from(await (await adminGet('/admin/export/survey.csv')).arrayBuffer()).subarray(3).toString('utf8');
+  assert.match(csv, /^id,created_at,lang,contact,q1,q2,q3,q4/);
+  assert.match(csv, /Diving; Snorkeling/);
+  assert.equal((await adminPost(`/admin/survey/${r.id}/delete`, {}, 'https://evil.example')).status, 403);
+  assert.equal((await adminPost(`/admin/survey/${r.id}/delete`, {})).status, 303);
+  assert.equal((await repo.allSurveyResponses()).find((x) => x.id === r.id), undefined);
+});
+
+test('sitemap has hreflang alternates and lastmod; verification meta is rendered', async () => {
+  const xml = await (await fetch(base + '/sitemap.xml')).text();
+  assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
+  assert.equal((xml.match(/<url>/g) || []).length, 2);
+  assert.match(xml, /<loc>https:\/\/kalma\.test\/en<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+  assert.match(xml, /hreflang="x-default" href="https:\/\/kalma\.test\/"/);
+  assert.doesNotMatch(xml, /survey|admin/);
+  assert.match(await (await fetch(base + '/')).text(), /<meta name="google-site-verification" content="abc123verify">/);
 });
 
 test('health check reports storage', async () => {

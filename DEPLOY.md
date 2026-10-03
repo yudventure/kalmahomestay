@@ -49,6 +49,7 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `DB_USER` | `u123456789_kalma` | Dari langkah 1 |
 | `DB_PASSWORD` | ••••••• | Dari langkah 1 |
 | `NODE_ENV` | `production` | Aktifkan cache file statis |
+| `GOOGLE_SITE_VERIFICATION` | `AbC123…` | Kode verifikasi Search Console (langkah 8) |
 
 `PORT` **tidak perlu** diisi; Hostinger mengaturnya sendiri.
 
@@ -84,7 +85,31 @@ Hostinger membuat backup otomatis, tapi sebaiknya unduh juga secara berkala:
 
 Data customer adalah data pribadi. Form website menampilkan pemberitahuan penggunaan data, dan admin bisa menghapus semua data seorang customer jika ia memintanya (tombol **Hapus customer** di halaman customer). Jangan bagikan password admin atau database, dan jangan simpan ekspor CSV di tempat umum.
 
-## 7. Alur kerja sehari-hari
+## 7. Survei tamu
+
+Bagikan link survei ke tamu, grup Facebook, komunitas diving, atau Instagram:
+
+- English: `https://domainmu.com/en/survey`
+- Indonesia: `https://domainmu.com/survey`
+
+Jawaban tersimpan di tabel `survey_responses` dan direkap otomatis di **`/admin/survey`**: grafik persentase untuk pilihan ganda, daftar jawaban terbuka, detail per responden, dan ekspor CSV. Halaman survei diberi `noindex` sehingga tidak muncul di Google; cukup dibagikan lewat link.
+
+## 8. Google Search Console
+
+1. Buka [search.google.com/search-console](https://search.google.com/search-console) → **Add property**.
+2. Pilih **Domain** (verifikasi lewat DNS di hPanel → Domains → DNS / Nameservers → tambah record TXT dari Google),
+   **atau** pilih **URL prefix** `https://domainmu.com` → metode **HTML tag**:
+   salin isi `content="…"` dari tag yang diberikan Google ke environment variable `GOOGLE_SITE_VERIFICATION`, deploy ulang, lalu klik **Verify**.
+3. Menu **Sitemaps** → masukkan `sitemap.xml` → **Submit**.
+4. Menu **URL Inspection** → masukkan `https://domainmu.com/` dan `https://domainmu.com/en` → **Request indexing**.
+
+Yang sudah disiapkan website:
+- `/sitemap.xml`: halaman Indonesia & English, lengkap dengan tautan `hreflang` antar bahasa dan tanggal update terakhir
+- `/robots.txt`: menunjuk ke sitemap dan memblokir `/admin`
+- Tag `canonical`, `hreflang`, Open Graph, dan data terstruktur `LodgingBusiness` di setiap halaman
+- `SITE_URL` **wajib** berisi domain asli dengan `https://` agar semua URL di atas benar
+
+## 9. Alur kerja sehari-hari
 
 ```bash
 git checkout main && git pull

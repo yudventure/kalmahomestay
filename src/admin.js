@@ -5,6 +5,7 @@ const express = require('express');
 const { ROOMS } = require('./config');
 const { STATUSES, STATUS_IDS } = require('./db/shared');
 const { todayISO } = require('./inquiry');
+const survey = require('./survey');
 
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const TZ = 'Asia/Jayapura'; // WIT, Raja Ampat local time
@@ -84,6 +85,7 @@ function createAdminRouter({ repo, config, t }) {
     next();
   });
 
+  const stamp = () => todayISO();
   const idParam = (req) => {
     const id = Number(req.params.id);
     return Number.isInteger(id) && id > 0 ? id : null;
@@ -176,8 +178,32 @@ function createAdminRouter({ repo, config, t }) {
     res.redirect(303, '/admin/customers?ok=customer-deleted');
   }));
 
+  /* ---------- survey ---------- */
+  router.get('/survey', ah(async (req, res) => {
+    const all = await repo.allSurveyResponses();
+    const list = await repo.listSurveyResponses({ page: req.query.page });
+    res.render('admin/survey', { title: 'Survei', total: all.length, summary: survey.summarize(all), sections: survey.SECTIONS, list });
+  }));
+
+  router.get('/survey/:id', ah(async (req, res, next) => {
+    const id = idParam(req); if (!id) return next();
+    const r = (await repo.allSurveyResponses()).find((x) => x.id === id);
+    if (!r) return next();
+    res.render('admin/survey-response', { title: `Jawaban survei #${id}`, r, sections: survey.SECTIONS });
+  }));
+
+  router.post('/survey/:id/delete', ah(async (req, res, next) => {
+    const id = idParam(req); if (!id) return next();
+    if (!(await repo.deleteSurveyResponse(id))) return next();
+    res.redirect(303, '/admin/survey?ok=survey-deleted');
+  }));
+
+  router.get('/export/survey.csv', ah(async (req, res) => {
+    const rows = (await repo.allSurveyResponses()).reverse().map(survey.toRow);
+    res.type('text/csv').attachment(`kalma-survey-${stamp()}.csv`).send(toCSV(rows, survey.CSV_COLUMNS));
+  }));
+
   /* ---------- exports ---------- */
-  const stamp = () => todayISO();
   router.get('/export/customers.csv', ah(async (req, res) => {
     const rows = await repo.exportCustomers();
     res.type('text/csv').attachment(`kalma-customers-${stamp()}.csv`)

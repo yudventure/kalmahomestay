@@ -6,6 +6,8 @@ const { loadConfig, ROOMS, GUEST_OPTIONS } = require('./config');
 const { normalize, validate, buildMessage } = require('./inquiry');
 const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
+const survey = require('./survey');
+const fs = require('fs');
 
 const ROOT = path.join(__dirname, '..');
 const CONTENT = {
@@ -72,6 +74,7 @@ function createApp(options = {}) {
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
       siteUrl: config.siteUrl,
+      googleVerification: config.googleVerification,
       path: lang === 'en' ? '/en' : '/',
       home: lang === 'en' ? '/en' : '/',
       base,
@@ -88,11 +91,12 @@ function createApp(options = {}) {
 
   /* ---------- booking inquiries ---------- */
   const hits = new Map(); // simple per-IP rate limit: 10 inquiries / 10 min
-  function rateLimited(ip) {
+  function rateLimited(ip, scope = 'inquiry') {
+    const key = scope + ':' + ip;
     const now = Date.now();
-    const list = (hits.get(ip) || []).filter((ts) => now - ts < 10 * 60 * 1000);
+    const list = (hits.get(key) || []).filter((ts) => now - ts < 10 * 60 * 1000);
     list.push(now);
-    hits.set(ip, list);
+    hits.set(key, list);
     if (hits.size > 5000) hits.clear();
     return list.length > 10;
   }
@@ -139,13 +143,58 @@ function createApp(options = {}) {
     res.redirect(303, r.whatsappUrl);
   }));
 
+  /* ---------- traveler survey ---------- */
+  function renderSurvey(res, lang, extra = {}) {
+    const t = translator(lang);
+    res.render('survey', {
+      lang, t, sections: survey.SECTIONS, base: lang === 'en' ? '/en' : '',
+      home: lang === 'en' ? '/en' : '/', siteUrl: config.siteUrl,
+      path: (lang === 'en' ? '/en' : '') + '/survey',
+      answers: {}, contact: '', missing: [], error: '', thanks: false, ...extra,
+    });
+  }
+  app.get(['/survey', '/en/survey'], (req, res) => {
+    const lang = req.path.startsWith('/en') ? 'en' : 'id';
+    renderSurvey(res, lang, { thanks: req.query.thanks === '1' });
+  });
+  app.post(['/survey', '/en/survey'], ah(async (req, res) => {
+    const lang = req.path.startsWith('/en') ? 'en' : 'id';
+    const target = (lang === 'en' ? '/en' : '') + '/survey?thanks=1';
+    if (req.body && req.body.website) return res.redirect(303, target); // honeypot
+    const { answers, contact, missing } = survey.parseSurvey(req.body);
+    if (rateLimited(req.ip, 'survey')) {
+      res.status(429);
+      return renderSurvey(res, lang, { answers, contact, error: translator(lang)('survey.errRate') });
+    }
+    if (missing.length) {
+      res.status(400);
+      return renderSurvey(res, lang, { answers, contact, missing, error: translator(lang)('survey.err') });
+    }
+    try {
+      await repo.addSurveyResponse({ lang, answers, contact });
+    } catch (e) {
+      console.error('Could not save survey response:', e.message);
+    }
+    res.redirect(303, target);
+  }));
+
   /* ---------- admin ---------- */
   app.use('/admin', createAdminRouter({ repo, config, t: translator('id') }));
 
   app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${config.siteUrl}/sitemap.xml\n`));
-  app.get('/sitemap.xml', (req, res) => res.type('application/xml').send(
-    `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-    `<url><loc>${config.siteUrl}/</loc></url>\n<url><loc>${config.siteUrl}/en</loc></url>\n</urlset>\n`));
+  // Sitemap for Google Search Console: both language versions linked with hreflang, lastmod = last content change.
+  const lastmod = new Date(Math.max(...['content/id.json', 'content/en.json', 'views/index.ejs', 'src/config.js']
+    .map((f) => { try { return fs.statSync(path.join(ROOT, f)).mtimeMs; } catch { return 0; } }))).toISOString().slice(0, 10);
+  app.get('/sitemap.xml', (req, res) => {
+    const u = config.siteUrl;
+    const alt = `<xhtml:link rel="alternate" hreflang="id" href="${u}/"/><xhtml:link rel="alternate" hreflang="en" href="${u}/en"/><xhtml:link rel="alternate" hreflang="x-default" href="${u}/"/>`;
+    res.type('application/xml').send(
+      '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
+      `  <url><loc>${u}/</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
+      `  <url><loc>${u}/en</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
+      '</urlset>\n');
+  });
   app.get('/healthz', ah(async (req, res) => {
     let db = 'ok';
     try { await repo.ping(); } catch { db = 'error'; }
