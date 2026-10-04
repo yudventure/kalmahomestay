@@ -15,7 +15,10 @@ Baca juga `.claude/skills/kalma-cms/SKILL.md` sebelum mengubah admin atau menamb
    - untuk nilai kosong di tabel pakai "-".
 3. **Branding Kalma tetap**: font Fraunces (judul) dan Plus Jakarta Sans (teks), warna dari `brand/tokens.css`
    (deep sea #224866, lagoon #4B8AA5, sand #EDE0B5, coral #E07A5F). Admin memakai layout `views/admin/_top.ejs`.
-4. Buat setiap fitur semudah mungkin dipakai staf homestay yang bukan orang teknis. Bahasa admin: Indonesia.
+4. **Animasi website harus jalan di semua perangkat**, termasuk Windows dengan "Animation effects" mati dan
+   Android dengan "Remove animations". Jangan mematikan animasi dekoratif (partner, gelembung komentar, logo sosial,
+   kelomang, video hero, efek muncul) lewat `prefers-reduced-motion`. Pengaturan itu hanya dipakai untuk smooth scroll.
+5. Buat setiap fitur semudah mungkin dipakai staf homestay yang bukan orang teknis. Bahasa admin: Indonesia.
 
 ## Alur kerja
 
