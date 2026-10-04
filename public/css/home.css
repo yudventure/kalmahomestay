@@ -143,13 +143,15 @@
 
 /* ------------------------------------------------ facts strip under the wave */
 .facts { background: var(--kalma-deep-sea); color: var(--kalma-shell); padding: var(--space-5) 0 var(--space-7); }
-.facts__in { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); }
+.facts__in { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5) var(--space-6); }
 .fact { display: flex; align-items: flex-start; gap: 14px; }
 .fact p { margin: 0; }
 .fact__ic { flex: none; display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: rgba(237, 224, 181, .1); box-shadow: inset 0 0 0 1px rgba(237, 224, 181, .35); }
 .fact__ic svg { width: 27px; height: 27px; fill: none; stroke: var(--kalma-sand); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .facts b { display: block; font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-weight: 500; font-size: var(--text-2xl); color: var(--kalma-sand); line-height: 1.15; }
 .facts p > span { display: block; font-size: var(--text-sm); color: #C7D6E0; }
+/* wide screens: one row, the longest fact sits first and every column takes the width its words need */
+@media (min-width: 1280px) { .facts__in { grid-template-columns: repeat(4, auto); justify-content: space-between; } .facts b, .facts p > span { white-space: nowrap; } .facts b { font-size: 1.65rem; } }
 @media (max-width: 760px) { .facts__in { grid-template-columns: 1fr 1fr; } .fact { flex-direction: column; gap: 10px; } .fact__ic { width: 46px; height: 46px; } }
 
 /* ------------------------------------------------ partner running text */
