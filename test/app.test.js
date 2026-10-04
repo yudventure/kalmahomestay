@@ -56,6 +56,16 @@ test('English page renders at /en', async () => {
   assert.match(html, /href="\/en" hreflang="en" lang="en" aria-current="page"/);
 });
 
+test('partner running text lists each partner twice for a seamless loop', async () => {
+  const html = await (await fetch(base + '/')).text();
+  const names = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'content', 'partners.json'), 'utf8')).partners;
+  if (!names.length) return assert.doesNotMatch(html, /class="partners"/);
+  assert.match(html, /<div class="partners" role="region"/);
+  const perCopy = Math.max(1, Math.ceil(14 / names.length)); // the list repeats to fill wide screens
+  assert.equal(html.split('<li>' + names[0] + '<').length - 1, 2 * perCopy);
+  assert.match(html, /<ul class="partners__list" aria-hidden="true">/);
+});
+
 test('homepage shows the guest-story invite when there are no reviews yet', async () => {
   const html = await (await fetch(base + '/')).text();
   assert.match(html, /class="quote__empty"/);
