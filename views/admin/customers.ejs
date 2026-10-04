@@ -14,9 +14,9 @@
   <% result.items.forEach(function (c) { %>
     <tr>
       <td><a href="/admin/customers/<%= c.id %>"><b><%= c.name %></b></a><% if (c.notes) { %> <span class="dot" title="Ada catatan">●</span><% } %></td>
-      <td><%= phoneDisplay(c.phone) || '—' %></td>
-      <td><%= c.email || '—' %></td>
-      <td><%= c.country || '—' %></td>
+      <td><%= phoneDisplay(c.phone) || '-' %></td>
+      <td><%= c.email || '-' %></td>
+      <td><%= c.country || '-' %></td>
       <td><%= c.inquiry_count %></td>
       <td><%= fmtDateTime(c.last_inquiry_at || c.created_at) %></td>
     </tr>

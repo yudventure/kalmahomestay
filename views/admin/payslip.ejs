@@ -7,7 +7,7 @@
   <header class="slip__head"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" height="40"><div><b>Kalma Raja Ampat</b><br><small>Slip gaji · periode <%= r.period %></small></div></header>
   <table class="slip__table">
     <tr><th>Nama</th><td><%= e.name %></td></tr>
-    <tr><th>Jabatan</th><td><%= e.position || '—' %><%= e.department ? ' · ' + e.department : '' %></td></tr>
+    <tr><th>Jabatan</th><td><%= e.position || '-' %><%= e.department ? ' · ' + e.department : '' %></td></tr>
     <tr><th>Gaji pokok</th><td class="num"><%= rupiah(r.base) %></td></tr>
     <tr><th>Tunjangan</th><td class="num"><%= rupiah(r.allowance) %></td></tr>
     <tr><th>Bonus</th><td class="num"><%= rupiah(r.bonus) %></td></tr>

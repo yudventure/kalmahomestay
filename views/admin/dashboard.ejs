@@ -1,64 +1,94 @@
 <%- include('_top') %>
-<h1>Ringkasan <small class="muted"><%= fmtDate(today) %></small></h1>
-<p class="muted">Halo, <%= me.name %>.</p>
+<section class="hello">
+  <p class="eyebrow-a"><%= roleLabel(me.role) %> · Dashboard Kalma</p>
+  <div class="hello__row">
+    <div>
+      <h1><%= greeting %>, <%= firstName %>.</h1>
+      <p><% if (alerts.length) { %>Ada <%= alerts.length %> hal yang perlu ditindaklanjuti hari ini.<% } else { %>Semua beres. Tidak ada yang menunggu tindak lanjut saat ini.<% } %></p>
+    </div>
+    <div class="hello__clock"><b id="clock">--.--.--</b><small id="clock-date"><%= fmtDate(today) %> · WIT</small></div>
+  </div>
+</section>
 
 <% if (can('reservations')) { %>
 <div class="cards">
-  <a class="card-stat card-stat--new" href="/admin/inquiries?status=new"><b><%= stats.counts.new %></b><span>Permintaan baru</span></a>
-  <a class="card-stat" href="/admin/calendar"><b><%= arrivals.length %> / <%= departures.length %></b><span>Check-in / check-out hari ini</span></a>
-  <a class="card-stat" href="/admin/calendar"><b><%= inHouse.length %></b><span>Kamar terisi malam ini</span></a>
-  <a class="card-stat" href="/admin/calendar"><b><%= occupancy %>%</b><span>Okupansi bulan ini</span></a>
+  <a class="card-stat" href="/admin/inquiries?status=new"><span>Permintaan baru</span><b><%= stats.counts.new %></b><em class="<%= stats.counts.new ? 'warn' : 'good' %>"><%= stats.counts.new ? 'Menunggu balasan' : 'Semua sudah dibalas' %></em></a>
+  <a class="card-stat" href="/admin/calendar"><span>Check-in hari ini</span><b><%= arrivals.length %></b><em><%= departures.length %> check-out</em></a>
+  <a class="card-stat" href="/admin/calendar"><span>Kamar terisi malam ini</span><b><%= inHouse.length %></b><em>dari kalender</em></a>
+  <a class="card-stat" href="/admin/finance/report"><span>Okupansi bulan ini</span><b><%= occupancy %>%</b><em>malam terjual dibanding kapasitas</em></a>
 </div>
 <% } %>
 <% if (can('finance') || can('hr')) { %>
 <div class="cards">
   <% if (can('finance')) { %>
-  <a class="card-stat" href="/admin/finance"><b><%= rupiah(income) %></b><span>Pemasukan bulan ini</span></a>
-  <a class="card-stat" href="/admin/finance/report"><b><%= rupiah(income - expense) %></b><span>Laba bulan ini</span></a>
+  <a class="card-stat" href="/admin/finance"><span>Pemasukan bulan ini</span><b class="money"><%= rupiah(income) %></b><em>pengeluaran <%= rupiah(expense) %></em></a>
+  <a class="card-stat" href="/admin/finance/report"><span>Laba bulan ini</span><b class="money"><%= rupiah(income - expense) %></b><em class="<%= income - expense >= 0 ? 'good' : 'warn' %>"><%= income - expense >= 0 ? 'Untung' : 'Rugi' %></em></a>
   <% } %>
   <% if (can('hr')) { %>
-  <a class="card-stat" href="/admin/hr/attendance"><b><%= attendanceFilled ? presentToday + ' / ' + staffCount : '—' %></b><span><%= attendanceFilled ? 'Karyawan hadir hari ini' : 'Absensi hari ini belum diisi' %></span></a>
-  <a class="card-stat<%= pendingLeave ? ' card-stat--new' : '' %>" href="/admin/hr/leave?status=pending"><b><%= pendingLeave %></b><span>Cuti menunggu persetujuan</span></a>
+  <a class="card-stat" href="/admin/hr/attendance"><span>Karyawan hadir hari ini</span><b><%= attendanceFilled ? presentToday + ' / ' + staffCount : '-' %></b><em class="<%= attendanceFilled ? 'good' : 'warn' %>"><%= attendanceFilled ? 'Absensi sudah diisi' : 'Absensi belum diisi' %></em></a>
+  <a class="card-stat" href="/admin/hr/leave?status=pending"><span>Cuti menunggu</span><b><%= pendingLeave %></b><em><%= pendingLeave ? 'Perlu persetujuan' : 'Tidak ada' %></em></a>
   <% } %>
 </div>
 <% } %>
 
+<section class="panel panel--attn<%= alerts.length ? ' is-alert' : '' %>">
+  <div>
+    <p class="eyebrow-a">Perlu perhatian</p>
+    <% if (alerts.length) { %>
+      <h2><%= alerts[0].label %></h2>
+      <p><%= alerts.slice(1).map(function (a) { return a.label; }).join(', ') || alerts[0].sub %></p>
+    <% } else { %>
+      <h2>Tidak ada yang tertunda</h2>
+      <p>Permintaan baru, check-in hari ini, cuti, dan sinkron OTA yang bermasalah akan muncul di sini.</p>
+    <% } %>
+  </div>
+  <% if (alerts.length) { %><a class="pill-btn" href="<%= alerts[0].href %>">Buka sekarang →</a><% } %>
+</section>
+
 <% if (can('reservations')) { %>
-<div class="grid2">
-  <section class="panel">
-    <div class="panel__head"><h2>Hari ini</h2><a class="link" href="/admin/calendar">Kalender →</a></div>
-    <% if (!arrivals.length && !departures.length) { %><p class="muted">Tidak ada check-in atau check-out hari ini.</p><% } else { %>
-    <ul class="list">
-      <% arrivals.forEach(function (it) { %><li><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b>Check-in · <%= it.label %></b><span><%= roomName(it.room) %> · <%= nights(it.start, it.end) %> malam<%= it.guests ? ' · ' + it.guests + ' tamu' : '' %><%= it.channel ? ' · ' + it.channel : '' %></span></a></li><% }) %>
+<div class="grid3">
+  <section class="panel action-card">
+    <p class="eyebrow-a">Hari ini</p>
+    <h2><%= arrivals.length + departures.length %> pergerakan tamu</h2>
+    <% if (!arrivals.length && !departures.length) { %><p>Tidak ada check-in atau check-out hari ini.</p><% } else { %>
+    <ul class="list" style="margin-bottom:16px">
+      <% arrivals.forEach(function (it) { %><li><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b>Check-in · <%= it.label %></b><span><%= roomName(it.room) %> · <%= nights(it.start, it.end) %> malam<%= it.channel ? ' · ' + it.channel : '' %></span></a></li><% }) %>
       <% departures.forEach(function (it) { %><li><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b>Check-out · <%= it.label %></b><span><%= roomName(it.room) %></span></a></li><% }) %>
     </ul><% } %>
+    <a class="pill-btn" href="/admin/calendar">Buka kalender →</a>
   </section>
-  <section class="panel">
-    <div class="panel__head"><h2>Permintaan baru</h2><a class="link" href="/admin/inquiries?status=new">Semua (<%= newTotal %>) →</a></div>
-    <% if (!recent.length) { %><p class="muted">Tidak ada permintaan baru. 🌊</p><% } else { %>
-    <ul class="list">
-      <% recent.forEach(function (it) { %>
-      <li><a href="/admin/inquiries/<%= it.id %>"><b><%= it.name %></b><span><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %> · <%= it.guests %> tamu · <%= roomName(it.room) %></span><small><%= fmtDateTime(it.created_at) %></small></a></li>
-      <% }) %>
+  <section class="panel action-card">
+    <p class="eyebrow-a">Permintaan masuk</p>
+    <h2><%= newTotal %> menunggu balasan</h2>
+    <% if (!recent.length) { %><p>Belum ada permintaan baru dari website.</p><% } else { %>
+    <ul class="list" style="margin-bottom:16px">
+      <% recent.slice(0, 3).forEach(function (it) { %><li><a href="/admin/inquiries/<%= it.id %>"><b><%= it.name %></b><span><%= fmtDate(it.checkin) %> · <%= it.guests %> tamu · <%= roomName(it.room) %></span></a></li><% }) %>
     </ul><% } %>
+    <a class="pill-btn" href="/admin/inquiries?status=new">Buka permintaan →</a>
+  </section>
+  <section class="panel action-card">
+    <p class="eyebrow-a">Kedatangan terdekat</p>
+    <h2><%= stats.upcoming.length ? stats.upcoming.length + ' tamu terkonfirmasi' : 'Belum ada jadwal' %></h2>
+    <% if (!stats.upcoming.length) { %><p>Tamu website yang sudah dikonfirmasi akan muncul di sini.</p><% } else { %>
+    <ul class="list" style="margin-bottom:16px">
+      <% stats.upcoming.slice(0, 3).forEach(function (it) { %><li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> · <%= it.name %></b><span><%= nights(it.checkin, it.checkout) %> malam · <%= roomName(it.room) %></span></a></li><% }) %>
+    </ul><% } %>
+    <a class="pill-btn" href="/admin/inquiries?status=confirmed">Lihat semua →</a>
   </section>
 </div>
-<div class="grid2">
-  <section class="panel">
-    <div class="panel__head"><h2>Kedatangan terdekat</h2><a class="link" href="/admin/inquiries?status=confirmed">Terkonfirmasi →</a></div>
-    <% if (!stats.upcoming.length) { %><p class="muted">Belum ada tamu website terkonfirmasi yang akan datang.</p><% } else { %>
-    <ul class="list">
-      <% stats.upcoming.forEach(function (it) { %>
-      <li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> · <%= it.name %></b><span><%= nights(it.checkin, it.checkout) %> malam · <%= it.guests %> tamu · <%= roomName(it.room) %></span></a></li>
-      <% }) %>
-    </ul><% } %>
-  </section>
-  <section class="panel">
-    <div class="panel__head"><h2>Ekspor data</h2></div>
-    <p class="muted">Unduh sebagai CSV, bisa dibuka di Excel atau Google Sheets.</p>
-    <div class="btns"><a class="btn btn--ghost btn--sm" href="/admin/export/customers.csv">Customer (.csv)</a><a class="btn btn--ghost btn--sm" href="/admin/export/inquiries.csv">Permintaan (.csv)</a>
-    <% if (can('finance')) { %><a class="btn btn--ghost btn--sm" href="/admin/finance/export.csv">Keuangan (.csv)</a><% } %></div>
-  </section>
-</div>
+
+<section class="panel">
+  <div class="panel__head"><div><p class="eyebrow-a">Ekspor data</p><h2>Unduh untuk Excel</h2></div></div>
+  <p class="muted">File CSV bisa dibuka di Excel atau Google Sheets.</p>
+  <div class="btns"><a class="pill-btn" href="/admin/export/customers.csv">Customer</a><a class="pill-btn" href="/admin/export/inquiries.csv">Permintaan</a>
+  <% if (can('finance')) { %><a class="pill-btn" href="/admin/finance/export.csv">Keuangan</a><% } %></div>
+</section>
 <% } %>
+<script>
+(function () {
+  var el = document.getElementById('clock');
+  function tick() { el.textContent = new Date().toLocaleTimeString('id-ID', { timeZone: 'Asia/Jayapura', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/:/g, '.'); }
+  tick(); setInterval(tick, 1000);
+})();
+</script>
 <%- include('_bottom') %>

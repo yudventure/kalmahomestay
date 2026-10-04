@@ -22,7 +22,7 @@
       <td class="num"><b style="color: <%= x.net < 0 ? 'var(--color-danger)' : 'inherit' %>"><%= rupiah(x.net) %></b></td>
       <td class="num"><%= x.sold %></td>
       <td class="num"><span class="occ"><span style="width: <%= Math.min(100, x.occupancy) %>%"></span></span> <%= x.occupancy %>%</td>
-      <td class="num"><%= x.adr ? rupiah(x.adr) : '—' %></td></tr>
+      <td class="num"><%= x.adr ? rupiah(x.adr) : '-' %></td></tr>
   <% }) %>
   </tbody>
 </table>

@@ -1,5 +1,36 @@
 <footer class="admin__foot">Kalma Raja Ampat · Admin · waktu ditampilkan dalam WIT</footer>
 </main>
 </div>
+<script>
+// Upload buttons: choosing or dropping a file uploads it right away, with a progress bar.
+document.querySelectorAll('form[data-upload]').forEach(function (form) {
+  var input = form.querySelector('input[type=file]');
+  var drop = form.querySelector('.upload__drop');
+  var bar = form.querySelector('progress');
+  var name = form.querySelector('.upload__name');
+  function send() {
+    if (!input.files.length) return;
+    var f = input.files[0];
+    var label = form.querySelector('[name=label]');
+    if (label && label.required && !label.value.trim()) { label.focus(); name.textContent = 'Isi nama dokumen dulu.'; return; }
+    name.textContent = f.name + ' · ' + (f.size / 1048576).toFixed(1) + ' MB';
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', form.action);
+    bar.hidden = false;
+    xhr.upload.onprogress = function (e) { if (e.lengthComputable) bar.value = Math.round(e.loaded / e.total * 100); };
+    xhr.onload = function () { window.location = xhr.responseURL || window.location.href; };
+    xhr.onerror = function () { name.textContent = 'Gagal mengunggah. Periksa koneksi lalu coba lagi.'; bar.hidden = true; };
+    xhr.send(new FormData(form));
+  }
+  input.addEventListener('change', send);
+  ['dragenter', 'dragover'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('is-over'); }); });
+  ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('is-over'); }); });
+  drop.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; send(); } });
+});
+// close the notification and account menus when clicking elsewhere
+document.addEventListener('click', function (e) {
+  document.querySelectorAll('.menu-pop[open]').forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });
+});
+</script>
 </body>
 </html>

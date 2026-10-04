@@ -1,7 +1,7 @@
 <%- include('_top') %>
 <h1>Komentar Instagram <small class="muted">(<%= items.length %>)</small></h1>
-<p class="muted">Komentar di sini tampil sebagai gelembung yang bergulir di bagian "Kata tamu". Selama token Instagram belum ada, salin komentar dari postingan atau reels Kalma lewat formulir di bawah. Setelah token diisi, komentar dari semua postingan dan reels (sampai postingan pertama) diambil otomatis sekali sehari; hanya yang berbentuk cerita (tanpa balasan akun sendiri, link, atau sekadar tag teman). Komentar yang disembunyikan tidak akan muncul lagi walau disinkronkan ulang.</p>
-<% if (flashErr === 'ig-invalid') { %><p class="alert alert--warn" role="alert">Komentar belum tersimpan: isi username (tanpa spasi), komentar minimal 4 huruf, dan link (jika diisi) harus link instagram.com.</p><% } %>
+<p class="muted">Komentar di sini tampil sebagai gelembung yang bergulir di bagian "Kata tamu". Selama token Instagram belum ada, salin komentar dari postingan atau reels Kalma lewat formulir di bawah. Setelah token diisi, komentar dari semua postingan dan reels (sampai postingan pertama) diambil otomatis sekali sehari. Yang diambil hanya komentar berbentuk cerita (tanpa balasan akun sendiri, link, atau sekadar tag teman). Komentar yang disembunyikan tidak akan muncul lagi walau disinkronkan ulang.</p>
+<% if (flashErr === 'ig-invalid') { %><p class="alert alert--warn" role="alert">Komentar belum tersimpan. Isi username (tanpa spasi), komentar minimal 4 huruf, dan link (jika diisi) harus link instagram.com.</p><% } %>
 
 <section class="panel">
   <h2>Tambah komentar manual</h2>
@@ -18,7 +18,7 @@
 
 <section class="panel">
 <% if (!enabled) { %>
-  <p class="alert alert--warn">Belum aktif: isi <code>INSTAGRAM_ACCESS_TOKEN</code> di environment variables hPanel lalu deploy ulang (lihat DEPLOY.md langkah 11).</p>
+  <p class="alert alert--warn">Belum aktif. Isi <code>INSTAGRAM_ACCESS_TOKEN</code> di environment variables hPanel lalu deploy ulang (lihat DEPLOY.md langkah 11).</p>
 <% } else if (sync) { %>
   <p>Sinkron terakhir: <b><%= fmtDateTime(sync.at) %></b>
     <% if (sync.ok) { %>· berhasil, <%= sync.count %> komentar cerita<% if (sync.username) { %> dari @<%= sync.username %><% } %><% } %></p>

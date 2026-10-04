@@ -40,7 +40,7 @@
     </div>
     <div class="row2">
       <div class="field"><label for="u-role">Peran</label><select id="u-role" name="role" required>
-        <% ROLES.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === (form.role || 'reservation') ? ' selected' : '' %>><%= r.label %> — <%= r.desc %></option><% }) %></select></div>
+        <% ROLES.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === (form.role || 'reservation') ? ' selected' : '' %>><%= r.label %> (<%= r.desc %>)</option><% }) %></select></div>
       <div class="field"><label for="u-pass">Password awal</label><input id="u-pass" name="password" type="password" required minlength="8" autocomplete="new-password"></div>
     </div>
     <button class="btn btn--primary btn--sm" type="submit">Tambah</button>

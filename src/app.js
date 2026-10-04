@@ -9,6 +9,7 @@ const { createAdminRouter } = require('./admin');
 const { createInstagramSync } = require('./instagram');
 const { createSite } = require('./site');
 const { createCalendar } = require('./calendar');
+const { createMedia } = require('./media');
 const { recordWebsitePayment } = require('./admin-finance');
 const survey = require('./survey');
 const payments = require('./payments');
@@ -66,6 +67,13 @@ function videoFinder(dir = path.join(ROOT, 'public/video')) {
     if (m) (found[m[1]] ||= {})[m[2].toLowerCase()] = '/video/' + f;
   }
   return (name) => found[name] || null;
+}
+
+/** Photos uploaded in the admin win over files in public/img. */
+function withUploads(files, media) {
+  const photo = (name) => { const u = media.photoUrl(name); return u ? `--img:url(${u})` : files(name); };
+  photo.url = (name) => media.photoUrl(name) || files.url(name);
+  return photo;
 }
 
 /** Changes on every start (= every deploy) so browsers fetch fresh CSS/JS despite long caching. */
@@ -130,6 +138,17 @@ function createApp(options = {}) {
   app.locals.loadPartners = loadPartners;
   const calendar = createCalendar({ repo, fetchImpl: options.calendarFetch, allowPrivate: options.allowPrivateIcal });
   app.locals.calendar = calendar;
+  const media = createMedia({ repo, dir: options.uploadDir || config.uploadDir || path.join(config.dataDir, 'uploads') });
+  app.locals.media = media;
+  app.locals.builtInMedia = () => ({ photo: photoFinder().url, video: videoFinder() });
+
+  // Website photos and videos uploaded in the admin (documents are never served here).
+  app.get('/media/:file', ah(async (req, res, next) => {
+    if (!/^[a-f0-9]{24}\.(jpg|png|webp|mp4|webm)$/.test(req.params.file)) return next();
+    const row = await media.findPublic(req.params.file);
+    if (!row) return next();
+    res.sendFile(media.filePath(row), { maxAge: '30d', headers: { 'Content-Type': row.mime } }, (err) => { if (err && !res.headersSent) next(); });
+  }));
   const instagram = options.instagramSync || createInstagramSync({ repo, token: (config.instagram || {}).token, api: options.instagramApi });
   app.locals.instagram = instagram;
 
@@ -141,8 +160,8 @@ function createApp(options = {}) {
       pay,
       checkoutOpen: Boolean(extra.formError || extra.bookRoom),
       lang, t, rupiah,
-      photo: photoFinder(),
-      video: videoFinder(),
+      photo: withUploads(photoFinder(), media),
+      video: ((files) => (name) => media.video(name) || files(name))(videoFinder()),
       partners: site.partners() || loadPartners(),
       igReviews: instagram.comments,
       rooms: ROOMS,
@@ -200,7 +219,7 @@ function createApp(options = {}) {
     return {
       status: 201, values, message,
       whatsappUrl: `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`,
-      mailtoUrl: `mailto:${config.contact.email}?subject=${encodeURIComponent(t('ui').subject + ' — Kalma')}&body=${encodeURIComponent(message)}`,
+      mailtoUrl: `mailto:${config.contact.email}?subject=${encodeURIComponent(t('ui').subject + ' · Kalma')}&body=${encodeURIComponent(message)}`,
     };
   }
 
@@ -341,7 +360,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, t: translator('id') }));
 
   // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
   app.get('/ical/:file', ah(async (req, res, next) => {

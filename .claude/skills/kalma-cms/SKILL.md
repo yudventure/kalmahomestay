@@ -1,0 +1,36 @@
+---
+name: kalma-cms
+description: Aturan dan pola untuk website & admin CMS Kalma Raja Ampat. Pakai setiap kali mengubah tampilan admin, menambah fitur CMS, menambah tempat unggah foto/video/dokumen, atau menulis teks untuk website/admin Kalma.
+---
+
+# Kalma CMS
+
+## Unggahan selalu lewat tombol
+Setiap fitur yang butuh foto, video, atau dokumen harus punya tombol unggah di admin. Tidak boleh lewat File Manager.
+
+Pola:
+1. Route: `router.post('/area/:id/files', (req, res, next) => media.receive('document')(req, res, next), ah(async (req, res) => { ... }))`.
+   Jenis: `image` (JPG/PNG/WebP, 10 MB), `video` (MP4/WebM, 80 MB), `document` (PDF/foto/Word/Excel, 15 MB).
+   Cek `req.uploadError` lalu redirect dengan `?err=upload-<kode>` (pesan otomatis tampil di `_top.ejs`).
+2. Simpan: `media.save(req.file, { kind, ownerType, ownerId, label, by: req.staff.username })`.
+   Untuk tempat foto website pakai `slot` dan daftarkan di `SLOTS` (`src/media.js`).
+3. Tampilan: `<%- include('_upload', { action, accept, title, hint, fields }) %>`. Tombol ini langsung mengunggah
+   saat file dipilih atau ditarik, dengan progress bar.
+4. File pribadi (dokumen karyawan, bukti transaksi) dibuka lewat `/admin/files/<id>` yang mengecek peran.
+   Tambahkan `owner_type` baru ke `AREA` di `src/admin-media.js`.
+5. Hapus file ikut saat datanya dihapus (`media.remove(id)`).
+
+## Layout admin
+- `_top.ejs`: top bar (logo, Kembali ke situs, lonceng pemberitahuan, menu akun), sidebar berikon dengan grup
+  yang bisa dibuka, kotak "Status hari ini", dan eyebrow halaman otomatis.
+- Komponen: `.hello` (kartu sapaan), `.cards` + `.card-stat` (angka), `.panel`, `.panel--attn`, `.grid3 .action-card`,
+  `.tabs` (filter pil), `.table`, `.chip`, `.btn btn--primary|btn--ghost`, `.pill-btn`.
+- Menu baru: tambahkan ke `NAV` di `_top.ejs` dengan `area` peran dari `src/staff.js`.
+- Pemberitahuan lonceng dihitung di middleware "bell notifications" di `src/admin.js`.
+
+## Gaya tulisan
+Tanpa em dash/en dash di tengah kalimat, tanpa titik koma, tanpa titik dua di tengah kalimat. Kalimat pendek dan jelas
+dalam bahasa Indonesia sehari-hari. Nilai kosong ditulis "-".
+
+## Branding
+Fraunces untuk judul, Plus Jakarta Sans untuk teks, warna dari `brand/tokens.css`. Jangan menambah font atau warna di luar token.

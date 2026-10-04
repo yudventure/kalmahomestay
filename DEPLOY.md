@@ -44,6 +44,7 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `INSTAGRAM_HANDLE` | `kalma.rajaampat` | Opsional |
 | `FACEBOOK_URL` | `https://facebook.com/kalma` | Opsional, link ikon Facebook |
 | `TIKTOK_URL` | `https://tiktok.com/@kalma` | Opsional, link ikon TikTok |
+| `UPLOAD_DIR` | `/home/u123456789/kalma-uploads` | Opsional. Tempat foto, video, dan dokumen yang diunggah di admin. Bawaan di produksi: folder `kalma-uploads` di home, di luar folder aplikasi supaya tidak hilang saat deploy |
 | `INSTAGRAM_ACCESS_TOKEN` | `IGAA…` | Opsional, komentar Instagram di "Kata tamu" (langkah 11). Rahasia |
 | `GOOGLE_BUSINESS_URL` | `https://maps.app.goo.gl/…` | Opsional, link ikon Google (profil Google Maps / ulasan) |
 | `ADMIN_PASSWORD` | password kuat | Untuk login `/admin` (user `admin`) |
@@ -198,10 +199,10 @@ Buka `https://halokalma.com/admin` → halaman **Masuk**.
 - Sesi login berlaku 12 jam. Opsional: isi `SESSION_SECRET` (teks acak panjang) di hPanel agar sesi tidak ikut berubah saat `ADMIN_PASSWORD` diganti.
 
 **Website** (tanpa deploy ulang, langsung tampil):
-- **Teks website** — semua tulisan per bagian, Indonesia & Inggris. Kosongkan kolom untuk kembali ke teks bawaan.
-- **Kamar & harga** — harga per orang per malam, maksimal tamu, dan jumlah unit tiap kamar.
-- **Kontak & sosial media** — WhatsApp, email, Instagram, Facebook, TikTok, Google. Mengganti nilai dari hPanel.
-- **Partner** — nama partner di running text.
+- **Teks website**. semua tulisan per bagian, Indonesia & Inggris. Kosongkan kolom untuk kembali ke teks bawaan.
+- **Kamar & harga**. harga per orang per malam, maksimal tamu, dan jumlah unit tiap kamar.
+- **Kontak & sosial media**. WhatsApp, email, Instagram, Facebook, TikTok, Google. Mengganti nilai dari hPanel.
+- **Partner**. nama partner di running text.
 
 ## 13. Kalender & sinkron OTA / agen
 
@@ -216,16 +217,25 @@ Website ikut memakai kalender ini: tamu tidak bisa membayar untuk tanggal yang s
 
 ## 14. SDM (HRD) & penggajian
 
-- **Karyawan** — data karyawan: jabatan, bagian, kontak, mulai kerja, gaji pokok, tunjangan tetap, catatan (rekening, kontrak). Karyawan yang berhenti cukup diubah menjadi "Tidak aktif".
-- **Absensi** — isi per hari untuk semua karyawan aktif (hadir, izin, sakit, cuti, tanpa keterangan, libur, jam masuk/pulang). Cuti yang sudah disetujui otomatis terisi. Ada rekap bulanan per karyawan.
-- **Cuti & izin** — ajukan, setujui, atau tolak. Tercatat siapa yang memutuskan.
-- **Penggajian** — tombol **Buat slip gaji** membuat slip untuk semua karyawan aktif: gaji pokok + tunjangan, dipotong otomatis untuk hari "tanpa keterangan" (gaji ÷ 26 per hari). Bonus dan potongan bisa diubah sebelum dibayar. **Tandai dibayar** otomatis mencatat gaji sebagai pengeluaran di Keuangan. Slip bisa dicetak / disimpan PDF.
+- **Karyawan**. data karyawan: jabatan, bagian, kontak, mulai kerja, gaji pokok, tunjangan tetap, catatan (rekening, kontrak). Karyawan yang berhenti cukup diubah menjadi "Tidak aktif".
+- **Absensi**. isi per hari untuk semua karyawan aktif (hadir, izin, sakit, cuti, tanpa keterangan, libur, jam masuk/pulang). Cuti yang sudah disetujui otomatis terisi. Ada rekap bulanan per karyawan.
+- **Cuti & izin**. ajukan, setujui, atau tolak. Tercatat siapa yang memutuskan.
+- **Penggajian**. tombol **Buat slip gaji** membuat slip untuk semua karyawan aktif: gaji pokok + tunjangan, dipotong otomatis untuk hari "tanpa keterangan" (gaji ÷ 26 per hari). Bonus dan potongan bisa diubah sebelum dibayar. **Tandai dibayar** otomatis mencatat gaji sebagai pengeluaran di Keuangan. Slip bisa dicetak / disimpan PDF.
 
 ## 15. Keuangan
 
-- **Transaksi** — catat pemasukan & pengeluaran per kategori (booking, tur & diving, makanan, gaji, bahan makanan, listrik & BBM, boat, perawatan, komisi OTA, pajak, dll.). Ringkasan pemasukan, pengeluaran, dan laba per bulan.
+- **Transaksi**. catat pemasukan & pengeluaran per kategori (booking, tur & diving, makanan, gaji, bahan makanan, listrik & BBM, boat, perawatan, komisi OTA, pajak, dll.). Ringkasan pemasukan, pengeluaran, dan laba per bulan.
 - Otomatis tercatat:
   - pembayaran online Midtrans yang lunas (sekali per pesanan),
   - gaji yang ditandai dibayar.
 - Dari halaman booking website (**Permintaan & booking**) finance bisa mencatat pembayaran transfer/tunai; dari **Kalender** bisa mencatat pendapatan booking OTA/agen/walk-in, dan komisi channel (% di Channel OTA & agen) otomatis dicatat sebagai pengeluaran.
-- **Laporan laba rugi** — per bulan dalam setahun: pemasukan, pengeluaran, laba, malam terjual, okupansi, dan rata-rata pendapatan per malam; rincian per kategori; unduh CSV untuk Excel/akuntan.
+- **Laporan laba rugi**. per bulan dalam setahun: pemasukan, pengeluaran, laba, malam terjual, okupansi, dan rata-rata pendapatan per malam; rincian per kategori; unduh CSV untuk Excel/akuntan.
+
+## 16. Unggah foto, video, dan dokumen
+
+Semua unggahan lewat tombol di admin, tidak perlu File Manager.
+- **Website → Foto & video**. Foto dan video website.
+- **SDM → Karyawan → (nama) → Dokumen**. KTP, kontrak, sertifikat. Hanya HRD, manager, dan owner yang bisa membuka.
+- **Keuangan → Transaksi → Bukti**. Foto nota atau PDF bukti transfer.
+
+File disimpan di `UPLOAD_DIR` (bawaan `~/kalma-uploads`), di luar folder aplikasi sehingga aman saat deploy ulang. Cadangkan folder ini bersama database.

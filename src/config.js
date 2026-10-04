@@ -14,6 +14,8 @@ function loadConfig(env = process.env) {
     port,
     siteUrl: String(env.SITE_URL || `http://localhost:${port}`).replace(/\/+$/, ''),
     dataDir: env.DATA_DIR || require('path').join(__dirname, '..', 'data'),
+    // Uploaded photos, videos and documents. In production they live outside the app folder so a redeploy keeps them.
+    uploadDir: env.UPLOAD_DIR || (env.NODE_ENV === 'production' ? require('path').join(require('os').homedir(), 'kalma-uploads') : ''),
     adminPassword: env.ADMIN_PASSWORD || '',
     googleVerification: env.GOOGLE_SITE_VERIFICATION || '',
     sessionSecret: env.SESSION_SECRET || '', // optional; admin sessions are otherwise signed with ADMIN_PASSWORD

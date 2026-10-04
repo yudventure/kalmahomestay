@@ -9,7 +9,7 @@
       <dt>Check-out</dt><dd><%= fmtDate(item.checkout) %> (<%= nights(item.checkin, item.checkout) %> malam)</dd>
       <dt>Tamu</dt><dd><%= item.guests %></dd>
       <dt>Kamar</dt><dd><%= roomName(item.room) %></dd>
-      <dt>Pesan</dt><dd class="pre"><%= item.message || '—' %></dd>
+      <dt>Pesan</dt><dd class="pre"><%= item.message || '-' %></dd>
       <dt>Bahasa</dt><dd><%= item.lang === 'en' ? 'English' : 'Indonesia' %></dd>
       <dt>Masuk</dt><dd><%= fmtDateTime(item.created_at) %></dd>
     </dl>
@@ -28,10 +28,10 @@
     <h2>Customer</h2>
     <dl class="dl">
       <dt>Nama</dt><dd><a href="/admin/customers/<%= item.customer_id %>"><b><%= item.name %></b></a></dd>
-      <dt>WhatsApp/HP</dt><dd><%= phoneDisplay(item.phone) || '—' %></dd>
-      <dt>Email</dt><dd><%= item.email || '—' %></dd>
+      <dt>WhatsApp/HP</dt><dd><%= phoneDisplay(item.phone) || '-' %></dd>
+      <dt>Email</dt><dd><%= item.email || '-' %></dd>
       <% if (item.other_contact) { %><dt>Kontak lain</dt><dd><%= item.other_contact %></dd><% } %>
-      <dt>Asal</dt><dd><%= item.country || '—' %></dd>
+      <dt>Asal</dt><dd><%= item.country || '-' %></dd>
     </dl>
     <% var r = reply(item); if (r) { %><a class="btn btn--cta btn--sm" href="<%= r.href %>" target="_blank" rel="noopener"><%= r.label %></a><% } else { %><p class="muted">Tidak ada nomor/email. Cek pesan WhatsApp masuk dari customer ini.</p><% } %>
   </section>

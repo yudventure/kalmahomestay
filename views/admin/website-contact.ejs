@@ -1,7 +1,7 @@
 <%- include('_top') %>
 <h1>Kontak & sosial media</h1>
-<p class="muted">Dipakai di seluruh website: tombol WhatsApp, footer, dan ikon sosial media di "Kata tamu". Kosongkan untuk memakai nilai dari hPanel (ditampilkan sebagai contoh).</p>
-<% if (flashErr === 'whatsapp') { %><p class="alert alert--err" role="alert">Nomor WhatsApp harus 8–15 angka, mis. 6281234567890.</p><% } %>
+<p class="muted">Dipakai di seluruh website, yaitu tombol WhatsApp, footer, dan ikon sosial media di "Kata tamu". Kosongkan untuk memakai nilai dari hPanel (ditampilkan sebagai contoh).</p>
+<% if (flashErr === 'whatsapp') { %><p class="alert alert--err" role="alert">Nomor WhatsApp harus 8 sampai 15 angka, mis. 6281234567890.</p><% } %>
 <form method="post" action="/admin/website/contact" class="panel stack">
   <div class="row2">
     <div class="field"><label for="c-wa">Nomor WhatsApp (tanpa +)</label><input id="c-wa" name="whatsapp" inputmode="numeric" value="<%= s.whatsapp || '' %>" placeholder="<%= env.whatsapp %>"></div>

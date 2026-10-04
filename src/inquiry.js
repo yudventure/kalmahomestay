@@ -48,7 +48,7 @@ function buildMessage(v, lang, t) {
     `${ui.name}: ${v.name}`,
     v.contact ? `${ui.contact}: ${v.contact}` : null,
     v.country ? `${ui.from}: ${v.country}` : null,
-    `${ui.dates}: ${formatDate(v.checkin, lang)} – ${formatDate(v.checkout, lang)}`,
+    `${ui.dates}: ${formatDate(v.checkin, lang)} ${lang === 'en' ? 'to' : 'sampai'} ${formatDate(v.checkout, lang)}`,
     `${ui.guests}: ${v.guests}`,
     `${ui.room}: ${room ? t(room.nameKey) : ui.any}`,
     v.msg ? `${ui.note}: ${v.msg}` : null,

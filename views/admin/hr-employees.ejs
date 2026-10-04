@@ -15,7 +15,7 @@
   <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada karyawan.</td></tr><% } %>
   <% list.forEach(function (e) { %>
     <tr><td><a href="/admin/hr/employees/<%= e.id %>"><b><%= e.name %></b></a><% if (e.status === 'inactive') { %> <span class="chip">Tidak aktif</span><% } %></td>
-      <td><%= e.position || '—' %></td><td><%= e.department || '—' %></td><td><%= e.phone || '—' %></td><td><%= fmtDate(e.join_date) %></td>
+      <td><%= e.position || '-' %></td><td><%= e.department || '-' %></td><td><%= e.phone || '-' %></td><td><%= fmtDate(e.join_date) %></td>
       <td class="num"><%= rupiah((e.salary || 0) + (e.allowance || 0)) %></td></tr>
   <% }) %>
   </tbody>

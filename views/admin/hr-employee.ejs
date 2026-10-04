@@ -15,7 +15,7 @@
   <section class="panel">
     <div class="panel__head"><h2>Cuti & izin</h2><a class="link" href="/admin/hr/leave">Semua →</a></div>
     <% if (!leaves.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="list">
-    <% leaves.forEach(function (l) { %><li><a><b><%= (LEAVE_KINDS.find(function (k) { return k.id === l.kind; }) || {}).label %> · <%= fmtDate(l.start_date) %> – <%= fmtDate(l.end_date) %></b><span><%= l.reason || '' %></span><small><%= { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' }[l.status] %></small></a></li><% }) %>
+    <% leaves.forEach(function (l) { %><li><a><b><%= (LEAVE_KINDS.find(function (k) { return k.id === l.kind; }) || {}).label %> · <%= fmtDate(l.start_date) %> sampai <%= fmtDate(l.end_date) %></b><span><%= l.reason || '' %></span><small><%= { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' }[l.status] %></small></a></li><% }) %>
     </ul><% } %>
   </section>
   <section class="panel">
@@ -25,5 +25,15 @@
     </ul><% } %>
   </section>
 </div>
+<section class="panel" id="dokumen">
+  <div class="panel__head"><div><p class="eyebrow-a">Arsip karyawan</p><h2>Dokumen</h2></div></div>
+  <p class="muted small" style="margin-top:0">KTP, kontrak kerja, sertifikat selam, dan dokumen lain. Hanya HRD, manager dan owner yang bisa membukanya.</p>
+  <% if (docs.length) { %><ul class="doc-list" style="margin-bottom:16px"><% docs.forEach(function (d) { %>
+    <li><a href="/admin/files/<%= d.id %>" target="_blank" rel="noopener"><%= d.label || d.original_name %></a><small><%= d.original_name %> · <%= (d.size / 1048576).toFixed(1) %> MB · <%= fmtDate(d.created_at) %></small>
+      <form method="post" action="/admin/files/<%= d.id %>/delete" onsubmit="return confirm('Hapus dokumen ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form></li>
+  <% }) %></ul><% } %>
+  <%- include('_upload', { action: '/admin/hr/employees/' + e.id + '/files', accept: '.pdf,.jpg,.jpeg,.png,.webp,.docx,.xlsx', title: 'Unggah dokumen', hint: 'PDF, foto, Word atau Excel, maksimal 15 MB',
+       fields: '<div class="field"><label for="doc-label">Nama dokumen</label><input id="doc-label" name="label" maxlength="120" required placeholder="mis. KTP, Kontrak 2026"></div>' }) %>
+</section>
 <form method="post" action="/admin/hr/employees/<%= e.id %>/delete" onsubmit="return confirm('Hapus <%= e.name %> beserta absensi dan cutinya?')" style="margin-top: var(--space-5)"><button class="btn btn--danger btn--sm" type="submit">Hapus karyawan</button></form>
 <%- include('_bottom') %>
