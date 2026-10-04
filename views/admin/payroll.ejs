@@ -1,0 +1,49 @@
+<%- include('_top') %>
+<h1>Penggajian</h1>
+<%- include('_hrtabs') %>
+<% if (flashErr === 'paid') { %><p class="alert alert--err" role="alert">Slip yang sudah dibayar tidak bisa diubah. Batalkan pembayarannya dulu.</p><% } %>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/payroll?period=<%= prev %>">← <%= prev %></a>
+  <b style="align-self:center">Periode <%= period %></b>
+  <a class="btn btn--ghost btn--sm" href="/admin/payroll?period=<%= next %>"><%= next %> →</a>
+</div>
+<% if (missing) { %>
+<form method="post" action="/admin/payroll/generate" class="panel">
+  <input type="hidden" name="period" value="<%= period %>">
+  <p><%= missing %> karyawan aktif belum punya slip gaji <%= period %>. Slip dibuat dari gaji pokok + tunjangan, dipotong otomatis untuk hari "tanpa keterangan" (gaji ÷ 26 per hari).</p>
+  <button class="btn btn--primary btn--sm" type="submit">Buat slip gaji <%= period %></button>
+</form>
+<% } %>
+<div class="table">
+<table>
+  <thead><tr><th>Karyawan</th><th class="num">Pokok</th><th class="num">Tunjangan</th><th class="num">Bonus</th><th class="num">Potongan</th><th class="num">Diterima</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% if (!rows.length) { %><tr><td colspan="8" class="muted">Belum ada slip untuk periode ini.</td></tr><% } %>
+  <% rows.forEach(function (r) { var paid = r.status === 'paid'; %>
+    <tr>
+      <form method="post" action="/admin/payroll/<%= r.id %>" id="f<%= r.id %>"></form>
+      <td><b><%= nameOf(r.employee_id).name %></b><% if (r.note) { %><br><small class="muted"><%= r.note %></small><% } %></td>
+      <% ['base', 'allowance', 'bonus', 'deduction'].forEach(function (k) { %>
+      <td class="num"><% if (paid) { %><%= rupiah(r[k]) %><% } else { %><input form="f<%= r.id %>" name="<%= k %>" inputmode="numeric" value="<%= r[k] %>" size="9" aria-label="<%= k %>"><% } %></td>
+      <% }) %>
+      <td class="num"><b><%= rupiah(r.net) %></b></td>
+      <td><span class="chip <%= paid ? 'chip--ok' : 'chip--warn' %>"><%= paid ? 'Dibayar' : 'Draf' %></span><% if (paid) { %><br><small class="muted"><%= fmtDateTime(r.paid_at) %></small><% } %></td>
+      <td><div class="actions">
+        <% if (!paid) { %>
+          <input form="f<%= r.id %>" type="hidden" name="note" value="<%= r.note || '' %>">
+          <button form="f<%= r.id %>" class="btn btn--ghost btn--sm" type="submit">Hitung ulang</button>
+          <form method="post" action="/admin/payroll/<%= r.id %>/pay"><button class="btn btn--primary btn--sm" type="submit">Tandai dibayar</button></form>
+          <form method="post" action="/admin/payroll/<%= r.id %>/delete"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
+        <% } else { %>
+          <form method="post" action="/admin/payroll/<%= r.id %>/unpay" onsubmit="return confirm('Batalkan pembayaran? Pengeluaran gaji di Keuangan ikut dihapus.')"><button class="btn btn--ghost btn--sm" type="submit">Batalkan bayar</button></form>
+        <% } %>
+        <a class="btn btn--ghost btn--sm" href="/admin/payroll/<%= r.id %>/slip" target="_blank" rel="noopener">Slip</a>
+      </div></td>
+    </tr>
+  <% }) %>
+  </tbody>
+  <% if (rows.length) { %><tfoot><tr><th colspan="5">Total <%= period %></th><th class="num"><%= rupiah(total) %></th><th colspan="2"></th></tr></tfoot><% } %>
+</table>
+</div>
+<p class="muted small">"Tandai dibayar" mencatat gaji sebagai pengeluaran di menu Keuangan secara otomatis.</p>
+<%- include('_bottom') %>

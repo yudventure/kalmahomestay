@@ -46,6 +46,21 @@
     <button class="btn btn--primary" type="submit">Simpan</button>
   </form>
 </section>
+<% if (can('finance')) { var paidSum = payments.reduce(function (s, p) { return s + p.amount; }, 0); %>
+<section class="panel">
+  <div class="panel__head"><h2>Pembayaran</h2><a class="link" href="/admin/finance">Keuangan →</a></div>
+  <% if (flash === 'paid') { %><p class="alert alert--ok" role="status">Pembayaran dicatat di Keuangan.</p><% } %>
+  <% if (flashErr === 'amount') { %><p class="alert alert--err" role="alert">Isi jumlah pembayaran.</p><% } %>
+  <% if (payments.length) { %><ul class="list"><% payments.forEach(function (p) { %><li><a><b><%= rupiah(p.amount) %></b><span><%= fmtDate(p.date) %> · <%= p.method || '' %></span><small><%= p.description %></small></a></li><% }) %></ul>
+  <p class="muted small">Total diterima: <b><%= rupiah(paidSum) %></b><% if (item.total) { %> dari <%= rupiah(item.total) %><% } %></p><% } else { %><p class="muted">Belum ada pembayaran tercatat.</p><% } %>
+  <form method="post" action="/admin/finance/booking/<%= item.id %>" class="inline admin" style="margin-top: var(--space-3)">
+    <input name="amount" inputmode="numeric" placeholder="Jumlah (Rp)" required aria-label="Jumlah">
+    <select name="method" aria-label="Metode"><option>transfer</option><option>cash</option><option>qris</option><option>kartu</option></select>
+    <input name="date" type="date" aria-label="Tanggal">
+    <button class="btn btn--primary btn--sm" type="submit">Catat pembayaran</button>
+  </form>
+</section>
+<% } %>
 <form method="post" action="/admin/inquiries/<%= item.id %>/delete" class="danger" onsubmit="return confirm('Hapus permintaan ini? Tidak bisa dibatalkan.')">
   <button class="btn btn--danger btn--sm" type="submit">Hapus permintaan ini</button>
 </form>

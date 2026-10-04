@@ -1,13 +1,38 @@
 <%- include('_top') %>
-<h1>Ringkasan</h1>
+<h1>Ringkasan <small class="muted"><%= fmtDate(today) %></small></h1>
+<p class="muted">Halo, <%= me.name %>.</p>
+
+<% if (can('reservations')) { %>
 <div class="cards">
   <a class="card-stat card-stat--new" href="/admin/inquiries?status=new"><b><%= stats.counts.new %></b><span>Permintaan baru</span></a>
-  <a class="card-stat" href="/admin/inquiries?status=contacted"><b><%= stats.counts.contacted %></b><span>Sudah dihubungi</span></a>
-  <a class="card-stat" href="/admin/inquiries?status=confirmed"><b><%= stats.counts.confirmed %></b><span>Terkonfirmasi</span></a>
-  <a class="card-stat" href="/admin/customers"><b><%= stats.customers %></b><span>Total customer</span></a>
+  <a class="card-stat" href="/admin/calendar"><b><%= arrivals.length %> / <%= departures.length %></b><span>Check-in / check-out hari ini</span></a>
+  <a class="card-stat" href="/admin/calendar"><b><%= inHouse.length %></b><span>Kamar terisi malam ini</span></a>
+  <a class="card-stat" href="/admin/calendar"><b><%= occupancy %>%</b><span>Okupansi bulan ini</span></a>
 </div>
+<% } %>
+<% if (can('finance') || can('hr')) { %>
+<div class="cards">
+  <% if (can('finance')) { %>
+  <a class="card-stat" href="/admin/finance"><b><%= rupiah(income) %></b><span>Pemasukan bulan ini</span></a>
+  <a class="card-stat" href="/admin/finance/report"><b><%= rupiah(income - expense) %></b><span>Laba bulan ini</span></a>
+  <% } %>
+  <% if (can('hr')) { %>
+  <a class="card-stat" href="/admin/hr/attendance"><b><%= attendanceFilled ? presentToday + ' / ' + staffCount : '—' %></b><span><%= attendanceFilled ? 'Karyawan hadir hari ini' : 'Absensi hari ini belum diisi' %></span></a>
+  <a class="card-stat<%= pendingLeave ? ' card-stat--new' : '' %>" href="/admin/hr/leave?status=pending"><b><%= pendingLeave %></b><span>Cuti menunggu persetujuan</span></a>
+  <% } %>
+</div>
+<% } %>
 
+<% if (can('reservations')) { %>
 <div class="grid2">
+  <section class="panel">
+    <div class="panel__head"><h2>Hari ini</h2><a class="link" href="/admin/calendar">Kalender →</a></div>
+    <% if (!arrivals.length && !departures.length) { %><p class="muted">Tidak ada check-in atau check-out hari ini.</p><% } else { %>
+    <ul class="list">
+      <% arrivals.forEach(function (it) { %><li><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b>Check-in · <%= it.label %></b><span><%= roomName(it.room) %> · <%= nights(it.start, it.end) %> malam<%= it.guests ? ' · ' + it.guests + ' tamu' : '' %><%= it.channel ? ' · ' + it.channel : '' %></span></a></li><% }) %>
+      <% departures.forEach(function (it) { %><li><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b>Check-out · <%= it.label %></b><span><%= roomName(it.room) %></span></a></li><% }) %>
+    </ul><% } %>
+  </section>
   <section class="panel">
     <div class="panel__head"><h2>Permintaan baru</h2><a class="link" href="/admin/inquiries?status=new">Semua (<%= newTotal %>) →</a></div>
     <% if (!recent.length) { %><p class="muted">Tidak ada permintaan baru. 🌊</p><% } else { %>
@@ -17,20 +42,23 @@
       <% }) %>
     </ul><% } %>
   </section>
+</div>
+<div class="grid2">
   <section class="panel">
     <div class="panel__head"><h2>Kedatangan terdekat</h2><a class="link" href="/admin/inquiries?status=confirmed">Terkonfirmasi →</a></div>
-    <% if (!stats.upcoming.length) { %><p class="muted">Belum ada tamu terkonfirmasi yang akan datang.</p><% } else { %>
+    <% if (!stats.upcoming.length) { %><p class="muted">Belum ada tamu website terkonfirmasi yang akan datang.</p><% } else { %>
     <ul class="list">
       <% stats.upcoming.forEach(function (it) { %>
       <li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> · <%= it.name %></b><span><%= nights(it.checkin, it.checkout) %> malam · <%= it.guests %> tamu · <%= roomName(it.room) %></span></a></li>
       <% }) %>
     </ul><% } %>
   </section>
+  <section class="panel">
+    <div class="panel__head"><h2>Ekspor data</h2></div>
+    <p class="muted">Unduh sebagai CSV, bisa dibuka di Excel atau Google Sheets.</p>
+    <div class="btns"><a class="btn btn--ghost btn--sm" href="/admin/export/customers.csv">Customer (.csv)</a><a class="btn btn--ghost btn--sm" href="/admin/export/inquiries.csv">Permintaan (.csv)</a>
+    <% if (can('finance')) { %><a class="btn btn--ghost btn--sm" href="/admin/finance/export.csv">Keuangan (.csv)</a><% } %></div>
+  </section>
 </div>
-
-<section class="panel">
-  <div class="panel__head"><h2>Ekspor data</h2></div>
-  <p class="muted">Unduh sebagai CSV, bisa dibuka di Excel atau Google Sheets.</p>
-  <div class="btns"><a class="btn btn--ghost btn--sm" href="/admin/export/customers.csv">Customer (.csv)</a><a class="btn btn--ghost btn--sm" href="/admin/export/inquiries.csv">Permintaan (.csv)</a></div>
-</section>
+<% } %>
 <%- include('_bottom') %>

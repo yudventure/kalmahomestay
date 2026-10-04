@@ -2,7 +2,7 @@
 <% var monthName = new Date(m + '-01T00:00:00Z').toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' });
    var typeLabel = { website: 'Website', ical: 'OTA (iCal)', channel: 'OTA / agen', walkin: 'Walk-in', block: 'Ditutup' };
    var errText = { room: 'Pilih kamar.', dates: 'Tanggal keluar harus setelah tanggal masuk.', source: 'Pilih jenis.', channel: 'Pilih channel/agen.',
-     full: 'Kamar sudah penuh pada: ' + full.map(fmtDate).join(', ') + '. Centang "tetap simpan" bila memang overbooking.' }[flashErr]; %>
+     amount: 'Isi nilai booking dulu.', recorded: 'Pendapatan booking ini sudah dicatat di Keuangan.', full: 'Kamar sudah penuh pada: ' + full.map(fmtDate).join(', ') + '. Centang "tetap simpan" bila memang overbooking.' }[flashErr]; %>
 <h1>Kalender <small class="muted"><%= monthName %></small></h1>
 <div class="btns" style="margin-bottom: var(--space-4)">
   <a class="btn btn--ghost btn--sm" href="/admin/calendar?m=<%= prev %>">← Bulan lalu</a>
@@ -75,6 +75,9 @@
     <li id="b<%= it.id %>"><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b><%= it.label %></b>
       <span><%= roomLabel(it.room) %> · <%= fmtDate(it.start) %> → <%= fmtDate(it.end) %> · <%= nights(it.start, it.end) %> malam<%= it.guests ? ' · ' + it.guests + ' tamu' : '' %></span>
       <small><%= typeLabel[it.type] %><%= it.channel ? ' · ' + it.channel : '' %><%= it.tentative ? ' · belum dikonfirmasi' : '' %><%= it.paid ? ' · lunas' : '' %><%= it.amount ? ' · ' + rupiah(it.amount) : '' %><%= it.note ? ' · ' + it.note : '' %></small></a>
+      <% if (can('finance') && (it.type === 'channel' || it.type === 'walkin' || it.type === 'ical')) { %>
+      <form method="post" action="/admin/finance/block/<%= it.id %>" class="inline"><input name="amount" inputmode="numeric" size="9" placeholder="Rp" value="<%= it.amount || '' %>" aria-label="Nilai booking"><button class="btn btn--ghost btn--sm" type="submit" title="Catat pendapatan (dan komisi channel) di Keuangan">Catat</button></form>
+      <% } %>
       <% if (it.type === 'channel' || it.type === 'walkin' || it.type === 'block') { %>
       <form method="post" action="/admin/calendar/blocks/<%= it.id %>/delete" onsubmit="return confirm('Hapus dari kalender?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
       <% } %>

@@ -1,0 +1,29 @@
+<%- include('_top') %>
+<p><a href="/admin/hr/employees">← Karyawan</a></p>
+<h1><%= e.name %> <% if (e.status === 'inactive') { %><span class="chip">Tidak aktif</span><% } %></h1>
+<% if (flashErr === 'name') { %><p class="alert alert--err" role="alert">Nama wajib diisi.</p><% } %>
+<% if (flashErr === 'has-payroll') { %><p class="alert alert--err" role="alert">Karyawan dengan gaji yang sudah dibayar tidak bisa dihapus. Ubah statusnya menjadi "Tidak aktif".</p><% } %>
+<div class="cards">
+  <% ATTENDANCE.slice(0, 5).forEach(function (a) { %><div class="card-stat"><b><%= recap[a.id] %></b><span><%= a.label %> · <%= month %></span></div><% }) %>
+</div>
+<form method="post" action="/admin/hr/employees/<%= e.id %>" class="panel stack admin">
+  <h2>Data karyawan</h2>
+  <%- include('_employee-fields', { e: e }) %>
+  <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+</form>
+<div class="grid2">
+  <section class="panel">
+    <div class="panel__head"><h2>Cuti & izin</h2><a class="link" href="/admin/hr/leave">Semua →</a></div>
+    <% if (!leaves.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="list">
+    <% leaves.forEach(function (l) { %><li><a><b><%= (LEAVE_KINDS.find(function (k) { return k.id === l.kind; }) || {}).label %> · <%= fmtDate(l.start_date) %> – <%= fmtDate(l.end_date) %></b><span><%= l.reason || '' %></span><small><%= { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' }[l.status] %></small></a></li><% }) %>
+    </ul><% } %>
+  </section>
+  <section class="panel">
+    <div class="panel__head"><h2>Slip gaji</h2><a class="link" href="/admin/payroll">Penggajian →</a></div>
+    <% if (!slips.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="list">
+    <% slips.forEach(function (s) { %><li><a href="/admin/payroll/<%= s.id %>/slip"><b><%= s.period %> · <%= rupiah(s.net) %></b><small><%= s.status === 'paid' ? 'Dibayar ' + fmtDateTime(s.paid_at) : 'Draf' %></small></a></li><% }) %>
+    </ul><% } %>
+  </section>
+</div>
+<form method="post" action="/admin/hr/employees/<%= e.id %>/delete" onsubmit="return confirm('Hapus <%= e.name %> beserta absensi dan cutinya?')" style="margin-top: var(--space-5)"><button class="btn btn--danger btn--sm" type="submit">Hapus karyawan</button></form>
+<%- include('_bottom') %>

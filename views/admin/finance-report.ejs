@@ -1,0 +1,39 @@
+<%- include('_top') %>
+<h1>Keuangan</h1>
+<%- include('_fintabs') %>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/finance/report?y=<%= Number(y) - 1 %>">← <%= Number(y) - 1 %></a>
+  <b style="align-self:center">Tahun <%= y %></b>
+  <a class="btn btn--ghost btn--sm" href="/admin/finance/report?y=<%= Number(y) + 1 %>"><%= Number(y) + 1 %> →</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/finance/export.csv?y=<%= y %>">Unduh CSV</a>
+</div>
+<div class="cards cards--3">
+  <div class="card-stat"><b><%= rupiah(totals.income) %></b><span>Pemasukan <%= y %></span></div>
+  <div class="card-stat"><b><%= rupiah(totals.expense) %></b><span>Pengeluaran <%= y %></span></div>
+  <div class="card-stat card-stat--new"><b><%= rupiah(totals.income - totals.expense) %></b><span>Laba bersih · <%= totals.sold %> malam terjual</span></div>
+</div>
+<div class="table" style="margin-bottom: var(--space-5)">
+<table>
+  <thead><tr><th>Bulan</th><th class="num">Pemasukan</th><th class="num">Pengeluaran</th><th class="num">Laba</th><th class="num">Malam terjual</th><th class="num">Okupansi</th><th class="num">Rata-rata / malam</th></tr></thead>
+  <tbody>
+  <% months.forEach(function (x) { %>
+    <tr><td><a href="/admin/finance?m=<%= x.m %>"><%= new Date(x.m + '-01T00:00:00Z').toLocaleDateString('id-ID', { month: 'long', timeZone: 'UTC' }) %></a></td>
+      <td class="num"><%= rupiah(x.income) %></td><td class="num"><%= rupiah(x.expense) %></td>
+      <td class="num"><b style="color: <%= x.net < 0 ? 'var(--color-danger)' : 'inherit' %>"><%= rupiah(x.net) %></b></td>
+      <td class="num"><%= x.sold %></td>
+      <td class="num"><span class="occ"><span style="width: <%= Math.min(100, x.occupancy) %>%"></span></span> <%= x.occupancy %>%</td>
+      <td class="num"><%= x.adr ? rupiah(x.adr) : '—' %></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<div class="grid2">
+  <section class="panel"><h2>Pemasukan per kategori</h2>
+    <% if (!incomeCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% incomeCats.forEach(function (c) { %><li><span class="bars__label"><%= c.c %></span><span class="bars__track"><span class="bars__fill" style="width: <%= Math.round(c.total / totals.income * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
+  </section>
+  <section class="panel"><h2>Pengeluaran per kategori</h2>
+    <% if (!expenseCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% expenseCats.forEach(function (c) { %><li><span class="bars__label"><%= c.c %></span><span class="bars__track"><span class="bars__fill bars__fill--exp" style="width: <%= Math.round(c.total / totals.expense * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
+  </section>
+</div>
+<p class="muted small">Okupansi = malam terjual ÷ (<%= units %> unit × hari dalam bulan), dari kalender (booking website terkonfirmasi/lunas, OTA, agen, walk-in). Rata-rata / malam = pemasukan booking ÷ malam terjual.</p>
+<%- include('_bottom') %>

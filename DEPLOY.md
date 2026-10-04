@@ -213,3 +213,19 @@ Buka `https://halokalma.com/admin` → halaman **Masuk**.
 3. Semua channel disinkronkan otomatis tiap 30 menit; tombol **Sinkronkan semua sekarang** untuk langsung.
 
 Website ikut memakai kalender ini: tamu tidak bisa membayar untuk tanggal yang sudah terisi (booking website terkonfirmasi/lunas, booking OTA/agen, walk-in, atau kamar ditutup). Kamar dengan beberapa unit (atur di **Website → Kamar & harga**) baru dianggap penuh bila semua unitnya terisi.
+
+## 14. SDM (HRD) & penggajian
+
+- **Karyawan** — data karyawan: jabatan, bagian, kontak, mulai kerja, gaji pokok, tunjangan tetap, catatan (rekening, kontrak). Karyawan yang berhenti cukup diubah menjadi "Tidak aktif".
+- **Absensi** — isi per hari untuk semua karyawan aktif (hadir, izin, sakit, cuti, tanpa keterangan, libur, jam masuk/pulang). Cuti yang sudah disetujui otomatis terisi. Ada rekap bulanan per karyawan.
+- **Cuti & izin** — ajukan, setujui, atau tolak. Tercatat siapa yang memutuskan.
+- **Penggajian** — tombol **Buat slip gaji** membuat slip untuk semua karyawan aktif: gaji pokok + tunjangan, dipotong otomatis untuk hari "tanpa keterangan" (gaji ÷ 26 per hari). Bonus dan potongan bisa diubah sebelum dibayar. **Tandai dibayar** otomatis mencatat gaji sebagai pengeluaran di Keuangan. Slip bisa dicetak / disimpan PDF.
+
+## 15. Keuangan
+
+- **Transaksi** — catat pemasukan & pengeluaran per kategori (booking, tur & diving, makanan, gaji, bahan makanan, listrik & BBM, boat, perawatan, komisi OTA, pajak, dll.). Ringkasan pemasukan, pengeluaran, dan laba per bulan.
+- Otomatis tercatat:
+  - pembayaran online Midtrans yang lunas (sekali per pesanan),
+  - gaji yang ditandai dibayar.
+- Dari halaman booking website (**Permintaan & booking**) finance bisa mencatat pembayaran transfer/tunai; dari **Kalender** bisa mencatat pendapatan booking OTA/agen/walk-in, dan komisi channel (% di Channel OTA & agen) otomatis dicatat sebagai pengeluaran.
+- **Laporan laba rugi** — per bulan dalam setahun: pemasukan, pengeluaran, laba, malam terjual, okupansi, dan rata-rata pendapatan per malam; rincian per kategori; unduh CSV untuk Excel/akuntan.

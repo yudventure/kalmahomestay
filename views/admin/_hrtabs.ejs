@@ -1,0 +1,8 @@
+<nav class="tabs" aria-label="SDM">
+  <% if (can('hr')) { %>
+  <a href="/admin/hr/employees"<%- current.indexOf('/hr/employees') === 0 ? ' aria-current="page"' : '' %>>Karyawan</a>
+  <a href="/admin/hr/attendance"<%- current.indexOf('/hr/attendance') === 0 ? ' aria-current="page"' : '' %>>Absensi</a>
+  <a href="/admin/hr/leave"<%- current.indexOf('/hr/leave') === 0 ? ' aria-current="page"' : '' %>>Cuti & izin</a>
+  <% } %>
+  <a href="/admin/payroll"<%- current.indexOf('/payroll') === 0 ? ' aria-current="page"' : '' %>>Penggajian</a>
+</nav>

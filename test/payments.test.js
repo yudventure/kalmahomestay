@@ -155,6 +155,11 @@ test('Midtrans notifications are verified before a booking is marked paid', asyn
   assert.equal(paid.payment_type, 'qris');
   assert.equal(paid.status, 'confirmed');
   assert.equal(new Date(paid.paid_at).toISOString(), '2026-10-04T02:30:00.000Z');
+
+  // the payment is booked as income in Keuangan once, even if Midtrans repeats the notification
+  await post('/api/payments/midtrans', notification(orderId, 5100000));
+  const income = await repo.table('transactions').list({ where: { ref_type: 'inquiry', ref_id: paid.id } });
+  assert.deepEqual(income.map((t) => [t.kind, t.category, t.amount, t.method]), [['income', 'Booking website', 5100000, 'midtrans']]);
 });
 
 test('a deposit percentage charges only part of the stay', async () => {
