@@ -1,0 +1,86 @@
+<%- include('_top') %>
+<% var monthName = new Date(m + '-01T00:00:00Z').toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+   var typeLabel = { website: 'Website', ical: 'OTA (iCal)', channel: 'OTA / agen', walkin: 'Walk-in', block: 'Ditutup' };
+   var errText = { room: 'Pilih kamar.', dates: 'Tanggal keluar harus setelah tanggal masuk.', source: 'Pilih jenis.', channel: 'Pilih channel/agen.',
+     full: 'Kamar sudah penuh pada: ' + full.map(fmtDate).join(', ') + '. Centang "tetap simpan" bila memang overbooking.' }[flashErr]; %>
+<h1>Kalender <small class="muted"><%= monthName %></small></h1>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/calendar?m=<%= prev %>">← Bulan lalu</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/calendar">Bulan ini</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/calendar?m=<%= next %>">Bulan depan →</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/channels">Channel OTA & agen</a>
+</div>
+<% if (errText) { %><p class="alert alert--err" role="alert"><%= errText %></p><% } %>
+
+<div class="cal" role="region" aria-label="Kalender <%= monthName %>" tabindex="0">
+<table class="cal__grid">
+  <thead><tr><th class="cal__room">Kamar</th>
+    <% days.forEach(function (d) { var wd = new Date(d + 'T00:00:00Z').getUTCDay(); %><th class="<%= d === today ? 'is-today' : '' %><%= wd === 0 || wd === 6 ? ' is-weekend' : '' %>"><small><%= ['Min','Sen','Sel','Rab','Kam','Jum','Sab'][wd] %></small><%= Number(d.slice(8)) %></th><% }) %>
+  </tr></thead>
+  <tbody>
+  <% grid.forEach(function (g) { g.lanes.forEach(function (lane, li) { %>
+    <tr<%- li === 0 ? ' class="cal__first"' : '' %>>
+      <% if (li === 0) { %><th class="cal__room" rowspan="<%= g.lanes.length %>"><%= roomLabel(g.room.id) %><small><%= g.room.units %> unit</small></th><% } %>
+      <% var col = 0; lane.forEach(function (seg) { while (col < seg.from) { %><td></td><% col++; } %>
+        <td colspan="<%= seg.span %>" class="cal__cell">
+          <a class="cal__bar cal__bar--<%= seg.it.type %><%= seg.it.tentative ? ' is-tentative' : '' %><%= seg.cutLeft ? ' cut-l' : '' %><%= seg.cutRight ? ' cut-r' : '' %>"
+             href="<%= seg.it.href || '#b' + seg.it.id %>" title="<%= seg.it.label %> · <%= fmtDate(seg.it.start) %> → <%= fmtDate(seg.it.end) %> · <%= typeLabel[seg.it.type] %><%= seg.it.channel ? ' · ' + seg.it.channel : '' %><%= seg.it.tentative ? ' · belum dikonfirmasi' : '' %>"><%= seg.it.label %></a>
+        </td>
+      <% col += seg.span; }); while (col < days.length) { %><td></td><% col++; } %>
+    </tr>
+  <% }) }) %>
+  </tbody>
+</table>
+</div>
+<p class="cal__legend">
+  <span class="cal__bar cal__bar--website">Website</span>
+  <span class="cal__bar cal__bar--website is-tentative">Website, belum dikonfirmasi</span>
+  <span class="cal__bar cal__bar--ical">OTA (iCal)</span>
+  <span class="cal__bar cal__bar--channel">OTA / agen (manual)</span>
+  <span class="cal__bar cal__bar--walkin">Walk-in</span>
+  <span class="cal__bar cal__bar--block">Ditutup</span>
+</p>
+
+<div class="grid2">
+<section class="panel">
+  <h2>Tambah booking / tutup kamar</h2>
+  <form method="post" action="/admin/calendar/blocks" class="stack">
+    <div class="row2">
+      <div class="field"><label for="b-room">Kamar</label><select id="b-room" name="room" required><% ROOMS.forEach(function (r) { %><option value="<%= r.id %>"<%= form.room === r.id ? ' selected' : '' %>><%= roomLabel(r.id) %></option><% }) %></select></div>
+      <div class="field"><label for="b-src">Jenis</label><select id="b-src" name="source"><% SOURCES.forEach(function (s) { %><option value="<%= s.id %>"<%= form.source === s.id ? ' selected' : '' %>><%= s.label %></option><% }) %></select></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="b-in">Tanggal masuk</label><input id="b-in" name="start_date" type="date" required value="<%= form.start_date || '' %>"></div>
+      <div class="field"><label for="b-out">Tanggal keluar (check-out)</label><input id="b-out" name="end_date" type="date" required value="<%= form.end_date || '' %>"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="b-ch">Channel / agen (untuk booking OTA/agen)</label><select id="b-ch" name="channel_id"><option value="">—</option><% chans.forEach(function (c) { %><option value="<%= c.id %>"<%= String(form.channel_id) === String(c.id) ? ' selected' : '' %>><%= c.name %> · <%= roomLabel(c.room) %></option><% }) %></select></div>
+      <div class="field"><label for="b-name">Nama tamu</label><input id="b-name" name="guest_name" maxlength="120" value="<%= form.guest_name || '' %>"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="b-guests">Jumlah tamu</label><input id="b-guests" name="guests" type="number" min="1" max="20" value="<%= form.guests || '' %>"></div>
+      <div class="field"><label for="b-amt">Nilai booking (Rp)</label><input id="b-amt" name="amount" inputmode="numeric" value="<%= form.amount || '' %>"></div>
+    </div>
+    <div class="field"><label for="b-note">Catatan</label><input id="b-note" name="note" maxlength="1000" value="<%= form.note || '' %>"></div>
+    <% if (flashErr === 'full') { %><label class="inline"><input type="checkbox" name="force" value="1"> Tetap simpan (overbooking)</label><% } %>
+    <button class="btn btn--primary btn--sm" type="submit">Simpan ke kalender</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Booking bulan ini</h2>
+  <% if (!items.length) { %><p class="muted">Belum ada booking di bulan ini.</p><% } else { %>
+  <ul class="list">
+  <% items.forEach(function (it) { %>
+    <li id="b<%= it.id %>"><a<%- it.href ? ' href="' + it.href + '"' : '' %>><b><%= it.label %></b>
+      <span><%= roomLabel(it.room) %> · <%= fmtDate(it.start) %> → <%= fmtDate(it.end) %> · <%= nights(it.start, it.end) %> malam<%= it.guests ? ' · ' + it.guests + ' tamu' : '' %></span>
+      <small><%= typeLabel[it.type] %><%= it.channel ? ' · ' + it.channel : '' %><%= it.tentative ? ' · belum dikonfirmasi' : '' %><%= it.paid ? ' · lunas' : '' %><%= it.amount ? ' · ' + rupiah(it.amount) : '' %><%= it.note ? ' · ' + it.note : '' %></small></a>
+      <% if (it.type === 'channel' || it.type === 'walkin' || it.type === 'block') { %>
+      <form method="post" action="/admin/calendar/blocks/<%= it.id %>/delete" onsubmit="return confirm('Hapus dari kalender?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
+      <% } %>
+    </li>
+  <% }) %>
+  </ul><% } %>
+</section>
+</div>
+<%- include('_bottom') %>

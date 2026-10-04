@@ -202,3 +202,14 @@ Buka `https://halokalma.com/admin` → halaman **Masuk**.
 - **Kamar & harga** — harga per orang per malam, maksimal tamu, dan jumlah unit tiap kamar.
 - **Kontak & sosial media** — WhatsApp, email, Instagram, Facebook, TikTok, Google. Mengganti nilai dari hPanel.
 - **Partner** — nama partner di running text.
+
+## 13. Kalender & sinkron OTA / agen
+
+**Reservasi → Kalender** menampilkan semua kamar per bulan: booking website (biru; garis putus = belum dikonfirmasi), booking dari OTA lewat iCal (oranye), booking OTA/agen yang dicatat manual (ungu), walk-in (hijau), dan kamar yang ditutup (abu-abu). Dari halaman ini Anda juga bisa mencatat walk-in, booking agen, atau menutup kamar. Admin akan memperingatkan bila tanggalnya sudah penuh.
+
+**Reservasi → Channel OTA & agen** menghubungkan kalender tiap kamar dengan Airbnb, Booking.com, Agoda, Tiket.com, Traveloka, Expedia, atau agen:
+1. Tambah channel (satu baris per kamar per OTA). Tempel **link iCal dari OTA** (menu *Export calendar*) agar booking OTA masuk ke kalender Kalma.
+2. Salin **link kalender Kalma** dari tabel dan tempel di menu *Import calendar* OTA tersebut, agar tanggal yang sudah terisi di website/OTA lain tertutup di sana.
+3. Semua channel disinkronkan otomatis tiap 30 menit; tombol **Sinkronkan semua sekarang** untuk langsung.
+
+Website ikut memakai kalender ini: tamu tidak bisa membayar untuk tanggal yang sudah terisi (booking website terkonfirmasi/lunas, booking OTA/agen, walk-in, atau kamar ditutup). Kamar dengan beberapa unit (atur di **Website → Kamar & harga**) baru dianggap penuh bila semua unitnya terisi.

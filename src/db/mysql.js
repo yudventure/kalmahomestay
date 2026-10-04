@@ -188,6 +188,15 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
       return row || null;
     },
 
+    /** Inquiries whose stay overlaps [from, to), for the booking calendar. */
+    async inquiriesBetween(from, to) {
+      const [rows] = await pool.query(
+        `SELECT i.id, i.customer_id, i.checkin, i.checkout, i.guests, i.room, i.status, i.payment_status, i.order_id, i.total, c.name
+         FROM inquiries i JOIN customers c ON c.id = i.customer_id
+         WHERE i.checkin < ? AND i.checkout > ? AND i.status <> 'cancelled' ORDER BY i.checkin, i.id`, [to, from]);
+      return rows;
+    },
+
     async updateInquiry(id, { status, adminNote }) {
       const sets = []; const args = [];
       if (status !== undefined) { if (!STATUS_IDS.includes(status)) throw new Error('invalid status'); sets.push('status = ?'); args.push(status); }

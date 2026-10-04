@@ -8,6 +8,7 @@ const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
 const { createInstagramSync } = require('./instagram');
 const { createSite } = require('./site');
+const { createCalendar } = require('./calendar');
 const survey = require('./survey');
 const payments = require('./payments');
 const { parseContact } = require('./db/shared');
@@ -126,6 +127,8 @@ function createApp(options = {}) {
   const site = createSite({ repo, config, content: CONTENT });
   app.locals.site = site;
   app.locals.loadPartners = loadPartners;
+  const calendar = createCalendar({ repo, fetchImpl: options.calendarFetch, allowPrivate: options.allowPrivateIcal });
+  app.locals.calendar = calendar;
   const instagram = options.instagramSync || createInstagramSync({ repo, token: (config.instagram || {}).token, api: options.instagramApi });
   app.locals.instagram = instagram;
 
@@ -236,6 +239,13 @@ function createApp(options = {}) {
     const q = payments.quote(values, pay.enabled ? pay.percent : 100);
     if (q.error) return res.status(400).json({ ok: false, error: String(ui[q.error] || ui.errServer).replace('{n}', q.max) });
 
+    // Nights already sold on the website, an OTA, an agent or blocked in the admin cannot be booked again.
+    try {
+      if (!(await calendar.isAvailable(values.room, values.checkin, values.checkout))) return res.status(409).json({ ok: false, error: ui.errUnavailable });
+    } catch (e) {
+      console.error('Availability check failed, accepting the booking:', e.message);
+    }
+
     const message = buildMessage(values, lang, t) + `\n${ui.total}: ${rupiahOrder(q.total)} (${q.nights} ${ui.nights})`;
     const whatsappUrl = `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`;
     const viaWhatsapp = async () => {
@@ -326,7 +336,17 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, t: translator('id') }));
+
+  // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
+  app.get('/ical/:file', ah(async (req, res, next) => {
+    const m = /^([\w-]{16,60})\.ics$/.exec(req.params.file);
+    if (!m) return next();
+    const ch = await repo.table('channels').find({ export_token: m[1] });
+    if (!ch || !ch.active) return next();
+    res.set({ 'Content-Type': 'text/calendar; charset=utf-8', 'Cache-Control': 'no-cache', 'X-Robots-Tag': 'noindex' });
+    res.send(await calendar.exportFor(ch));
+  }));
 
   app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${config.siteUrl}/sitemap.xml\n`));
   // Sitemap for Google Search Console: both language versions linked with hreflang, lastmod = last content change.

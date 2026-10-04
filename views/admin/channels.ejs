@@ -1,0 +1,72 @@
+<%- include('_top') %>
+<h1>Channel OTA & agen</h1>
+<p class="muted">Hubungkan kalender tiap kamar dengan Airbnb, Booking.com, Agoda, Tiket.com, Traveloka, Expedia, atau agen perjalanan, supaya tanggal yang sudah terjual di satu tempat otomatis tertutup di tempat lain. Website menyinkronkan semua channel tiap 30 menit.</p>
+<% var errText = { channel: 'Isi nama channel dan pilih kamar.', url: 'Link iCal harus diawali https://', sync: 'Sinkronisasi gagal, lihat status di tabel.' }[flashErr]; %>
+<% if (errText) { %><p class="alert alert--err" role="alert"><%= errText %></p><% } %>
+
+<section class="panel">
+  <h2>Cara menghubungkan</h2>
+  <ol class="steps">
+    <li><b>Kalender OTA → Kalma (impor):</b> di extranet OTA cari menu <i>Export calendar / iCal</i> (Airbnb: Kalender → Ketersediaan → Hubungkan kalender; Booking.com: Tarif & Ketersediaan → Sinkronisasi kalender). Salin linknya ke kolom "Link iCal dari channel".</li>
+    <li><b>Kalma → OTA (ekspor):</b> salin "Link kalender Kalma" di tabel, lalu tempel di menu <i>Import calendar</i> OTA tersebut. Link ini berisi tanggal yang sudah terisi dari website, walk-in, dan channel lain.</li>
+    <li>Untuk agen yang tidak punya iCal, catat bookingnya di <a href="/admin/calendar">Kalender</a> dengan jenis "Booking dari OTA / agen".</li>
+  </ol>
+</section>
+
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <form method="post" action="/admin/channels/sync"><button class="btn btn--ghost btn--sm" type="submit">Sinkronkan semua sekarang</button></form>
+</div>
+
+<div class="table" style="margin-bottom: var(--space-6)">
+<table>
+  <thead><tr><th>Channel</th><th>Kamar</th><th>Link kalender Kalma (tempel di OTA)</th><th>Sinkron terakhir</th><th>Ubah</th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="5" class="muted">Belum ada channel.</td></tr><% } %>
+  <% list.forEach(function (c) { var bad = /^Gagal/.test(c.last_sync_status || ''); %>
+    <tr>
+      <td><b><%= c.name %></b><br><small class="muted"><%= c.kind === 'agent' ? 'Agen' : 'OTA' %><%= c.commission_pct ? ' · komisi ' + c.commission_pct + '%' : '' %><%= c.contact ? ' · ' + c.contact : '' %></small>
+        <% if (!c.active) { %><br><span class="chip">Nonaktif</span><% } %></td>
+      <td><%= roomLabel(c.room) %></td>
+      <td><input class="copy" readonly value="<%= exportUrl(c) %>" onclick="this.select()" aria-label="Link kalender Kalma untuk <%= c.name %>"></td>
+      <td><% if (c.ical_url) { %><span class="chip <%= bad ? 'chip--err' : c.last_sync_at ? 'chip--ok' : '' %>"><%= c.last_sync_status || 'Belum' %></span><br><small class="muted"><%= fmtDateTime(c.last_sync_at) %></small><% } else { %><small class="muted">Tanpa impor iCal</small><% } %></td>
+      <td>
+        <details><summary>Ubah</summary>
+          <form method="post" action="/admin/channels/<%= c.id %>" class="stack" style="margin-top:8px">
+            <div class="field"><label>Nama</label><input name="name" value="<%= c.name %>" maxlength="80"></div>
+            <div class="field"><label>Link iCal dari channel</label><input name="ical_url" type="url" value="<%= c.ical_url || '' %>"></div>
+            <div class="row2">
+              <div class="field"><label>Komisi %</label><input name="commission_pct" type="number" min="0" max="100" value="<%= c.commission_pct || '' %>"></div>
+              <div class="field"><label>Status</label><select name="active"><option value="1"<%= c.active ? ' selected' : '' %>>Aktif</option><option value="0"<%= c.active ? '' : ' selected' %>>Nonaktif</option></select></div>
+            </div>
+            <div class="field"><label>Kontak</label><input name="contact" value="<%= c.contact || '' %>" maxlength="160"></div>
+            <label class="inline"><input type="checkbox" name="new_token" value="1"> Buat link kalender Kalma baru (link lama berhenti)</label>
+            <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+          </form>
+          <% if (c.ical_url) { %><form method="post" action="/admin/channels/<%= c.id %>/sync" style="margin-top:6px"><button class="btn btn--ghost btn--sm" type="submit">Sinkron sekarang</button></form><% } %>
+          <form method="post" action="/admin/channels/<%= c.id %>/delete" onsubmit="return confirm('Hapus channel ini? Booking hasil impornya ikut dihapus dari kalender.')" style="margin-top:6px"><button class="btn btn--danger btn--sm" type="submit">Hapus</button></form>
+        </details>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<section class="panel">
+  <h2>Tambah channel</h2>
+  <form method="post" action="/admin/channels" class="stack">
+    <div class="row3">
+      <div class="field"><label for="c-name">Nama</label><input id="c-name" name="name" list="presets" required maxlength="80" placeholder="Airbnb"><datalist id="presets"><% PRESETS.forEach(function (p) { %><option value="<%= p %>"><% }) %></datalist></div>
+      <div class="field"><label for="c-kind">Jenis</label><select id="c-kind" name="kind"><option value="ota">OTA</option><option value="agent">Agen perjalanan</option></select></div>
+      <div class="field"><label for="c-room">Kamar</label><select id="c-room" name="room"><% ROOMS.forEach(function (r) { %><option value="<%= r.id %>"><%= roomLabel(r.id) %></option><% }) %></select></div>
+    </div>
+    <div class="field"><label for="c-ical">Link iCal dari channel (opsional)</label><input id="c-ical" name="ical_url" type="url" placeholder="https://www.airbnb.com/calendar/ical/….ics"></div>
+    <div class="row2">
+      <div class="field"><label for="c-com">Komisi % (opsional)</label><input id="c-com" name="commission_pct" type="number" min="0" max="100"></div>
+      <div class="field"><label for="c-contact">Kontak (opsional)</label><input id="c-contact" name="contact" maxlength="160"></div>
+    </div>
+    <button class="btn btn--primary btn--sm" type="submit">Tambah channel</button>
+    <p class="muted small">Satu baris per kamar per channel. Jika satu kamar dijual di 3 OTA, tambahkan 3 channel.</p>
+  </form>
+</section>
+<%- include('_bottom') %>

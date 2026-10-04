@@ -86,6 +86,12 @@ function createFileRepo(dataDir) {
       return i ? joined(i) : null;
     },
 
+    async inquiriesBetween(from, to) {
+      return db.inquiries.filter((i) => i.checkin < to && i.checkout > from && i.status !== 'cancelled')
+        .sort((a, b) => (a.checkin < b.checkin ? -1 : a.checkin > b.checkin ? 1 : a.id - b.id))
+        .map((i) => { const j = joined(i); return { ...j, payment_status: i.payment_status || null, order_id: i.order_id || null, total: i.total || null }; });
+    },
+
     async updateInquiry(id, { status, adminNote }) {
       const i = db.inquiries.find((x) => x.id === Number(id));
       if (!i) return false;
