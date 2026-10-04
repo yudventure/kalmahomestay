@@ -9,7 +9,7 @@ const os = require('os');
 const path = require('path');
 const { createApp } = require('../src/app');
 const { loadConfig } = require('../src/config');
-const { quote, paymentStatus, midtransTime } = require('../src/payments');
+const { quote, paymentStatus, midtransTime, paymentOrder } = require('../src/payments');
 const { todayISO } = require('../src/inquiry');
 
 const SERVER_KEY = 'SB-Mid-server-test';
@@ -128,6 +128,7 @@ test('with Midtrans keys the server prices the stay, saves the order and returns
   assert.equal(lastSnap.body.transaction_details.gross_amount, 5100000);
   assert.equal(lastSnap.body.transaction_details.order_id, body.orderId);
   assert.equal(lastSnap.body.customer_details.email, 'rina@example.com');
+  assert.deepEqual(lastSnap.body.enabled_payments, paymentOrder(5100000), 'Kalma decides the order of payment methods');
   const saved = await repo.getInquiryByOrder(body.orderId);
   assert.equal(saved.amount, 5100000);
   assert.equal(saved.payment_status, 'pending');
@@ -138,6 +139,11 @@ test('with Midtrans keys the server prices the stay, saves the order and returns
   assert.match(html, /SB-Mid-client-test/);
   assert.doesNotMatch(html, new RegExp(SERVER_KEY));
   assert.match(html, /Bayar sekarang/);
+  // payment methods open inside a Kalma panel on the page, with the Kalma logo
+  assert.match(html, /id="bk-paybox" hidden/);
+  assert.match(html, /id="snap-embed"/);
+  assert.match(html, /kalma-wordmark-white\.png/);
+  assert.match(html, /Pembayaran aman/);
 });
 
 test('Midtrans notifications are verified before a booking is marked paid', async () => {
@@ -230,4 +236,15 @@ test('social links only accept http(s) URLs and render as bubbles beside guest s
   const html = await (await fetch(base + '/id')).text();
   assert.match(html, /<a class="soc soc--instagram" href="https:\/\/instagram\.com\/kalma"/);
   for (const k of ['google', 'facebook', 'tiktok']) assert.match(html, new RegExp(`<span class="soc soc--${k}" aria-hidden="true">`));
+});
+
+test('payment methods follow the Kalma order and QRIS or e-wallets drop out above their limit', () => {
+  const small = paymentOrder(5000000);
+  assert.equal(small[0], 'other_qris');
+  assert.ok(small.indexOf('bca_va') < small.indexOf('gopay'));
+  assert.ok(small.indexOf('shopeepay') < small.indexOf('credit_card'));
+  const big = paymentOrder(56100000);
+  assert.equal(big[0], 'bca_va', 'virtual account first when the total is too big for QRIS');
+  for (const m of ['other_qris', 'gopay', 'shopeepay']) assert.ok(!big.includes(m));
+  assert.ok(big.includes('credit_card'));
 });

@@ -111,7 +111,9 @@
   }
 
   /* step markers follow what is filled in */
+  var paying = false;
   function steps() {
+    if (paying) return;
     var datesOk = trip ? dateEl && dateEl.value : nights() > 0;
     var detailsOk = f.name.value.trim() && /@/.test(f.email.value) && f.phone.value.replace(/\D/g, "").length >= 8;
     var on = datesOk ? (detailsOk ? 3 : 2) : 1;
@@ -183,6 +185,49 @@
     btn.querySelector("span").textContent = on ? text : label;
   }
 
+  /* Kalma payment panel: Midtrans methods load inside the page, not in a bare popup */
+  var box = $("bk-paybox");
+  var snapBox = $("snap-embed");
+  var sections = form.querySelectorAll(".bk-card[data-sec]");
+  function showPanel(on) {
+    paying = on;
+    sections.forEach(function (sec) { sec.hidden = on; });
+    if (box) box.hidden = !on;
+    if (on) {
+      document.querySelectorAll(".steps li").forEach(function (li) {
+        var s = Number(li.dataset.step);
+        li.classList.toggle("is-on", s === 3);
+        li.classList.toggle("is-done", s < 3);
+      });
+    } else steps();
+    var top = (on ? box : form).getBoundingClientRect().top + window.pageYOffset - 100;
+    window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
+  }
+  function openPayment(snap, r) {
+    var done = function () { window.location.href = r.doneUrl; };
+    var handlers = {
+      onSuccess: done, onPending: done, onError: done,
+      onClose: function () { errBox.textContent = UI.payClosed; if (box && !box.hidden) showPanel(false); }
+    };
+    if (!box || typeof snap.embed !== "function") return snap.pay(r.token, handlers);
+    $("paybox-order").textContent = r.orderId || "-";
+    $("paybox-due").textContent = rp(r.amount);
+    $("paybox-err").textContent = "";
+    snapBox.innerHTML = "";
+    showPanel(true);
+    try {
+      snap.embed(r.token, Object.assign({ embedId: "snap-embed" }, handlers));
+    } catch (err) {
+      showPanel(false);
+      snap.pay(r.token, handlers);
+    }
+  }
+  if (box) $("paybox-edit").addEventListener("click", function () {
+    snapBox.innerHTML = "";
+    errBox.textContent = "";
+    showPanel(false);
+  });
+
   form.addEventListener("submit", function (e) {
     e.preventDefault();
     var msg = precheck();
@@ -201,12 +246,7 @@
           return snapP.then(function (snap) {
             if (!snap) { window.location.href = r.redirectUrl || r.doneUrl; return; }
             busy(false);
-            snap.pay(r.token, {
-              onSuccess: function () { window.location.href = r.doneUrl; },
-              onPending: function () { window.location.href = r.doneUrl; },
-              onError: function () { window.location.href = r.doneUrl; },
-              onClose: function () { errBox.textContent = UI.payClosed; }
-            });
+            openPayment(snap, r);
           });
         }
         window.location.href = r.doneUrl;
