@@ -35,6 +35,20 @@ function newOrderId() {
   return 'KALMA-' + Date.now().toString(36).toUpperCase() + '-' + crypto.randomBytes(5).toString('hex').toUpperCase();
 }
 
+/* QRIS and e-wallets refuse one payment above about Rp 10 million (Bank Indonesia limit), so for bigger totals
+   they are left out instead of showing "exceeds max transaction amount" at the top of the list. */
+const WALLET_LIMIT = 10000000;
+/** Payment methods in the order Kalma shows them: QRIS, virtual account, GoPay, ShopeePay, card. */
+function paymentOrder(amount) {
+  const wallets = amount <= WALLET_LIMIT;
+  return [
+    ...(wallets ? ['other_qris'] : []),
+    'bca_va', 'bni_va', 'bri_va', 'echannel', 'permata_va', 'cimb_va', 'other_va',
+    ...(wallets ? ['gopay', 'shopeepay'] : []),
+    'credit_card',
+  ];
+}
+
 /** Ask Midtrans for a Snap token. Throws on any failure (the caller falls back to WhatsApp). */
 async function createSnapTransaction(cfg, { orderId, amount, itemName, name, email, phone, finishUrl }, fetchImpl = fetch) {
   const customer = { first_name: String(name || 'Guest').slice(0, 50) };
@@ -44,6 +58,7 @@ async function createSnapTransaction(cfg, { orderId, amount, itemName, name, ema
     transaction_details: { order_id: orderId, gross_amount: amount },
     item_details: [{ id: 'stay', price: amount, quantity: 1, name: String(itemName).slice(0, 50) }],
     customer_details: customer,
+    enabled_payments: paymentOrder(amount),
     callbacks: { finish: finishUrl },
     expiry: { unit: 'hours', duration: 24 },
   };
@@ -92,4 +107,4 @@ function midtransTime(s) {
   return isNaN(d) ? null : d;
 }
 
-module.exports = { quote, nightsBetween, newOrderId, createSnapTransaction, verifyNotification, paymentStatus, midtransTime };
+module.exports = { paymentOrder, WALLET_LIMIT, quote, nightsBetween, newOrderId, createSnapTransaction, verifyNotification, paymentStatus, midtransTime };

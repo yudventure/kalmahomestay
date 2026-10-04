@@ -143,6 +143,26 @@
           <% if (online) { %><p class="bk-secure"><%- lock %><%= bk.secure %></p><% } %>
           <p class="bform__privacy"><%- t('form.privacy') %></p>
         </section>
+        <% if (online) { %>
+        <!-- 3b · Kalma payment panel, Midtrans methods load inside it -->
+        <section class="bk-card paybox" id="bk-paybox" hidden aria-labelledby="paybox-title">
+          <div class="paybox__head">
+            <img src="/brand/assets/kalma-wordmark-white.png" alt="Kalma" width="96" height="46">
+            <span class="paybox__secure"><%- lock %><span id="paybox-title"><%= bk.payboxTitle %></span></span>
+          </div>
+          <div class="paybox__meta">
+            <div><span><%= bk.payboxOrder %></span><b id="paybox-order">-</b></div>
+            <div class="paybox__due"><span><%= bk.payboxDue %></span><b id="paybox-due">-</b></div>
+          </div>
+          <p class="paybox__lead"><%= bk.payboxLead %></p>
+          <div class="paybox__snap" id="snap-embed"><p class="paybox__loading"><%= bk.payboxLoading %></p></div>
+          <p class="paybox__err bk-err" id="paybox-err" role="alert" aria-live="polite"></p>
+          <div class="paybox__foot">
+            <button type="button" class="paybox__edit" id="paybox-edit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><%= bk.payboxEdit %></button>
+            <small><%- lock %><%= bk.payboxBy %></small>
+          </div>
+        </section>
+        <% } %>
       </div>
 
       <!-- summary -->
