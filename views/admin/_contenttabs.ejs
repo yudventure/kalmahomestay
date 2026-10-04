@@ -1,0 +1,14 @@
+<%# Tabs and filters shared by the content calendar and board. Params: active, f, team, PLATFORMS, extra (hidden fields) %>
+<div class="ct-bar">
+  <nav class="tabs" aria-label="Tampilan">
+    <a href="/admin/content"<%- active === 'calendar' ? ' aria-current="page"' : '' %>>Kalender</a>
+    <a href="/admin/content/board"<%- active === 'board' ? ' aria-current="page"' : '' %>>Papan</a>
+  </nav>
+  <form class="ct-filter" method="get">
+    <% if (locals.month) { %><input type="hidden" name="m" value="<%= month %>"><% } %>
+    <select name="platform" aria-label="Platform" onchange="this.form.submit()"><option value="">Semua platform</option><% PLATFORMS.forEach(function (p) { %><option value="<%= p.id %>"<%= f.platform === p.id ? ' selected' : '' %>><%= p.label %></option><% }) %></select>
+    <select name="who" aria-label="PIC" onchange="this.form.submit()"><option value="">Semua PIC</option><% team.forEach(function (u) { %><option value="<%= u.username %>"<%= f.who === u.username ? ' selected' : '' %>><%= u.name %></option><% }) %></select>
+    <noscript><button class="btn btn--ghost btn--sm">Saring</button></noscript>
+  </form>
+  <a class="btn btn--primary btn--sm" href="/admin/content/new">+ Konten baru</a>
+</div>

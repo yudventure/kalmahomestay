@@ -14,7 +14,7 @@ const { normalize, validate, todayISO } = require('./inquiry');
 const { normalizePhone, normalizeEmail } = require('./db/shared');
 const { addDays } = require('./ical');
 const payments = require('./payments');
-const { SERVICES, servicePath, bookPath } = require('./activities');
+const { SERVICES, servicePath, bookPath, homePath } = require('./activities');
 
 const ROOM_KEYS = { laguna: 'r1', pantai: 'r2', keluarga: 'r3' };
 const ROOM_PH = { laguna: 'ph-lagoon', pantai: 'ph-beach', keluarga: 'ph-family' };
@@ -30,11 +30,11 @@ function mountBooking(app, ctx) {
   /** What every public page needs for the shared header and footer. */
   function page(lang, extra = {}) {
     const t = translator(lang);
-    const home = lang === 'en' ? '/en' : '/';
+    const home = homePath(lang);
     return {
       lang, t, rupiah, home, base: lang === 'en' ? '/en' : '', contact: config.contact, siteUrl: config.siteUrl,
       year: new Date().getFullYear(), servicePath: (id) => servicePath(lang, id), bookPath: bookPath(lang),
-      feedbackPath: lang === 'en' ? '/en/feedback' : '/masukan', anchor: (h) => (lang === 'en' ? '/en' : '/') + h,
+      feedbackPath: lang === 'en' ? '/en/feedback' : '/masukan', anchor: (h) => (lang === 'en' ? '/' : '/id') + h,
       pay, ...extra,
     };
   }
@@ -114,7 +114,7 @@ function mountBooking(app, ctx) {
     }));
   }
   app.get(['/pesan', '/en/book'], ah((req, res) => renderBook(req, res)));
-  app.get('/book', (req, res) => res.redirect(301, '/pesan'));
+  app.get('/book', (req, res) => res.redirect(301, '/en/book'));
 
   /* ---------------------------------------------------------------- checkout */
   async function checkout(lang, body, ip) {
@@ -212,7 +212,7 @@ function mountBooking(app, ctx) {
   app.post(['/pesan', '/en/book'], ah(async (req, res) => {
     const lang = langOf(req);
     const r = await checkout(lang, req.body, req.ip);
-    if (r.spam) return res.redirect(303, lang === 'en' ? '/en' : '/');
+    if (r.spam) return res.redirect(303, homePath(lang));
     if (r.error) return renderBook(req, res, { status: r.status, error: r.error, values: req.body });
     res.redirect(303, r.mode === 'pay' && r.redirectUrl ? r.redirectUrl : r.doneUrl);
   }));
@@ -240,7 +240,7 @@ function mountBooking(app, ctx) {
   return {
     redirectOldBook: (req, res, next) => {
       if (!req.query.book) return next();
-      const lang = req.path.startsWith('/en') ? 'en' : 'id';
+      const lang = req.path.startsWith('/id') ? 'id' : 'en';
       const room = ROOMS.some((r) => r.id === req.query.book) ? `?room=${req.query.book}` : '';
       res.redirect(302, bookPath(lang) + room);
     },

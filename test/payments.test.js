@@ -190,11 +190,11 @@ test('old /?book=<room> links open the booking page with that room', async () =>
   const { base } = await start({ enabled: false, percent: 100 });
   const r = await fetch(base + '/?book=pantai', { redirect: 'manual' });
   assert.equal(r.status, 302);
-  assert.equal(r.headers.get('location'), '/pesan?room=pantai');
-  assert.equal((await fetch(base + '/en?book=x', { redirect: 'manual' })).headers.get('location'), '/en/book');
+  assert.equal(r.headers.get('location'), '/en/book?room=pantai');
+  assert.equal((await fetch(base + '/id?book=x', { redirect: 'manual' })).headers.get('location'), '/pesan');
   const page = await (await fetch(base + '/pesan?room=pantai')).text();
   assert.match(page, /<input type="radio" name="room" value="pantai" checked>/);
-  const plain = await (await fetch(base + '/')).text();
+  const plain = await (await fetch(base + '/id')).text();
   assert.doesNotMatch(plain, /<dialog class="checkout"/, 'the booking dialog is gone');
   assert.doesNotMatch(plain, /class="wa-float"/, 'no floating WhatsApp button');
 });
@@ -205,7 +205,7 @@ test('social links only accept http(s) URLs and render as bubbles beside guest s
   assert.equal(c.tiktokUrl, '');
   assert.equal(c.googleUrl, '');
   const { base } = await start({ enabled: false, percent: 100 });
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   assert.match(html, /<a class="soc soc--instagram" href="https:\/\/instagram\.com\/kalma"/);
   for (const k of ['google', 'facebook', 'tiktok']) assert.match(html, new RegExp(`<span class="soc soc--${k}" aria-hidden="true">`));
 });

@@ -1,4 +1,4 @@
-/* "We hear you" feedback page */
+/* "We hear you" feedback page. No site header: the Kalma logo and language switch sit in the blue card. */
 .fb { background: linear-gradient(180deg, #F4F8FA 0, #fff 420px); }
 .fb__main { padding-top: clamp(24px, 5vw, 56px); padding-bottom: 80px; }
 .fb__grid { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 28px; align-items: start; }
@@ -9,13 +9,8 @@
 .fb__lead { color: #D5E3EC; margin: 0 0 24px; }
 .fb__promise { list-style: none; margin: 0 0 28px; padding: 0; display: grid; gap: 12px; }
 .fb__promise li { display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: var(--text-sm); }
-.fb__promise svg, .fb__wa-btn svg, .fb__submit svg, .fb__kind svg, .fb__check svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fb__promise svg, .fb__home svg, .fb__submit svg, .fb__kind svg, .fb__check svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .fb__promise svg { flex: none; width: 34px; height: 34px; padding: 7px; border-radius: 10px; background: rgba(255,255,255,.1); color: var(--kalma-sand); }
-.fb__wa { padding-top: 22px; border-top: 1px solid rgba(255,255,255,.14); display: grid; gap: 10px; }
-.fb__wa span { font-size: var(--text-sm); color: #C9D9E4; }
-.fb__wa-btn { justify-self: start; display: inline-flex; align-items: center; gap: 10px; padding: 11px 18px; border-radius: 999px; background: #25D366; color: #0B3B1E; font-weight: 700; text-decoration: none; }
-.fb__wa-btn:hover { background: #2EE372; }
-.fb__wa-btn svg { width: 20px; height: 20px; }
 
 .fb__form { background: #fff; border: 1px solid #E2EAEF; border-radius: 28px; padding: clamp(22px, 4vw, 40px); box-shadow: 0 1px 2px rgba(34,72,102,.05), 0 24px 48px -28px rgba(34,72,102,.35); display: grid; gap: 22px; }
 .fb__form legend, .fb__field > label { font-weight: 700; font-size: var(--text-sm); color: var(--kalma-deep-sea); margin-bottom: 10px; padding: 0; }
@@ -57,3 +52,12 @@
   .fb__row, .fb__row--3 { grid-template-columns: 1fr; }
   .fb__kinds { grid-template-columns: 1fr 1fr; }
 }
+.fb__home { display: inline-flex; align-items: center; gap: 6px; margin-bottom: 18px; padding: 8px 16px 8px 10px; border-radius: 999px; background: #fff; border: 1px solid #DCE6EC; color: var(--kalma-deep-sea); font-weight: 600; font-size: var(--text-sm); text-decoration: none; transition: background .15s, transform .15s; }
+.fb__home:hover { background: #EEF5F8; transform: translateX(-2px); }
+.fb__home svg { width: 18px; height: 18px; stroke-width: 2.2; }
+.fb__brand { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,.14); }
+.fb__logo img { width: 112px; height: auto; }
+.lang--dark { border-color: rgba(255,255,255,.3); }
+.lang--dark a { color: #fff; }
+.lang--dark a[aria-current="page"] { background: #fff; color: var(--kalma-deep-sea); }
+.fb__promise { margin-bottom: 0; }

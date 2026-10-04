@@ -1,0 +1,60 @@
+<%- include('_top') %>
+<p><a href="/admin/content">← Kalender konten</a> · <a href="/admin/content/board">Papan konten</a></p>
+<h1><%= isNew ? 'Konten baru' : p.title %></h1>
+<% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+<% var chosen = String(p.platforms || '').split(','); %>
+<form method="post" action="/admin/content<%= isNew ? '' : '/' + p.id %>" class="panel stack admin">
+  <h2>Rencana</h2>
+  <div class="field"><label for="c-title">Judul atau ide konten</label><input id="c-title" name="title" maxlength="160" required value="<%= p.title || '' %>" placeholder="mis. Pagi pertama di Bungalow Laguna"></div>
+  <div class="row3">
+    <div class="field"><label for="c-date">Tanggal tayang</label><input id="c-date" name="publish_date" type="date" value="<%= p.publish_date || '' %>"><small class="muted">Kosongkan jika masih ide.</small></div>
+    <div class="field"><label for="c-time">Jam tayang</label><input id="c-time" name="publish_time" maxlength="5" placeholder="mis. 19.00" value="<%= p.publish_time || '' %>"></div>
+    <div class="field"><label for="c-status">Tahap</label><select id="c-status" name="status"><% STATUSES.forEach(function (s) { %><option value="<%= s.id %>"<%= p.status === s.id ? ' selected' : '' %>><%= s.label %></option><% }) %></select></div>
+  </div>
+  <fieldset class="field ct-plat"><legend>Platform</legend>
+    <% PLATFORMS.forEach(function (pl) { %><label class="check"><input type="checkbox" name="platforms" value="<%= pl.id %>"<%= chosen.indexOf(pl.id) >= 0 ? ' checked' : '' %>> <%= pl.label %></label><% }) %>
+  </fieldset>
+  <div class="row3">
+    <div class="field"><label for="c-format">Format</label><select id="c-format" name="format"><option value="">-</option><% Object.keys(FORMATS).forEach(function (k) { %><option value="<%= k %>"<%= p.format === k ? ' selected' : '' %>><%= FORMATS[k] %></option><% }) %></select></div>
+    <div class="field"><label for="c-pillar">Tema</label><select id="c-pillar" name="pillar"><option value="">-</option><% Object.keys(PILLARS).forEach(function (k) { %><option value="<%= k %>"<%= p.pillar === k ? ' selected' : '' %>><%= PILLARS[k] %></option><% }) %></select></div>
+    <div class="field"><label for="c-who">PIC (penanggung jawab)</label><select id="c-who" name="assignee"><option value="">-</option><% team.forEach(function (u) { %><option value="<%= u.username %>"<%= p.assignee === u.username ? ' selected' : '' %>><%= u.name %></option><% }) %></select></div>
+  </div>
+
+  <h2>Naskah</h2>
+  <div class="field"><label for="c-hook">Hook (kalimat pembuka 3 detik pertama)</label><textarea id="c-hook" name="hook" rows="2" maxlength="1000" placeholder="mis. Bangun tidur, buka pintu, langsung laut biru."><%= p.hook || '' %></textarea></div>
+  <div class="field"><label for="c-script">Naskah dan daftar adegan</label><textarea id="c-script" name="script" rows="10" maxlength="10000" class="mono"><%= p.script || '' %></textarea></div>
+  <div class="field"><label for="c-caption">Caption</label><textarea id="c-caption" name="caption" rows="5" maxlength="4000"><%= p.caption || '' %></textarea><small class="muted"><span data-count="c-caption">0</span> karakter. Instagram maksimal 2.200.</small></div>
+  <div class="grid2">
+    <div class="field"><label for="c-tags">Hashtag</label><textarea id="c-tags" name="hashtags" rows="3" maxlength="1000" placeholder="#rajaampat #kalmarajaampat #homestay"><%= p.hashtags || '' %></textarea></div>
+    <div class="field"><label for="c-cta">Ajakan (CTA)</label><input id="c-cta" name="cta" maxlength="190" value="<%= p.cta || '' %>" placeholder="mis. Pesan lewat link di bio"></div>
+  </div>
+  <div class="grid2">
+    <div class="field"><label for="c-link">Link setelah tayang</label><input id="c-link" name="link" maxlength="300" value="<%= p.link || '' %>" placeholder="https://instagram.com/p/..."></div>
+    <div class="field"><label for="c-notes">Catatan tim</label><textarea id="c-notes" name="notes" rows="3" maxlength="4000"><%= p.notes || '' %></textarea></div>
+  </div>
+  <div class="sticky-save"><button class="btn btn--primary btn--sm" type="submit"><%= isNew ? 'Simpan, lalu unggah materi' : 'Simpan perubahan' %></button></div>
+</form>
+
+<% if (!isNew) { %>
+<section class="panel" id="materi">
+  <div class="panel__head"><div><p class="eyebrow-a">Materi</p><h2>Foto, video, dan dokumen</h2></div></div>
+  <p class="muted small" style="margin-top:0">Hasil foto, video mentah atau final, desain, dan brief. Hanya tim yang punya akses sosial media yang bisa membukanya.</p>
+  <% if (files.length) { %><ul class="doc-list" style="margin-bottom:16px"><% files.forEach(function (d) { %>
+    <li><a href="/admin/files/<%= d.id %>" target="_blank" rel="noopener"><%= d.label || d.original_name %></a><small><%= d.kind === 'video' ? 'Video' : 'File' %> · <%= (d.size / 1048576).toFixed(1) %> MB · <%= fmtDate(d.created_at) %> · <%= d.uploaded_by %></small>
+      <form method="post" action="/admin/files/<%= d.id %>/delete" onsubmit="return confirm('Hapus file ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form></li>
+  <% }) %></ul><% } %>
+  <div class="grid2">
+    <%- include('_upload', { action: '/admin/content/' + p.id + '/files/document', accept: '.jpg,.jpeg,.png,.webp,.pdf,.docx,.xlsx', title: 'Unggah foto atau dokumen', hint: KINDS.document.label }) %>
+    <%- include('_upload', { action: '/admin/content/' + p.id + '/files/video', accept: '.mp4,.webm,video/mp4,video/webm', title: 'Unggah video', hint: KINDS.video.label }) %>
+  </div>
+</section>
+<form method="post" action="/admin/content/<%= p.id %>/delete" onsubmit="return confirm('Hapus konten ini beserta materinya?')" style="margin-top: var(--space-5)"><button class="btn btn--danger btn--sm" type="submit">Hapus konten</button></form>
+<% } %>
+<script>
+  document.querySelectorAll('[data-count]').forEach(function (out) {
+    var ta = document.getElementById(out.dataset.count);
+    var upd = function () { out.textContent = ta.value.length; out.parentNode.classList.toggle('warn', ta.value.length > 2200); };
+    ta.addEventListener('input', upd); upd();
+  });
+</script>
+<%- include('_bottom') %>

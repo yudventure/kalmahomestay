@@ -31,7 +31,7 @@ function upload(p, buf, filename, fields = {}, headers = AUTH) {
   return fetch(base + p, { method: 'POST', body: form, redirect: 'manual', headers: { ...headers, Origin: base } });
 }
 const post = (p, headers = AUTH) => fetch(base + p, { method: 'POST', redirect: 'manual', headers: { ...headers, Origin: base } });
-const home = async () => (await fetch(base + '/')).text();
+const home = async () => (await fetch(base + '/id')).text();
 
 test('file types are recognised by their content, not their name', () => {
   assert.equal(sniff(JPG), 'jpg');

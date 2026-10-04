@@ -108,7 +108,7 @@ test('website settings change contacts, prices, partners and texts on the live s
   const owner = await login('admin', 'rahasia');
 
   await post(owner, '/admin/website/contact', { whatsapp: '62 812 9999 0000', email: 'halo@kalma.id', instagram: 'https://www.instagram.com/kalma.baru/', facebookUrl: 'https://facebook.com/kalma', tiktokUrl: 'javascript:alert(1)' });
-  let html = await (await fetch(base + '/')).text();
+  let html = await (await fetch(base + '/id')).text();
   assert.match(html, /wa\.me\/6281299990000/);
   assert.match(html, /href="https:\/\/instagram\.com\/kalma\.baru"/);
   assert.match(html, /<a class="soc soc--facebook" href="https:\/\/facebook\.com\/kalma"/);
@@ -125,15 +125,15 @@ test('website settings change contacts, prices, partners and texts on the live s
   assert.equal(quote.total, 900000 * 3 * 2, 'new price and capacity are used for bookings');
 
   await post(owner, '/admin/website/partners', { partners: 'Raja Ampat Dive\n\nWaigeo Trips\n' });
-  html = await (await fetch(base + '/')).text();
+  html = await (await fetch(base + '/id')).text();
   assert.match(html, /Raja Ampat Dive/);
   assert.match(html, /Waigeo Trips/);
 
   const page = await (await get(owner, '/admin/website/content?s=hero')).text();
   assert.match(page, /name="id__hero\.title"/);
   await post(owner, '/admin/website/content', { section: 'hero', 'id__hero.title': 'Selamat datang di <em>Kalma</em>', 'en__hero.title': '' });
-  assert.match(await (await fetch(base + '/')).text(), /Selamat datang di <em>Kalma<\/em>/);
-  assert.doesNotMatch(await (await fetch(base + '/en')).text(), /Selamat datang/, 'empty English keeps the default');
+  assert.match(await (await fetch(base + '/id')).text(), /Selamat datang di <em>Kalma<\/em>/);
+  assert.doesNotMatch(await (await fetch(base + '/')).text(), /Selamat datang/, 'empty English keeps the default');
 
   // settings survive a restart
   const again = createApp({ dataDir, db: null, adminPassword: 'rahasia', contact, payments: { enabled: false, percent: 100 } });
@@ -143,7 +143,7 @@ test('website settings change contacts, prices, partners and texts on the live s
   assert.deepEqual(again.locals.site.partners(), ['Raja Ampat Dive', 'Waigeo Trips']);
 
   await post(owner, '/admin/website/content', { section: 'hero', 'id__hero.title': '' });
-  assert.doesNotMatch(await (await fetch(base + '/')).text(), /Selamat datang di/);
+  assert.doesNotMatch(await (await fetch(base + '/id')).text(), /Selamat datang di/);
 });
 
 test('repeated wrong passwords are slowed down', async () => {

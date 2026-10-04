@@ -23,17 +23,16 @@
     <span class="chip <%= f.status === 'selesai' ? 'chip--ok' : f.status === 'baru' ? 'chip--warn' : '' %>"><%= STATUSES[f.status] || f.status %></span>
   </div>
   <p class="pre fbk__msg"><%= f.message %></p>
-  <p class="muted small"><%= fmtDateTime(f.created_at) %> · <%= f.lang === 'en' ? 'English' : 'Indonesia' %><% if (f.stay_date) { %> · menginap <%= fmtDate(f.stay_date) %><% } %><% if (f.contact) { %> · <b><%= f.contact %></b><% } %><% if (f.handled_by) { %> · ditangani <%= f.handled_by %><% } %></p>
+  <p class="muted small"><%= fmtDateTime(f.created_at) %> · <%= f.lang === 'en' ? 'English' : 'Indonesia' %><% if (f.stay_date) { %> · menginap <%= fmtDate(f.stay_date) %><% } %><% if (f.email || f.contact) { %> · <b><%= f.email || f.contact %></b><% } %><% if (f.phone) { %> · <b>+<%= f.phone %></b><% } %><% if (f.handled_by) { %> · ditangani <%= f.handled_by %><% } %></p>
   <form method="post" action="/admin/feedback/<%= f.id %>" class="fbk__form">
     <div class="field"><label for="fn<%= f.id %>">Catatan tindak lanjut</label><textarea id="fn<%= f.id %>" name="admin_note" rows="2" maxlength="2000" placeholder="Mis. sudah ditelepon, diberi potongan trip berikutnya"><%= f.admin_note || '' %></textarea></div>
     <div class="btns">
       <select name="status" aria-label="Status"><% Object.keys(STATUSES).forEach(function (s) { %><option value="<%= s %>"<%= f.status === s ? ' selected' : '' %>><%= STATUSES[s] %></option><% }) %></select>
       <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
-      <% var digits = String(f.contact || '').replace(/\D/g, ''); if (/^(\+|0|62|8)\d{7,}/.test(String(f.contact || '').replace(/[\s-]/g, ''))) { var wa = digits.indexOf('0') === 0 ? '62' + digits.slice(1) : digits.indexOf('8') === 0 ? '62' + digits : digits; %>
-        <a class="btn btn--cta btn--sm" href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Halo ' + (f.name || '') + ', terima kasih atas masukannya untuk Kalma.') %>" target="_blank" rel="noopener">Balas via WhatsApp</a>
-      <% } else if (/@/.test(f.contact || '')) { %>
-        <a class="btn btn--cta btn--sm" href="mailto:<%= f.contact %>?subject=<%= encodeURIComponent('Masukan untuk Kalma Raja Ampat') %>">Balas via email</a>
-      <% } %>
+      <% var mail = f.email || (/@/.test(f.contact || '') ? f.contact : ''); var raw = f.phone || (!mail ? f.contact : ''); var digits = String(raw || '').replace(/\D/g, '');
+         var wa = /^(\+|0|62|8)\d{7,}/.test(String(raw || '').replace(/[\s-]/g, '')) ? (digits.indexOf('0') === 0 ? '62' + digits.slice(1) : digits.indexOf('8') === 0 ? '62' + digits : digits) : ''; %>
+      <% if (mail) { %><a class="btn btn--cta btn--sm" href="mailto:<%= mail %>?subject=<%= encodeURIComponent('Masukan untuk Kalma Raja Ampat') %>">Balas via email</a><% } %>
+      <% if (wa) { %><a class="btn btn--ghost btn--sm" href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Halo ' + (f.name || '') + ', terima kasih atas masukannya untuk Kalma.') %>" target="_blank" rel="noopener">WhatsApp</a><% } %>
     </div>
   </form>
   <form method="post" action="/admin/feedback/<%= f.id %>/delete" onsubmit="return confirm('Hapus pesan ini?')" style="margin-top:8px"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
