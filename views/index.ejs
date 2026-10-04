@@ -276,29 +276,44 @@
           <% }) %>
         </div>
       </div>
+      <% if (reviews.length) {
+           // Two columns scrolling in opposite directions; each track holds the list twice for a seamless loop,
+           // and short lists are repeated so a loop is always taller than the window.
+           var loop = reviews.slice(); while (loop.length < 6) loop = loop.concat(reviews);
+           var half = Math.ceil(loop.length / 2);
+           var cols = [loop, loop.slice(half).concat(loop.slice(0, half))];
+           var initial = function (n) { return String(n || '?').replace(/^@/, '').charAt(0).toUpperCase(); };
+           var kindLabel = { reel: 'Reels', post: lang === 'en' ? 'Post' : 'Foto' }; %>
+      <div class="bubbles" style="--dur: <%= Math.max(24, loop.length * 5) %>s">
+        <% cols.forEach(function (col, ci) { %>
+        <div class="bubbles__col<%= ci ? ' bubbles__col--down' : '' %>"<%- ci ? ' aria-hidden="true"' : '' %>>
+          <div class="bubbles__track">
+          <% [0, 1].forEach(function (copy) { %>
+            <ul class="bubbles__list"<%- copy ? ' aria-hidden="true"' : '' %>>
+            <% col.forEach(function (r, i) { var repeat = ci || copy || i >= reviews.length; %>
+              <li class="bubble"<%- !ci && !copy && repeat ? ' aria-hidden="true"' : '' %>>
+                <span class="bubble__av" aria-hidden="true"><%= initial(r.name) %></span>
+                <div class="bubble__body">
+                  <p class="bubble__who"><b><%= r.name %></b>
+                    <% if (r.url) { %><a class="bubble__tag" href="<%= r.url %>" target="_blank" rel="noopener nofollow"<%- repeat ? ' tabindex="-1"' : '' %>><%= kindLabel[r.kind] || r.from %></a><% } else if (r.kind || r.from) { %><span class="bubble__tag"><%= kindLabel[r.kind] || r.from %></span><% } %>
+                    <% if (r.rating) { %><span class="stars" aria-label="<%= r.rating %>/5"><%= '★'.repeat(Math.max(0, Math.min(5, r.rating | 0))) %></span><% } %></p>
+                  <p class="bubble__text"><%= r.quote %></p>
+                </div>
+              </li>
+            <% }) %>
+            </ul>
+          <% }) %>
+          </div>
+        </div>
+        <% }) %>
+      </div>
+      <% } else { %>
       <div class="quote">
         <svg class="quote__mark" viewBox="0 0 48 36" aria-hidden="true"><path d="M0 36V22C0 9 7 2 19 0l2 5c-7 2-10 7-10 13h9v18zm27 0V22C27 9 34 2 46 0l2 5c-7 2-10 7-10 13h9v18z"/></svg>
-        <% if (reviews.length) { %>
-        <div class="quote__slides" aria-live="polite">
-          <% reviews.forEach(function (r, i) { %>
-          <figure class="quote__item"<%- i ? ' hidden' : '' %>>
-            <blockquote><%= r.quote %></blockquote>
-            <figcaption><b><%= r.name %></b><% if (r.url) { %><a class="quote__src" href="<%= r.url %>" target="_blank" rel="noopener nofollow"><%= r.from %></a><% } else if (r.from) { %><span><%= r.from %></span><% } %>
-              <% if (r.rating) { %><span class="stars" aria-label="<%= r.rating %>/5"><%= '★'.repeat(Math.max(0, Math.min(5, r.rating | 0))) %></span><% } %></figcaption>
-          </figure>
-          <% }) %>
-        </div>
-        <% if (reviews.length > 1) { %>
-        <div class="arrows quote__arrows">
-          <button type="button" class="arrow" data-q="-1" aria-label="<%= t('car.prev') %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
-          <button type="button" class="arrow arrow--fill" data-q="1" aria-label="<%= t('car.next') %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
-        </div>
-        <% } %>
-        <% } else { %>
         <p class="quote__empty"><%- t('rev.empty') %></p>
         <a class="btn btn--soft btn--sm" href="https://wa.me/<%= contact.whatsapp %>?text=<%= waText %>" target="_blank" rel="noopener"><%- t('rev.cta') %></a>
-        <% } %>
       </div>
+      <% } %>
     </div>
   </div>
 </section>
