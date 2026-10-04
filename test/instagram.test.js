@@ -148,13 +148,15 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
   const auth = { Authorization: 'Basic ' + Buffer.from('admin:rahasia').toString('base64') };
   try {
     let html = await (await fetch(base + '/en')).text();
-    assert.match(html, /Guest stories will appear here/, 'empty before the first sync');
+    assert.match(html, /Sample view\. Real guest stories will appear here/, 'labelled samples before the first sync');
+    assert.match(html, /bubble__tag--sample">Sample</);
 
     const sync = await fetch(base + '/admin/instagram/sync', { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' });
     assert.equal(sync.headers.get('location'), '/admin/instagram?ok=ig-synced');
 
     html = await (await fetch(base + '/en')).text();
     assert.match(html, /Tempatnya tenang banget/);
+    assert.doesNotMatch(html, /bubble__tag--sample|Sample view/, 'samples disappear once real comments exist');
     assert.match(html, /<b>@rina\.travels<\/b>\s*<a class="bubble__tag" href="https:\/\/www\.instagram\.com\/reel\/AAA\/"[^>]*>Reels<\/a>/);
     assert.match(html, /class="bubbles"/);
     assert.doesNotMatch(html, /Terima kasih banyak Rina/);

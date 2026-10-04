@@ -66,10 +66,12 @@ test('partner running text lists each partner twice for a seamless loop', async 
   assert.match(html, /<ul class="partners__list" aria-hidden="true">/);
 });
 
-test('homepage shows the guest-story invite when there are no reviews yet', async () => {
+test('without guest stories the homepage shows labelled sample bubbles and the WhatsApp invite', async () => {
   const html = await (await fetch(base + '/')).text();
-  assert.match(html, /class="quote__empty"/);
-  assert.doesNotMatch(html, /class="quote__item"/);
+  assert.match(html, /class="bubbles bubbles--sample"/);
+  assert.equal((html.match(/bubble__tag--sample">Contoh</g) || []).length >= 6, true, 'every sample bubble is tagged');
+  assert.match(html, /Contoh tampilan\. Cerita tamu asli akan muncul di sini\./);
+  assert.match(html, /class="reviews__note"[^]*?href="https:\/\/wa\.me\//);
 });
 
 test('photo slots use real photos from the image folder when present', () => {

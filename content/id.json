@@ -184,6 +184,40 @@
   "rev.lead": "Cerita dari mereka yang sudah singgah di Kalma.",
   "rev.empty": "Pernah menginap di Kalma? Ceritakan pengalamanmu. Cerita tamu akan kami tampilkan di sini.",
   "rev.cta": "Kirim ceritamu lewat WhatsApp",
+  "rev.sampleNote": "Contoh tampilan. Cerita tamu asli akan muncul di sini.",
+  "rev.sampleTag": "Contoh",
+  "rev.samples": [
+    {
+      "name": "Tamu dari Jakarta",
+      "quote": "Bangun pagi langsung lihat laut sebening kaca. Tenang banget, nggak mau pulang.",
+      "kind": "post"
+    },
+    {
+      "name": "Tamu dari Belanda",
+      "quote": "Snorkeling langsung dari dermaga, ikannya banyak dan karangnya cantik sekali.",
+      "kind": "reel"
+    },
+    {
+      "name": "Tamu dari Surabaya",
+      "quote": "Tuan rumahnya ramah, masakan ikan bakarnya juara. Serasa di rumah sendiri.",
+      "kind": "post"
+    },
+    {
+      "name": "Tamu dari Bandung",
+      "quote": "Sunset di dermaga Kalma adalah momen favorit kami selama di Raja Ampat.",
+      "kind": "reel"
+    },
+    {
+      "name": "Tamu dari Australia",
+      "quote": "Kamarnya bersih, angin laut sejuk, dan trip ke Piaynemo diatur dengan rapi.",
+      "kind": "post"
+    },
+    {
+      "name": "Tamu dari Makassar",
+      "quote": "Pengalaman diving pertama yang nggak terlupakan. Pemandunya sabar dan sigap.",
+      "kind": "reel"
+    }
+  ],
   "fs.1": "Balas cepat via WhatsApp",
   "fs.2": "Tuan rumah orang kampung",
   "fs.3": "Ramah terumbu karang",

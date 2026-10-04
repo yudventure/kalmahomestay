@@ -46,7 +46,10 @@
   const ROOM_KEYS = ['r1', 'r2', 'r3'];
   const ROOM_PH = ['ph-lagoon', 'ph-beach', 'ph-family'];
   const EXP_PH = ['ph-reef', 'ph-karst', 'ph-deep', 'ph-jungle', 'ph-house', 'ph-dusk'];
-  const reviews = (Array.isArray(t('reviews')) ? t('reviews') : []).concat(igReviews || []);
+  const realReviews = (Array.isArray(t('reviews')) ? t('reviews') : []).concat(igReviews || []);
+  // Until there are real guest stories, show clearly labelled sample bubbles so the section is not empty.
+  const isSample = !realReviews.length;
+  const reviews = isSample ? (Array.isArray(t('rev.samples')) ? t('rev.samples') : []) : realReviews;
   // Social bubbles beside the guest stories, largest first; a network without a link in hPanel is shown but not clickable.
   const socials = [
     { key: 'instagram', name: 'Instagram', url: contact.instagramUrl,
@@ -282,9 +285,10 @@
            var loop = reviews.slice(); while (loop.length < 6) loop = loop.concat(reviews);
            var half = Math.ceil(loop.length / 2);
            var cols = [loop, loop.slice(half).concat(loop.slice(0, half))];
-           var initial = function (n) { return String(n || '?').replace(/^@/, '').charAt(0).toUpperCase(); };
+           var initial = function (n) { var w = String(n || '?').replace(/^@/, '').split(' '); return (isSample ? w[w.length - 1] : w[0]).charAt(0).toUpperCase(); };
            var kindLabel = { reel: 'Reels', post: lang === 'en' ? 'Post' : 'Foto' }; %>
-      <div class="bubbles" style="--dur: <%= Math.max(24, loop.length * 5) %>s">
+      <div class="reviews__wall">
+      <div class="bubbles<%= isSample ? ' bubbles--sample' : '' %>" style="--dur: <%= Math.max(24, loop.length * 5) %>s">
         <% cols.forEach(function (col, ci) { %>
         <div class="bubbles__col<%= ci ? ' bubbles__col--down' : '' %>"<%- ci ? ' aria-hidden="true"' : '' %>>
           <div class="bubbles__track">
@@ -295,7 +299,7 @@
                 <span class="bubble__av" aria-hidden="true"><%= initial(r.name) %></span>
                 <div class="bubble__body">
                   <p class="bubble__who"><b><%= r.name %></b>
-                    <% if (r.url) { %><a class="bubble__tag" href="<%= r.url %>" target="_blank" rel="noopener nofollow"<%- repeat ? ' tabindex="-1"' : '' %>><%= kindLabel[r.kind] || r.from %></a><% } else if (r.kind || r.from) { %><span class="bubble__tag"><%= kindLabel[r.kind] || r.from %></span><% } %>
+                    <% if (r.url) { %><a class="bubble__tag" href="<%= r.url %>" target="_blank" rel="noopener nofollow"<%- repeat ? ' tabindex="-1"' : '' %>><%= kindLabel[r.kind] || r.from %></a><% } else if (isSample) { %><span class="bubble__tag bubble__tag--sample"><%= t('rev.sampleTag') %></span><% } else if (r.kind || r.from) { %><span class="bubble__tag"><%= kindLabel[r.kind] || r.from %></span><% } %>
                     <% if (r.rating) { %><span class="stars" aria-label="<%= r.rating %>/5"><%= '★'.repeat(Math.max(0, Math.min(5, r.rating | 0))) %></span><% } %></p>
                   <p class="bubble__text"><%= r.quote %></p>
                 </div>
@@ -306,6 +310,10 @@
           </div>
         </div>
         <% }) %>
+      </div>
+      <% if (isSample) { %>
+      <p class="reviews__note"><%- t('rev.sampleNote') %> <a href="https://wa.me/<%= contact.whatsapp %>?text=<%= waText %>" target="_blank" rel="noopener"><%- t('rev.cta') %></a></p>
+      <% } %>
       </div>
       <% } else { %>
       <div class="quote">

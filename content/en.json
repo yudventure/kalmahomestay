@@ -184,6 +184,40 @@
   "rev.lead": "From travelers who have stayed with us.",
   "rev.empty": "Stayed at Kalma? Tell us about it. Guest stories will appear here.",
   "rev.cta": "Share your story on WhatsApp",
+  "rev.sampleNote": "Sample view. Real guest stories will appear here.",
+  "rev.sampleTag": "Sample",
+  "rev.samples": [
+    {
+      "name": "Guest from Jakarta",
+      "quote": "Woke up to glass-clear water right outside. So peaceful we didn't want to leave.",
+      "kind": "post"
+    },
+    {
+      "name": "Guest from the Netherlands",
+      "quote": "Snorkeling straight off the jetty, so many fish and the coral is beautiful.",
+      "kind": "reel"
+    },
+    {
+      "name": "Guest from Surabaya",
+      "quote": "Warm hosts and the best grilled fish. It felt like staying with family.",
+      "kind": "post"
+    },
+    {
+      "name": "Guest from Bandung",
+      "quote": "Sunset on Kalma's jetty was our favourite moment in Raja Ampat.",
+      "kind": "reel"
+    },
+    {
+      "name": "Guest from Australia",
+      "quote": "Clean rooms, cool sea breeze, and the Piaynemo trip was perfectly arranged.",
+      "kind": "post"
+    },
+    {
+      "name": "Guest from Makassar",
+      "quote": "An unforgettable first dive. The guide was patient and on top of everything.",
+      "kind": "reel"
+    }
+  ],
   "fs.1": "Quick replies on WhatsApp",
   "fs.2": "Hosted by a village family",
   "fs.3": "Reef-friendly",
