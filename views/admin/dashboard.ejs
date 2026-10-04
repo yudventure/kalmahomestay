@@ -31,6 +31,14 @@
 </div>
 <% } %>
 
+<% if (can('content')) { %>
+<div class="cards">
+  <a class="card-stat" href="/admin/content"><span>Konten 7 hari ke depan</span><b><%= contentWeek.length %></b><em><%= contentWeek.filter(function (p) { return p.status === 'siap' || p.status === 'tayang'; }).length %> sudah siap</em></a>
+  <a class="card-stat" href="/admin/content/board"><span>Bank ide</span><b><%= contentIdeas %></b><em>ide yang belum dikerjakan</em></a>
+  <% contentWeek.slice(0, 2).forEach(function (p) { %><a class="card-stat" href="/admin/content/<%= p.id %>"><span><%= fmtDate(p.publish_date) %><%= p.publish_time ? ' · ' + p.publish_time : '' %></span><b style="font-size:1.05rem;line-height:1.3"><%= p.title %></b><em><%= p.status === 'tayang' ? 'Sudah tayang' : 'Dijadwalkan' %></em></a><% }) %>
+</div>
+<% } %>
+
 <section class="panel panel--attn<%= alerts.length ? ' is-alert' : '' %>">
   <div>
     <p class="eyebrow-a">Perlu perhatian</p>

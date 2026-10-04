@@ -241,19 +241,18 @@
     var box = this.box;
     if (window.innerWidth < 640) { box.classList.add("is-sheet"); box.style.left = box.style.top = ""; return; }
     box.classList.remove("is-sheet");
-    var r = this.fields[0].getBoundingClientRect();
+    // always open right under the booking bar (like booking sites and apps do), never above it
+    var bar = this.fields[0].closest(".search") || this.fields[0];
+    var r = bar.getBoundingClientRect();
     var w = box.offsetWidth, h = box.offsetHeight;
-    // not enough room below or above (short laptop screens): scroll the page so the whole calendar fits
-    if (r.bottom + 8 + h > window.innerHeight - 12 && r.top - h - 8 < 12 && !this.scrolled) {
+    if (r.bottom + 8 + h > window.innerHeight - 12 && !this.scrolled) {
+      // short screen: scroll the page once so the whole calendar fits below the bar
       this.scrolled = true;
-      window.scrollBy(0, Math.max(0, r.bottom + 8 + h - window.innerHeight + 16));
-      r = this.fields[0].getBoundingClientRect();
+      window.scrollBy(0, Math.min(r.top - 84, r.bottom + 8 + h - window.innerHeight + 16));
+      r = bar.getBoundingClientRect();
     }
-    var left = Math.min(Math.max(12, r.left), window.innerWidth - w - 12);
-    var top = r.bottom + 8;
-    if (top + h > window.innerHeight - 12 && r.top - h - 8 > 12) top = r.top - h - 8;
-    box.style.left = left + "px";
-    box.style.top = Math.max(12, top) + "px";
+    box.style.left = Math.min(Math.max(12, r.left), window.innerWidth - w - 12) + "px";
+    box.style.top = Math.max(12, r.bottom + 8) + "px";
   };
 
   Picker.prototype.close = function (refocus) {

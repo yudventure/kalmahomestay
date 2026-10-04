@@ -48,11 +48,11 @@ test('the first diving and trip list is written once and every text follows the 
 });
 
 test('each service card opens its own detail page with a matching button', async () => {
-  const home = await page('/');
+  const home = await page('/id');
   assert.match(home, /href="\/layanan\/homestay" class="btn btn--cta btn--sm">Lihat detail homestay</);
   assert.match(home, /href="\/layanan\/diving-snorkeling" class="btn btn--light btn--sm">Lihat pilihan diving (&amp;|&) snorkeling</);
   assert.match(home, /href="\/layanan\/trip" class="btn btn--light btn--sm">Lihat semua trip</);
-  assert.match(await page('/en'), /href="\/en\/services\/trips"/);
+  assert.match(await page('/'), /href="\/en\/services\/trips"/);
 
   const stay = await page('/layanan/homestay');
   assert.match(stay, /<h1>Homestay<\/h1>/);
@@ -73,7 +73,7 @@ test('each service card opens its own detail page with a matching button', async
 });
 
 test('the footer shows the WhatsApp logo, no survey and no floating button; dates use the Kalma calendar', async () => {
-  const home = await page('/');
+  const home = await page('/id');
   assert.match(home, /aria-label="WhatsApp" class="foot__wa"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fill" d="M20\.52 3\.48/);
   assert.doesNotMatch(home, /survey|wa-float/);
   assert.match(home, /<form class="search" id="quick" method="get" action="\/pesan">/);

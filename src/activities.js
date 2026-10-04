@@ -21,6 +21,8 @@ const servicePath = (lang, id) => {
   return lang === 'en' ? `/en/services/${s.slug.en}` : `/layanan/${s.slug.id}`;
 };
 const bookPath = (lang) => (lang === 'en' ? '/en/book' : '/pesan');
+/** English is the default language: the English homepage is "/", the Indonesian one "/id". */
+const homePath = (lang) => (lang === 'en' ? '/' : '/id');
 const lines = (s) => String(s || '').split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 const paragraphs = (s) => String(s || '').split(/\r?\n\s*\r?\n/).map((p) => p.trim()).filter(Boolean);
 
@@ -67,4 +69,4 @@ function createActivities({ repo, media }) {
   };
 }
 
-module.exports = { createActivities, SERVICES, CATEGORIES, LEVELS, servicePath, bookPath, DEFAULTS };
+module.exports = { createActivities, SERVICES, CATEGORIES, LEVELS, servicePath, bookPath, homePath, DEFAULTS };

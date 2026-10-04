@@ -49,3 +49,14 @@ untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 
 - Halaman detail layanan ada di `/layanan/<slug>` (`views/service.ejs`). Isi diving, snorkeling, dan trip diatur di admin
   Website → Aktivitas & trip (tabel `activities`, foto lewat tombol unggah). Harga kosong berarti "sesuai permintaan".
 - Survei tamu sudah tidak ada di website dan tidak ada tombol WhatsApp melayang.
+
+## Bahasa, peran PR, dan konten planner
+- Bahasa bawaan website adalah Inggris. Beranda Inggris di `/`, beranda Indonesia di `/id` (`homePath()` di
+  `src/activities.js`). Halaman lain tetap `/en/...` untuk Inggris dan `/pesan`, `/layanan`, `/masukan` untuk Indonesia.
+- Semua pemberitahuan ke tamu lewat email. Teks website meminta tamu mengecek email (termasuk folder spam).
+- Halaman We hear you tanpa header situs. Logo Kalma dan pilihan bahasa ada di kartu biru, ada tombol kembali ke beranda,
+  email dan nomor WhatsApp wajib dan dipisah. Tidak ada tombol WhatsApp di halaman itu.
+- Peran `pr` (Public Relations) membuka area `website` dan `content`. Menu Sosial media berisi Kalender konten,
+  Papan konten (ide, naskah, produksi, siap tayang, sudah tayang), dan Komentar Instagram (`src/admin-content.js`).
+  Materi konten diunggah lewat tombol (dokumen/foto dan video), bersifat pribadi.
+- Kalender tanggal di bar pemesanan selalu terbuka di bawah bar. Jika layar pendek, halaman digulir dulu.

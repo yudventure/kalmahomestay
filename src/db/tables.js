@@ -40,7 +40,7 @@ const TABLES = {
       label: 'str', public: 'bool', uploaded_by: 'str' },
   },
   feedback: {
-    columns: { kind: 'str', topic: 'str', rating: 'int', message: 'text', name: 'str', contact: 'str', stay_date: 'date',
+    columns: { kind: 'str', topic: 'str', rating: 'int', message: 'text', name: 'str', contact: 'str', email: 'str', phone: 'str', stay_date: 'date',
       lang: 'str', status: 'str', admin_note: 'text', handled_by: 'str' },
   },
   activities: {
@@ -48,6 +48,10 @@ const TABLES = {
       level: 'str', duration: 'str', duration_en: 'str', start_time: 'str', title_id: 'str', title_en: 'str',
       summary_id: 'text', summary_en: 'text', body_id: 'text', body_en: 'text', includes_id: 'text', includes_en: 'text',
       bring_id: 'text', bring_en: 'text', notes_id: 'text', notes_en: 'text' },
+  },
+  content_posts: {
+    columns: { title: 'str', platforms: 'str', format: 'str', pillar: 'str', status: 'str', publish_date: 'date', publish_time: 'str',
+      assignee: 'str', hook: 'text', script: 'text', caption: 'text', hashtags: 'text', cta: 'str', link: 'str', notes: 'text', created_by: 'str' },
   },
   transactions: {
     columns: { date: 'date', kind: 'str', category: 'str', amount: 'money', method: 'str', description: 'text',

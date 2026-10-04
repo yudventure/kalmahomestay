@@ -147,14 +147,14 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
   const base = `http://127.0.0.1:${server.address().port}`;
   const auth = { Authorization: 'Basic ' + Buffer.from('admin:rahasia').toString('base64') };
   try {
-    let html = await (await fetch(base + '/en')).text();
+    let html = await (await fetch(base + '/')).text();
     assert.match(html, /Sample view\. Real guest stories will appear here/, 'labelled samples before the first sync');
     assert.match(html, /bubble__tag--sample">Sample</);
 
     const sync = await fetch(base + '/admin/instagram/sync', { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' });
     assert.equal(sync.headers.get('location'), '/admin/instagram?ok=ig-synced');
 
-    html = await (await fetch(base + '/en')).text();
+    html = await (await fetch(base + '/')).text();
     assert.match(html, /Tempatnya tenang banget/);
     assert.doesNotMatch(html, /bubble__tag--sample|Sample view/, 'samples disappear once real comments exist');
     assert.match(html, /<b>@rina\.travels<\/b>\s*<a class="bubble__tag" href="https:\/\/www\.instagram\.com\/reel\/AAA\/"[^>]*>Reels<\/a>/);
@@ -166,7 +166,7 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
 
     const hide = await fetch(base + '/admin/instagram/101/visibility', { method: 'POST', headers: { ...auth, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'hidden=1', redirect: 'manual' });
     assert.equal(hide.status, 303);
-    html = await (await fetch(base + '/en')).text();
+    html = await (await fetch(base + '/')).text();
     assert.doesNotMatch(html, /Tempatnya tenang banget/);
     assert.match(html, /Best snorkeling trip/);
 
@@ -175,13 +175,13 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
     assert.equal((await form({ username: '@sari', text: 'Sunset di dermaga Kalma juara!', kind: 'post', link: 'https://www.instagram.com/p/ZZZ/' })).headers.get('location'), '/admin/instagram?ok=ig-added');
     assert.equal((await form({ username: 'sari', text: 'ok', kind: 'post' })).headers.get('location'), '/admin/instagram?err=ig-invalid');
     assert.equal((await form({ username: 'sari', text: 'Bagus sekali tempatnya', link: 'javascript:alert(1)' })).headers.get('location'), '/admin/instagram?err=ig-invalid');
-    html = await (await fetch(base + '/')).text();
+    html = await (await fetch(base + '/id')).text();
     assert.match(html, /<b>@sari<\/b>\s*<a class="bubble__tag" href="https:\/\/www\.instagram\.com\/p\/ZZZ\/"[^>]*>Foto<\/a>/);
     const manual = (await app.locals.repo.listIgComments()).find((c) => c.username === 'sari');
     assert.equal(manual.media_kind, 'post');
     assert.equal((await fetch(base + '/admin/instagram/201/delete', { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' })).status, 404, 'synced comments are hidden, not deleted');
     assert.equal((await fetch(base + `/admin/instagram/${manual.id}/delete`, { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' })).status, 303);
-    assert.doesNotMatch(await (await fetch(base + '/')).text(), /Sunset di dermaga/);
+    assert.doesNotMatch(await (await fetch(base + '/id')).text(), /Sunset di dermaga/);
 
     const forged = await fetch(base + '/admin/instagram/201/visibility', { method: 'POST', headers: { ...auth, Origin: 'https://evil.example', 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'hidden=1' });
     assert.equal(forged.status, 403);

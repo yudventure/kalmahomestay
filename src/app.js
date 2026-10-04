@@ -9,10 +9,11 @@ const { createInstagramSync } = require('./instagram');
 const { createSite } = require('./site');
 const { createCalendar } = require('./calendar');
 const { createMedia } = require('./media');
-const { createActivities, servicePath, bookPath } = require('./activities');
+const { createActivities, servicePath, bookPath, homePath } = require('./activities');
 const { mountBooking } = require('./booking');
 const { recordWebsitePayment } = require('./admin-finance');
 const payments = require('./payments');
+const { normalizeEmail, normalizePhone } = require('./db/shared');
 const fs = require('fs');
 const compression = require('compression');
 
@@ -166,8 +167,8 @@ function createApp(options = {}) {
       contact: config.contact,
       siteUrl: config.siteUrl,
       googleVerification: config.googleVerification,
-      path: lang === 'en' ? '/en' : '/',
-      home: lang === 'en' ? '/en' : '/',
+      path: homePath(lang),
+      home: homePath(lang),
       base,
       year: new Date().getFullYear(),
       servicePath: (id) => servicePath(lang, id),
@@ -197,8 +198,10 @@ function createApp(options = {}) {
     photo: () => withUploads(photoFinder(), media),
   });
   // old links like /?book=laguna opened a booking dialog; they now go to the booking page
-  app.get('/', booking.redirectOldBook, (req, res) => renderHome(res, 'id'));
-  app.get('/en', booking.redirectOldBook, (req, res) => renderHome(res, 'en'));
+  // English is the default language; Indonesian lives under /id
+  app.get('/', booking.redirectOldBook, (req, res) => renderHome(res, 'en'));
+  app.get('/id', booking.redirectOldBook, (req, res) => renderHome(res, 'id'));
+  app.get('/en', booking.redirectOldBook, (req, res) => res.redirect(301, '/'));
 
   // Midtrans "Payment Notification URL": https://<domain>/api/payments/midtrans
   app.post('/api/payments/midtrans', ah(async (req, res) => {
@@ -225,7 +228,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- the traveler survey was taken off the website; old links go home ---------- */
-  app.get(['/survey', '/en/survey'], (req, res) => res.redirect(301, req.path.startsWith('/en') ? '/en' : '/'));
+  app.get(['/survey', '/en/survey'], (req, res) => res.redirect(301, req.path.startsWith('/en') ? '/' : '/id'));
 
   /* ---------- "We hear you": suggestions, complaints, compliments ---------- */
   const FB_KINDS = ['saran', 'keluhan', 'pujian', 'pertanyaan'];
@@ -233,13 +236,13 @@ function createApp(options = {}) {
   const fbPath = (lang) => (lang === 'en' ? '/en/feedback' : '/masukan');
   function renderFeedback(res, lang, extra = {}) {
     res.render('feedback', {
-      lang, t: translator(lang), base: lang === 'en' ? '/en' : '', home: lang === 'en' ? '/en' : '/', siteUrl: config.siteUrl, contact: config.contact,
-      action: fbPath(lang), KINDS: FB_KINDS, TOPICS: FB_TOPICS, values: { kind: '', topic: '', rating: '', message: '', name: '', contact: '', stay_date: '' },
+      lang, t: translator(lang), base: lang === 'en' ? '/en' : '', home: homePath(lang), siteUrl: config.siteUrl, contact: config.contact,
+      action: fbPath(lang), KINDS: FB_KINDS, TOPICS: FB_TOPICS, values: { kind: '', topic: '', rating: '', message: '', name: '', email: '', phone: '', stay_date: '' },
       error: '', thanks: false, ...extra,
     });
   }
   app.get(['/masukan', '/en/feedback'], (req, res) => renderFeedback(res, req.path.startsWith('/en') ? 'en' : 'id', { thanks: req.query.thanks === '1' }));
-  app.get('/feedback', (req, res) => res.redirect(301, '/masukan'));
+  app.get('/feedback', (req, res) => res.redirect(301, '/en/feedback'));
   app.post(['/masukan', '/en/feedback'], ah(async (req, res) => {
     const lang = req.path.startsWith('/en') ? 'en' : 'id';
     const t = translator(lang);
@@ -249,16 +252,19 @@ function createApp(options = {}) {
     const v = {
       kind: FB_KINDS.includes(b.kind) ? b.kind : '', topic: FB_TOPICS.includes(b.topic) ? b.topic : 'lainnya',
       rating: /^[1-5]$/.test(String(b.rating || '')) ? Number(b.rating) : '', message: String(b.message || '').trim().slice(0, 4000),
-      name: String(b.name || '').trim().slice(0, 120), contact: String(b.contact || '').trim().slice(0, 120),
+      name: String(b.name || '').trim().slice(0, 120), email: String(b.email || '').trim().slice(0, 120), phone: String(b.phone || '').trim().slice(0, 20),
       stay_date: /^\d{4}-\d{2}-\d{2}$/.test(String(b.stay_date || '')) ? b.stay_date : '',
     };
     let error = '';
     if (!v.kind) error = t('fb.errKind');
     else if (v.message.length < 10) error = t('fb.errMessage');
+    else if (!normalizeEmail(v.email)) error = t('fb.errEmail');
+    else if (!normalizePhone(v.phone)) error = t('fb.errPhone');
     else if (rateLimited(req.ip, 'feedback')) error = t('fb.errRate');
     if (error) { res.status(400); return renderFeedback(res, lang, { values: v, error }); }
     try {
-      await repo.table('feedback').insert({ ...v, rating: v.rating || null, stay_date: v.stay_date || null, lang, status: 'baru' });
+      const email = normalizeEmail(v.email), phone = normalizePhone(v.phone);
+      await repo.table('feedback').insert({ ...v, email, phone, contact: email, rating: v.rating || null, stay_date: v.stay_date || null, lang, status: 'baru' });
     } catch (e) {
       console.error('Could not save feedback:', e.message);
     }
@@ -284,12 +290,12 @@ function createApp(options = {}) {
     .map((f) => { try { return fs.statSync(path.join(ROOT, f)).mtimeMs; } catch { return 0; } }))).toISOString().slice(0, 10);
   app.get('/sitemap.xml', (req, res) => {
     const u = config.siteUrl;
-    const alt = `<xhtml:link rel="alternate" hreflang="id" href="${u}/"/><xhtml:link rel="alternate" hreflang="en" href="${u}/en"/><xhtml:link rel="alternate" hreflang="x-default" href="${u}/"/>`;
+    const alt = `<xhtml:link rel="alternate" hreflang="id" href="${u}/id"/><xhtml:link rel="alternate" hreflang="en" href="${u}/"/><xhtml:link rel="alternate" hreflang="x-default" href="${u}/"/>`;
     res.type('application/xml').send(
       '<?xml version="1.0" encoding="UTF-8"?>\n' +
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
       `  <url><loc>${u}/</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
-      `  <url><loc>${u}/en</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
+      `  <url><loc>${u}/id</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
       ['homestay', 'diving', 'trip'].map((id) => {
         const pid = u + servicePath('id', id), pen = u + servicePath('en', id);
         const a = `<xhtml:link rel="alternate" hreflang="id" href="${pid}"/><xhtml:link rel="alternate" hreflang="en" href="${pen}"/>`;
@@ -309,8 +315,8 @@ function createApp(options = {}) {
   }));
 
   app.use((req, res) => {
-    const lang = req.path.startsWith('/en') ? 'en' : 'id';
-    res.status(404).render('404', { lang, t: translator(lang), home: lang === 'en' ? '/en' : '/' });
+    const lang = /^\/(id|pesan|layanan|masukan)(\/|$)/.test(req.path) ? 'id' : 'en';
+    res.status(404).render('404', { lang, t: translator(lang), home: homePath(lang) });
   });
 
   // eslint-disable-next-line no-unused-vars

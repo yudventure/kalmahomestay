@@ -1,0 +1,36 @@
+<%- include('_top') %>
+<% var short = {}; PLATFORMS.forEach(function (p) { short[p.id] = p.short; }); %>
+<h1>Kalender konten</h1>
+<p class="muted">Rencana unggahan Instagram, TikTok, Facebook, YouTube, dan Google untuk tim public relations. Klik tanggal untuk menambah konten, klik kartu untuk membuka naskah dan materinya.</p>
+<%- include('_contenttabs', { active: 'calendar' }) %>
+<div class="ct-month">
+  <a class="btn btn--ghost btn--sm" href="/admin/content?m=<%= prev %>">‹ Sebelumnya</a>
+  <h2><%= monthLabel %></h2>
+  <a class="btn btn--ghost btn--sm" href="/admin/content?m=<%= nextMonth %>">Berikutnya ›</a>
+</div>
+<div class="ct-legend">
+  <% STATUSES.forEach(function (s) { %><span class="ct-dot ct--<%= s.id %>"><%= s.label %> <b><%= counts[s.id] %></b></span><% }) %>
+</div>
+<div class="ct-cal" role="grid">
+  <% DAY_NAMES.forEach(function (d) { %><div class="ct-cal__wd" role="columnheader"><%= d %></div><% }) %>
+  <% days.forEach(function (d) { var other = d.slice(0, 7) !== month; %>
+  <div class="ct-day<%= other ? ' is-other' : '' %><%= d === today ? ' is-today' : '' %>" role="gridcell">
+    <div class="ct-day__head"><span><%= Number(d.slice(8)) %></span><a href="/admin/content/new?date=<%= d %>" aria-label="Tambah konten <%= d %>">+</a></div>
+    <% (byDay[d] || []).forEach(function (p) { %>
+    <a class="ct-chip ct--<%= p.status %>" href="/admin/content/<%= p.id %>">
+      <small><%= p.publish_time || '' %> <%= String(p.platforms || '').split(',').filter(Boolean).map(function (x) { return short[x]; }).join(' ') %></small>
+      <b><%= p.title %></b>
+    </a>
+    <% }) %>
+  </div>
+  <% }) %>
+</div>
+<% if (unplanned.length) { %>
+<section class="panel">
+  <div class="panel__head"><div><p class="eyebrow-a">Bank ide</p><h2>Belum ada tanggal</h2></div></div>
+  <ul class="list">
+    <% unplanned.forEach(function (p) { %><li><a href="/admin/content/<%= p.id %>"><b><%= p.title %></b><span><%= (STATUSES.find(function (s) { return s.id === p.status; }) || {}).label %><%= p.pillar ? ' · ' + PILLARS[p.pillar] : '' %></span></a></li><% }) %>
+  </ul>
+</section>
+<% } %>
+<%- include('_bottom') %>

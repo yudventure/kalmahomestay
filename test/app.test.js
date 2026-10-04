@@ -36,28 +36,33 @@ const post = (p, body) => fetch(base + p, { method: 'POST', headers: { 'Content-
 const valid = () => ({ name: 'Rina', contact: '0812 3456 7890', checkin: addDays(10), checkout: addDays(13), guests: '2', room: 'pantai', msg: 'Vegetarian' });
 
 test('home page renders in Indonesian with contact settings', async () => {
-  const res = await fetch(base + '/');
+  const res = await fetch(base + '/id');
   assert.equal(res.status, 200);
   const html = await res.text();
   assert.match(html, /<html lang="id">/);
   assert.match(html, /Bangun dengan suara <em>ombak<\/em>\./);
   assert.match(html, /Rp 850\.000/);
   assert.match(html, /wa\.me\/6281111111111/);
-  assert.match(html, /<link rel="canonical" href="https:\/\/kalma\.test\/">/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/kalma\.test\/id">/);
   assert.doesNotMatch(html, /<%|t\('/, 'no unrendered template tags');
   assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
 });
 
-test('English page renders at /en', async () => {
-  const html = await (await fetch(base + '/en')).text();
+test('English is the default language at /, and /en goes there', async () => {
+  const html = await (await fetch(base + '/')).text();
   assert.match(html, /<html lang="en">/);
   assert.match(html, /Wake up to the sound of <em>waves<\/em>\./);
   assert.match(html, /Lagoon Bungalow/);
-  assert.match(html, /href="\/en" hreflang="en" lang="en" aria-current="page"/);
+  assert.match(html, /href="\/" hreflang="en" lang="en" aria-current="page"/);
+  assert.match(html, /href="\/id" hreflang="id" lang="id"/);
+  assert.match(html, /<link rel="canonical" href="https:\/\/kalma\.test\/">/);
+  const old = await fetch(base + '/en', { redirect: 'manual' });
+  assert.equal(old.status, 301);
+  assert.equal(old.headers.get('location'), '/');
 });
 
 test('partners scroll three at a time with a logo or initials, each listed twice for a seamless loop', async () => {
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   const names = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'content', 'partners.json'), 'utf8')).partners;
   if (!names.length) return assert.doesNotMatch(html, /class="partners"/);
   assert.match(html, /<div class="partners" role="region"[^>]*>\s*<div class="partners__viewport">/);
@@ -68,12 +73,12 @@ test('partners scroll three at a time with a logo or initials, each listed twice
 });
 
 test('each fact in the strip has an icon', async () => {
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   assert.equal((html.match(/<div class="fact"><span class="fact__ic" aria-hidden="true"><svg/g) || []).length, 4);
 });
 
 test('without guest stories the homepage shows labelled sample bubbles and the WhatsApp invite', async () => {
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   assert.match(html, /class="bubbles bubbles--sample"/);
   assert.equal((html.match(/bubble__tag--sample">Contoh</g) || []).length >= 6, true, 'every sample bubble is tagged');
   assert.match(html, /Contoh tampilan\. Cerita tamu asli akan muncul di sini\./);
@@ -105,7 +110,7 @@ test('video slots pair mp4 and webm files by name', () => {
 });
 
 test('hero tiles play the bundled clips over their poster photos, and assets are versioned', async () => {
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   for (let i = 1; i <= 4; i++) {
     assert.match(html, new RegExp(`--img:url\\(/img/hero-${i}\\.jpg\\)`));
     assert.match(html, new RegExp(`<video class="tile__video" autoplay muted loop playsinline[^>]*poster="/img/hero-${i}\\.jpg"><source src="/video/hero-${i}\\.mp4" type="video/mp4">`));
@@ -124,7 +129,7 @@ test('assets are compressed, long-cached and fonts are self-hosted', async () =>
   const font = await fetch(base + '/fonts/jakarta-latin.woff2');
   assert.equal(font.status, 200);
   assert.equal(font.headers.get('content-type'), 'font/woff2');
-  const html = await (await fetch(base + '/')).text();
+  const html = await (await fetch(base + '/id')).text();
   assert.doesNotMatch(html, /fonts\.googleapis\.com/);
   assert.match(html, /<link rel="preload" href="\/fonts\/jakarta-latin\.woff2" as="font"/);
 });
@@ -306,9 +311,9 @@ test('replyLink handles phones and emails', () => {
 test('the survey is gone from the website; old links go home', async () => {
   const r = await fetch(base + '/en/survey', { redirect: 'manual' });
   assert.equal(r.status, 301);
-  assert.equal(r.headers.get('location'), '/en');
-  assert.equal((await fetch(base + '/survey', { redirect: 'manual' })).headers.get('location'), '/');
-  assert.doesNotMatch(await (await fetch(base + '/')).text(), /\/survey/);
+  assert.equal(r.headers.get('location'), '/');
+  assert.equal((await fetch(base + '/survey', { redirect: 'manual' })).headers.get('location'), '/id');
+  assert.doesNotMatch(await (await fetch(base + '/id')).text(), /\/survey/);
 });
 
 test('admin still shows earlier survey answers, CSV and delete', async () => {
@@ -333,10 +338,10 @@ test('sitemap has hreflang alternates and lastmod; verification meta is rendered
   assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
   assert.equal((xml.match(/<url>/g) || []).length, 8, 'home and the three service pages, in both languages');
   assert.match(xml, /<loc>https:\/\/kalma\.test\/en\/services\/diving-snorkeling<\/loc>/);
-  assert.match(xml, /<loc>https:\/\/kalma\.test\/en<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
+  assert.match(xml, /<loc>https:\/\/kalma\.test\/id<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
   assert.match(xml, /hreflang="x-default" href="https:\/\/kalma\.test\/"/);
   assert.doesNotMatch(xml, /survey|admin/);
-  assert.match(await (await fetch(base + '/')).text(), /<meta name="google-site-verification" content="abc123verify">/);
+  assert.match(await (await fetch(base + '/id')).text(), /<meta name="google-site-verification" content="abc123verify">/);
 });
 
 test('health check reports storage', async () => {

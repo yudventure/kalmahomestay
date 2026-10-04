@@ -10,20 +10,22 @@ const crypto = require('crypto');
 
 const ROLES = [
   { id: 'owner', label: 'Owner', desc: 'Semua menu, termasuk pengguna' },
-  { id: 'manager', label: 'Manager', desc: 'Reservasi, website, SDM dan keuangan' },
+  { id: 'manager', label: 'Manager', desc: 'Reservasi, website, sosial media, SDM dan keuangan' },
   { id: 'reservation', label: 'Reservasi / Front office', desc: 'Permintaan, kalender, customer, channel OTA' },
   { id: 'hrd', label: 'HRD', desc: 'Karyawan, absensi, cuti, penggajian' },
   { id: 'finance', label: 'Finance', desc: 'Transaksi, laporan, penggajian' },
+  { id: 'pr', label: 'Public Relations', desc: 'Website, sosial media, kalender dan naskah konten' },
 ];
 const ROLE_IDS = ROLES.map((r) => r.id);
 
 /** Menu areas per role. */
 const AREAS = {
-  owner: ['reservations', 'website', 'hr', 'payroll', 'finance', 'users'],
-  manager: ['reservations', 'website', 'hr', 'payroll', 'finance'],
+  owner: ['reservations', 'website', 'content', 'hr', 'payroll', 'finance', 'users'],
+  manager: ['reservations', 'website', 'content', 'hr', 'payroll', 'finance'],
   reservation: ['reservations'],
   hrd: ['hr', 'payroll'],
   finance: ['finance', 'payroll'],
+  pr: ['website', 'content'],
 };
 const can = (role, area) => (AREAS[role] || []).includes(area);
 

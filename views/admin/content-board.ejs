@@ -1,0 +1,25 @@
+<%- include('_top') %>
+<% var short = {}; PLATFORMS.forEach(function (p) { short[p.id] = p.short; }); var ids = STATUSES.map(function (s) { return s.id; }); %>
+<h1>Papan konten</h1>
+<p class="muted">Setiap konten berjalan dari ide, naskah, produksi, siap tayang, sampai sudah tayang. Pakai tombol panah untuk memindahkan kartu.</p>
+<%- include('_contenttabs', { active: 'board' }) %>
+<div class="ct-board">
+  <% columns.forEach(function (c, ci) { %>
+  <section class="ct-col ct--<%= c.id %>">
+    <h2><span class="ct-dot ct--<%= c.id %>"></span><%= c.label %> <small><%= c.items.length %></small></h2>
+    <% if (!c.items.length) { %><p class="muted small">Kosong</p><% } %>
+    <% c.items.forEach(function (p) { var late = p.publish_date && p.publish_date < today && c.id !== 'tayang'; %>
+    <article class="ct-card<%= late ? ' is-late' : '' %>">
+      <a href="/admin/content/<%= p.id %>"><b><%= p.title %></b></a>
+      <p class="muted small"><%= p.publish_date ? fmtDate(p.publish_date) : 'Belum ada tanggal' %><%= p.publish_time ? ' · ' + p.publish_time : '' %><%= late ? ' · terlambat' : '' %></p>
+      <p class="ct-card__tags"><% String(p.platforms || '').split(',').filter(Boolean).forEach(function (x) { %><span class="chip"><%= short[x] %></span><% }) %><% if (p.format) { %><span class="chip"><%= FORMATS[p.format] %></span><% } %><% if (p.assignee) { %><span class="chip chip--ok"><%= p.assignee %></span><% } %></p>
+      <div class="ct-card__move">
+        <% if (ci > 0) { %><form method="post" action="/admin/content/<%= p.id %>/status"><input type="hidden" name="status" value="<%= ids[ci - 1] %>"><button class="btn btn--ghost btn--sm" type="submit" aria-label="Kembali ke <%= STATUSES[ci - 1].label %>">‹</button></form><% } %>
+        <% if (ci < ids.length - 1) { %><form method="post" action="/admin/content/<%= p.id %>/status"><input type="hidden" name="status" value="<%= ids[ci + 1] %>"><button class="btn btn--ghost btn--sm" type="submit">Lanjut ke <%= STATUSES[ci + 1].label %> ›</button></form><% } %>
+      </div>
+    </article>
+    <% }) %>
+  </section>
+  <% }) %>
+</div>
+<%- include('_bottom') %>

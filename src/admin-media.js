@@ -87,7 +87,7 @@ function mountMedia(router, { repo, media, ah, idParam, t }) {
   }));
 
   /* ---------- private files: only for roles that own them ---------- */
-  const AREA = { employee: 'hr', transaction: 'finance', website: 'website' };
+  const AREA = { employee: 'hr', transaction: 'finance', website: 'website', content: 'content' };
   router.get('/files/:id', ah(async (req, res, next) => {
     const id = idParam(req); if (!id) return next();
     const row = await media.get(id);
@@ -104,7 +104,8 @@ function mountMedia(router, { repo, media, ah, idParam, t }) {
     if (!row || row.owner_type === 'website') return next();
     if (!can(req.staff.role, AREA[row.owner_type])) return res.status(403).render('admin/forbidden', { title: 'Tidak ada akses' });
     await media.remove(id);
-    const back = row.owner_type === 'employee' ? `/admin/hr/employees/${row.owner_id}?ok=deleted#dokumen` : '/admin/finance?ok=deleted';
+    const back = row.owner_type === 'employee' ? `/admin/hr/employees/${row.owner_id}?ok=deleted#dokumen`
+      : row.owner_type === 'content' ? `/admin/content/${row.owner_id}?ok=deleted#materi` : '/admin/finance?ok=deleted';
     res.redirect(303, back);
   }));
 }

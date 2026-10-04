@@ -13,6 +13,7 @@ const { mountFinance, soldNights } = require('./admin-finance');
 const { mountMedia } = require('./admin-media');
 const { mountFeedback } = require('./admin-feedback');
 const { mountActivities } = require('./admin-activities');
+const { mountContent, contentAlerts } = require('./admin-content');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
@@ -186,6 +187,12 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
         status.push(arr || dep ? `${arr} check-in dan ${dep} check-out hari ini.` : 'Tidak ada check-in atau check-out hari ini.');
         for (const c of chans.filter((x) => /^Gagal/.test(x.last_sync_status || ''))) alerts.push({ label: `Sinkron ${c.name} gagal`, sub: c.last_sync_status, href: '/admin/channels' });
       }
+      if (can(role, 'content')) {
+        const c = await contentAlerts(repo, today);
+        if (c.dueToday) alerts.push({ label: `${c.dueToday} konten tayang hari ini`, sub: 'Cek naskah dan materinya', href: '/admin/content' });
+        if (c.late) alerts.push({ label: `${c.late} konten lewat jadwal`, sub: 'Belum ditandai sudah tayang', href: '/admin/content/board' });
+        if (c.dueToday) status.push(`${c.dueToday} konten dijadwalkan tayang hari ini.`);
+      }
       if (can(role, 'hr')) {
         const [pending, staffCount, att] = await Promise.all([
           repo.table('leave_requests').count({ where: { status: 'pending' } }),
@@ -211,6 +218,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
     : res.status(403).render('admin/forbidden', { title: 'Tidak ada akses' }));
   router.use(['/inquiries', '/customers', '/calendar', '/channels', '/feedback', '/export/customers.csv', '/export/inquiries.csv'], need('reservations'));
   router.use(['/website', '/instagram', '/survey', '/export/survey.csv'], need('website'));
+  router.use('/content', need('content'));
   router.use('/hr', need('hr'));
   router.use('/payroll', need('payroll'));
   router.use('/finance', need('finance'));
@@ -224,6 +232,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
   mountMedia(router, { repo, media, ah, idParam, t });
   mountFeedback(router, { repo, ah, idParam });
   if (activities) mountActivities(router, { activities, media, ah, idParam });
+  mountContent(router, { repo, media, ah, idParam });
 
   const stamp = () => todayISO();
 
@@ -261,6 +270,10 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
         repo.table('leave_requests').count({ where: { status: 'pending' } }),
       ]);
       Object.assign(view, { staffCount: staff, presentToday: att.filter((a) => a.status === 'hadir').length, attendanceFilled: att.length, pendingLeave: pending });
+    }
+    if (can(role, 'content')) {
+      const week = await repo.table('content_posts').list({ range: { col: 'publish_date', from: today, to: addDays(today, 7) }, order: [['publish_date', 'asc'], ['publish_time', 'asc']] });
+      Object.assign(view, { contentWeek: week, contentIdeas: await repo.table('content_posts').count({ where: { status: 'ide' } }) });
     }
     res.render('admin/dashboard', view);
   }));

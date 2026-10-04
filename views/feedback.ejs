@@ -15,27 +15,25 @@
 <link rel="stylesheet" href="/css/feedback.css?v=<%= v %>">
 </head>
 <body class="sv fb">
-<header class="sv__head">
-  <div class="wrap sv__bar">
-    <a href="<%= home %>"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="100" height="48"></a>
-    <div class="lang" role="group" aria-label="Bahasa / Language">
-      <a href="/masukan" hreflang="id" lang="id"<%- lang === 'id' ? ' aria-current="page"' : '' %>>ID</a>
-      <a href="/en/feedback" hreflang="en" lang="en"<%- lang === 'en' ? ' aria-current="page"' : '' %>>EN</a>
-    </div>
-  </div>
-</header>
-<% var wa = 'https://wa.me/' + contact.whatsapp; %>
 <main class="wrap fb__main">
+  <a class="fb__home" href="<%= home %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><%= t('fb.back') %></a>
 <% if (thanks) { %>
   <section class="fb__thanks">
     <span class="fb__check" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
     <h1><%= t('fb.thanks') %></h1>
     <p class="lead"><%= t('fb.thanksText') %></p>
-    <div class="fb__actions"><a class="btn btn--primary" href="<%= home %>"><%= t('fb.back') %></a><a class="btn btn--ghost" href="<%= wa %>" target="_blank" rel="noopener"><%= t('fb.waBtn') %></a></div>
+    <div class="fb__actions"><a class="btn btn--primary" href="<%= home %>"><%= t('fb.back') %></a></div>
   </section>
 <% } else { %>
   <div class="fb__grid">
     <aside class="fb__intro">
+      <div class="fb__brand">
+        <a href="<%= home %>" class="fb__logo" aria-label="Kalma Raja Ampat"><img src="/brand/assets/kalma-logo-white.png" alt="Kalma" width="120" height="70"></a>
+        <div class="lang lang--dark" role="group" aria-label="Bahasa / Language">
+          <a href="/masukan" hreflang="id" lang="id"<%- lang === 'id' ? ' aria-current="page"' : '' %>>ID</a>
+          <a href="/en/feedback" hreflang="en" lang="en"<%- lang === 'en' ? ' aria-current="page"' : '' %>>EN</a>
+        </div>
+      </div>
       <p class="eyebrow"><%= t('fb.eyebrow') %></p>
       <h1><%= t('fb.title') %></h1>
       <p class="fb__lead"><%= t('fb.lead') %></p>
@@ -44,10 +42,6 @@
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg><%= t('fb.promise2') %></li>
         <li><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/></svg><%= t('fb.promise3') %></li>
       </ul>
-      <div class="fb__wa">
-        <span><%= t('fb.orWa') %></span>
-        <a class="fb__wa-btn" href="<%= wa %>" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 0 1-13.5 7.8L3 21l1.2-4.4A9 9 0 1 1 21 12z"/></svg><%= t('fb.waBtn') %></a>
-      </div>
     </aside>
 
     <form class="fb__form" method="post" action="<%= action %>" novalidate>
@@ -77,9 +71,12 @@
       <div class="fb__field"><label for="fb-msg"><%= t('fb.message') %></label>
         <textarea id="fb-msg" name="message" rows="6" maxlength="4000" required minlength="10" placeholder="<%= t('fb.messagePh') %>"><%= values.message %></textarea></div>
 
-      <div class="fb__row fb__row--3">
+      <div class="fb__row">
+        <div class="fb__field"><label for="fb-email"><%= t('fb.email') %></label><input id="fb-email" name="email" type="email" maxlength="120" autocomplete="email" required value="<%= values.email %>"><small><%= t('fb.contactHint') %></small></div>
+        <div class="fb__field"><label for="fb-phone"><%= t('fb.phone') %></label><input id="fb-phone" name="phone" type="tel" maxlength="20" autocomplete="tel" required placeholder="+62 812 3456 7890" value="<%= values.phone %>"></div>
+      </div>
+      <div class="fb__row">
         <div class="fb__field"><label for="fb-name"><%= t('fb.name') %></label><input id="fb-name" name="name" maxlength="120" autocomplete="name" value="<%= values.name %>"></div>
-        <div class="fb__field"><label for="fb-contact"><%= t('fb.contact') %></label><input id="fb-contact" name="contact" maxlength="120" autocomplete="tel" value="<%= values.contact %>"><small><%= t('fb.contactHint') %></small></div>
         <div class="fb__field"><label for="fb-stay"><%= t('fb.stay') %></label><input id="fb-stay" name="stay_date" type="date" value="<%= values.stay_date %>"></div>
       </div>
 
