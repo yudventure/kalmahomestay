@@ -293,6 +293,7 @@
     "payClosed": "Pembayaran belum selesai. Kamu bisa mencoba lagi atau menghubungi kami lewat WhatsApp.",
     "payError": "Pembayaran tidak bisa dibuka. Silakan coba lagi atau hubungi kami lewat WhatsApp.",
     "chatWa": "Chat kami di WhatsApp",
-    "close": "Tutup"
+    "close": "Tutup",
+    "errUnavailable": "Kamar ini sudah terisi pada tanggal tersebut. Pilih tanggal atau kamar lain, atau tanya kami lewat WhatsApp."
   }
 }

@@ -293,6 +293,7 @@
     "payClosed": "The payment wasn't completed. You can try again or contact us on WhatsApp.",
     "payError": "We couldn't open the payment. Please try again or contact us on WhatsApp.",
     "chatWa": "Chat with us on WhatsApp",
-    "close": "Close"
+    "close": "Close",
+    "errUnavailable": "This room is already booked on those dates. Choose other dates or another room, or ask us on WhatsApp."
   }
 }

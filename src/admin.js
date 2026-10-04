@@ -7,6 +7,7 @@ const { STATUSES, STATUS_IDS } = require('./db/shared');
 const { todayISO } = require('./inquiry');
 const survey = require('./survey');
 const { mountUsers, mountWebsite } = require('./admin-cms');
+const { mountCalendar } = require('./admin-calendar');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
 
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -45,7 +46,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -166,6 +167,7 @@ function createAdminRouter({ repo, config, instagram, site, t }) {
 
   mountUsers(router, { repo, ah, idParam });
   mountWebsite(router, { site, ah, t });
+  mountCalendar(router, { repo, calendar, config, ah, idParam, t });
 
   const stamp = () => todayISO();
 
