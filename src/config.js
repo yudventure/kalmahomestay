@@ -25,8 +25,17 @@ function loadConfig(env = process.env) {
       email: env.CONTACT_EMAIL || 'hello@kalma-rajaampat.com',
       instagram: '@' + instagram.replace(/^@/, ''),
       instagramUrl: 'https://instagram.com/' + instagram.replace(/^@/, ''),
+      facebookUrl: webUrl(env.FACEBOOK_URL),
+      tiktokUrl: webUrl(env.TIKTOK_URL),
+      googleUrl: webUrl(env.GOOGLE_BUSINESS_URL),
     },
   };
+}
+
+/** Keep only http(s) links, so a typo in hPanel can never become a javascript: link. */
+function webUrl(v) {
+  const s = String(v || '').trim();
+  return /^https?:\/\/\S+$/i.test(s) ? s : '';
 }
 
 /**

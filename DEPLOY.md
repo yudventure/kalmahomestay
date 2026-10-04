@@ -42,6 +42,9 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `WHATSAPP_DISPLAY` | `+62 812-3456-7890` | Opsional |
 | `CONTACT_EMAIL` | `hello@kalma-rajaampat.com` | |
 | `INSTAGRAM_HANDLE` | `kalma.rajaampat` | Opsional |
+| `FACEBOOK_URL` | `https://facebook.com/kalma` | Opsional, link ikon Facebook |
+| `TIKTOK_URL` | `https://tiktok.com/@kalma` | Opsional, link ikon TikTok |
+| `GOOGLE_BUSINESS_URL` | `https://maps.app.goo.gl/…` | Opsional, link ikon Google (profil Google Maps / ulasan) |
 | `ADMIN_PASSWORD` | password kuat | Untuk login `/admin` (user `admin`) |
 | `DB_HOST` | `localhost` | Dari langkah 1 |
 | `DB_PORT` | `3306` | |

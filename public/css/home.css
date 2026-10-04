@@ -102,8 +102,6 @@
   .fold .facts { padding: var(--space-3) 0 var(--space-5); }
 }
 .hero__text h1 { max-width: 11ch; }
-.reviews__plane .dash { fill: none; stroke: var(--kalma-lagoon-deep); stroke-width: 1.5; stroke-dasharray: 4 5; }
-.reviews__plane .plane { fill: var(--blue); stroke: var(--blue); stroke-width: 1.5; stroke-linejoin: round; }
 
 .mosaic { grid-area: mosaic; position: relative; display: grid; grid-template-columns: 1.15fr 1fr 1.1fr; grid-template-rows: 150px 140px 150px; gap: 14px; }
 .mosaic .photo { border-radius: 26px; box-shadow: var(--card-shadow); }
@@ -255,12 +253,23 @@
 /* ------------------------------------------------ reviews */
 .reviews { display: grid; grid-template-columns: 1fr 1.2fr; gap: var(--space-7); align-items: center; }
 .reviews__art { position: relative; height: 300px; }
-.reviews__photo { position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; transform: translate(-50%, -50%); border-radius: var(--radius-blob); border: 6px solid #fff; box-shadow: var(--card-shadow); }
-.leaf { position: absolute; border-radius: 0 70% 0 70%; }
-.leaf--1 { left: 12%; bottom: 14%; width: 90px; height: 90px; background: var(--kalma-lagoon); opacity: .85; transform: rotate(-20deg); }
-.leaf--2 { right: 18%; bottom: 18%; width: 40px; height: 40px; background: var(--kalma-coral); border-radius: 50%; }
-.dots { position: absolute; left: 14%; top: 8%; width: 110px; height: 80px; background-image: radial-gradient(var(--tint-2) 2px, transparent 2.5px); background-size: 14px 14px; }
-.reviews__plane { position: absolute; right: 0; top: 0; width: 110px; height: 74px; }
+.dots { position: absolute; width: 110px; height: 80px; background-image: radial-gradient(var(--tint-2) 2px, transparent 2.5px); background-size: 14px 14px; }
+/* Social bubbles: a fixed 440×300 stage, scaled down on small screens */
+.socials { position: absolute; left: 50%; top: 50%; width: 440px; height: 300px; transform: translate(-50%, -50%) scale(var(--soc-scale, 1)); }
+.socials .dots { left: 24px; top: 196px; }
+.socials__ring { position: absolute; left: 76px; top: 36px; width: 228px; height: 228px; border: 1.5px dashed var(--tint-2); border-radius: 50%; animation: soc-spin 40s linear infinite; }
+.soc { position: absolute; display: grid; place-items: center; border-radius: 50%; background: #fff; box-shadow: var(--card-shadow); border: 1px solid var(--line);
+  animation: soc-float var(--dur, 6s) ease-in-out var(--delay, 0s) infinite; transition: box-shadow .25s ease, scale .25s ease; }
+.soc svg { width: 50%; height: 50%; display: block; }
+a.soc:hover, a.soc:focus-visible { scale: 1.08; box-shadow: 0 18px 40px rgba(20, 60, 90, .18); }
+.soc--instagram { left: 110px; top: 70px; width: 160px; height: 160px; --dur: 6.5s; }
+.soc--google { left: 290px; top: 22px; width: 112px; height: 112px; --dur: 5.2s; --delay: -1.6s; }
+.soc--facebook { left: 302px; top: 182px; width: 90px; height: 90px; --dur: 4.6s; --delay: -3s; }
+.soc--tiktok { left: 22px; top: 42px; width: 74px; height: 74px; --dur: 5.8s; --delay: -2.2s; }
+.soc--tiktok svg { width: 46%; height: 46%; }
+@keyframes soc-float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-12px) rotate(-4deg); } }
+@keyframes soc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .soc, .socials__ring { animation: none; } }
 .quote { position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--card-shadow); }
 .quote__mark { width: 44px; height: 34px; fill: var(--kalma-lagoon); margin-bottom: var(--space-4); }
 .quote blockquote { margin: 0 0 var(--space-5); font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--heading); line-height: 1.45; }
@@ -273,7 +282,7 @@
 @media (max-width: 860px) {
   .reviews { grid-template-columns: 1fr; gap: var(--space-4); }
   .reviews__art { height: 220px; }
-  .reviews__photo { width: 170px; height: 170px; }
+  .socials { --soc-scale: .72; }
   .quote { padding: var(--space-5); }
   .quote__arrows { position: static; margin-top: var(--space-4); }
 }
