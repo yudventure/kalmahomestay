@@ -1,0 +1,18 @@
+<%- include('_top') %>
+<h1>Teks website</h1>
+<p class="muted">Ubah semua tulisan di website, per bagian, dalam bahasa Indonesia dan Inggris. Kosongkan kolom untuk kembali ke teks bawaan. Tag sederhana seperti &lt;em&gt; dan &lt;br&gt; boleh dipakai.</p>
+<nav class="tabs" aria-label="Bagian">
+<% names.forEach(function (n) { %><a href="/admin/website/content?s=<%= encodeURIComponent(n) %>"<%- n === sec ? ' aria-current="page"' : '' %>><%= groupLabel(n) %></a><% }) %>
+</nav>
+<form method="post" action="/admin/website/content" class="panel">
+  <input type="hidden" name="section" value="<%= sec %>">
+  <div class="kv admin">
+    <% keys.forEach(function (k) { var changed = over.id[k] != null || over.en[k] != null; %>
+      <p class="kv__key"><%= k %><% if (changed) { %> · <b>diubah</b><% } %></p>
+      <div class="field"><label for="id__<%= k %>">Indonesia</label><textarea id="id__<%= k %>" name="id__<%= k %>" rows="2"><%= over.id[k] != null ? over.id[k] : base.id[k] %></textarea></div>
+      <div class="field"><label for="en__<%= k %>">English</label><textarea id="en__<%= k %>" name="en__<%= k %>" rows="2"><%= over.en[k] != null ? over.en[k] : (base.en[k] != null ? base.en[k] : base.id[k]) %></textarea></div>
+    <% }) %>
+  </div>
+  <div class="sticky-save"><button class="btn btn--primary btn--sm" type="submit">Simpan bagian "<%= groupLabel(sec) %>"</button></div>
+</form>
+<%- include('_bottom') %>

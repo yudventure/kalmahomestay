@@ -6,17 +6,19 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { createFileTable } = require('./tables');
 const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError, paging } = require('./shared');
 
 function createFileRepo(dataDir) {
   const file = path.join(dataDir, 'kalma-db.json');
-  let db = { seq: { customer: 0, inquiry: 0, survey: 0 }, customers: [], inquiries: [], survey: [], settings: {}, ig: [] };
+  let db = { seq: { customer: 0, inquiry: 0, survey: 0 }, customers: [], inquiries: [], survey: [], settings: {}, ig: [], tables: {} };
 
   function load() {
     if (fs.existsSync(file)) db = JSON.parse(fs.readFileSync(file, 'utf8'));
     db.survey = db.survey || [];
     db.seq.survey = db.seq.survey || 0;
     db.settings = db.settings || {};
+    db.tables = db.tables || {};
     db.ig = db.ig || [];
   }
   function save() {
@@ -39,9 +41,12 @@ function createFileRepo(dataDir) {
   };
   const newestFirst = (a, b) => (b.created_at > a.created_at ? 1 : b.created_at < a.created_at ? -1 : b.id - a.id);
 
+  const tables = {};
   return {
     kind: 'file',
     file,
+    /** Generic CMS tables (see tables.js). `db` is replaced on load, so look it up on each call. */
+    table(name) { return (tables[name] ||= createFileTable({ get tables() { return db.tables; }, get seq() { return db.seq; } }, save, name)); },
     async init() { load(); },
     async close() {},
     async ping() { return true; },

@@ -6,6 +6,8 @@ const { ROOMS } = require('./config');
 const { STATUSES, STATUS_IDS } = require('./db/shared');
 const { todayISO } = require('./inquiry');
 const survey = require('./survey');
+const { mountUsers, mountWebsite } = require('./admin-cms');
+const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
 
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const TZ = 'Asia/Jayapura'; // WIT, Raja Ampat local time
@@ -22,6 +24,7 @@ function fmtDate(iso) {
 function nights(a, b) {
   return Math.round((Date.parse(String(b).slice(0, 10)) - Date.parse(String(a).slice(0, 10))) / 864e5);
 }
+function fmtRupiah(n) { return 'Rp ' + Math.round(Number(n) || 0).toLocaleString('id-ID'); }
 function phoneDisplay(p) { return p ? '+' + p : ''; }
 function reply(c) {
   const hello = `Halo ${c.name || ''}, terima kasih sudah menghubungi Kalma Raja Ampat!`;
@@ -42,27 +45,30 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, t }) {
+function createAdminRouter({ repo, config, instagram, site, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
   const roomName = (id) => { const r = ROOMS.find((x) => x.id === id); return r ? t(r.nameKey) : '—'; };
 
-  /* HTTP Basic auth, user "admin". Disabled (404) when ADMIN_PASSWORD is empty. */
+  const idParam = (req) => {
+    const id = Number(req.params.id);
+    return Number.isInteger(id) && id > 0 ? id : null;
+  };
+  const sessions = createSessions(config.sessionSecret || 'pw:' + config.adminPassword);
+  const ownerPv = () => passwordVersion('env:' + config.adminPassword);
+  const OWNER = () => ({ id: 'admin', name: 'Owner', username: 'admin', role: 'owner', pv: ownerPv() });
+  const users = repo.table('staff_users');
+  const sameSecret = (a, b) => crypto.timingSafeEqual(crypto.createHash('sha256').update(String(a)).digest(), crypto.createHash('sha256').update(String(b)).digest());
+
+  /* The admin is off (404) until ADMIN_PASSWORD is set in hPanel. */
   router.use((req, res, next) => {
     if (!config.adminPassword) return res.status(404).send('Not found');
-    const [scheme, encoded] = (req.get('authorization') || '').split(' ');
-    const [user, pass] = scheme === 'Basic' && encoded ? Buffer.from(encoded, 'base64').toString().split(/:(.*)/s) : [];
-    const a = crypto.createHash('sha256').update(String(pass || '')).digest();
-    const b = crypto.createHash('sha256').update(config.adminPassword).digest();
-    if (user === 'admin' && crypto.timingSafeEqual(a, b)) {
-      res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' });
-      return next();
-    }
-    res.set('WWW-Authenticate', 'Basic realm="Kalma admin", charset="UTF-8"').status(401).send('Login required');
+    res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' });
+    next();
   });
 
-  /* Browsers resend Basic credentials automatically, so state-changing requests must come from this site (CSRF guard). */
+  /* State-changing requests must come from this site (CSRF guard; the session cookie is sent automatically). */
   router.use((req, res, next) => {
     if (req.method !== 'POST') return next();
     const src = req.get('origin') || req.get('referer');
@@ -75,21 +81,93 @@ function createAdminRouter({ repo, config, instagram, t }) {
     next();
   });
 
+  /* ---------- login ---------- */
+  const attempts = new Map();
+  const tooMany = (ip) => {
+    const now = Date.now();
+    const list = (attempts.get(ip) || []).filter((t) => now - t < 15 * 60 * 1000);
+    attempts.set(ip, list);
+    return list.length >= 10;
+  };
+  const safeNext = (n) => (/^\/admin(\/[\w\-/.?=&%]*)?$/.test(String(n || '')) && !String(n).startsWith('/admin/login') ? n : '/admin');
+
+  router.get('/login', (req, res) => res.render('admin/login', { title: 'Masuk', error: '', username: '', next: safeNext(req.query.next), query: req.query }));
+
+  router.post('/login', ah(async (req, res) => {
+    const username = String(req.body.username || '').trim().toLowerCase().slice(0, 60);
+    const password = String(req.body.password || '');
+    const next = safeNext(req.body.next);
+    const fail = (error) => res.status(401).render('admin/login', { title: 'Masuk', error, username, next });
+    if (tooMany(req.ip)) return fail('Terlalu banyak percobaan. Coba lagi 15 menit lagi.');
+    let user = null;
+    if (username === 'admin') {
+      if (sameSecret(password, config.adminPassword)) user = OWNER();
+    } else {
+      const u = await users.find({ username });
+      if (u && u.active && verifyPassword(password, u.password_hash)) {
+        user = { id: u.id, pv: passwordVersion(u.password_hash) };
+        await users.update(u.id, { last_login_at: new Date() });
+      }
+    }
+    if (!user) { attempts.get(req.ip).push(Date.now()); return fail('Username atau password salah.'); }
+    res.cookie(COOKIE, sessions.issue(user), { path: '/admin', httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: SESSION_HOURS * 3600 * 1000 });
+    res.redirect(303, next);
+  }));
+
+  router.post('/logout', (req, res) => {
+    res.clearCookie(COOKIE, { path: '/admin' });
+    res.redirect(303, '/admin/login');
+  });
+
+  /* ---------- who is this? (session cookie, or Basic auth for the owner) ---------- */
+  router.use(ah(async (req, res, next) => {
+    let staff = null;
+    const [scheme, encoded] = (req.get('authorization') || '').split(' ');
+    if (scheme === 'Basic' && encoded) {
+      const [user, pass] = Buffer.from(encoded, 'base64').toString().split(/:(.*)/s);
+      if (user === 'admin' && sameSecret(pass || '', config.adminPassword)) staff = OWNER();
+    }
+    if (!staff) {
+      const s = sessions.read(readCookie(req, COOKIE));
+      if (s && s.u === 'admin' && s.pv === ownerPv()) staff = OWNER();
+      else if (s && Number.isInteger(s.u)) {
+        const u = await users.get(s.u);
+        if (u && u.active && s.pv === passwordVersion(u.password_hash)) staff = { id: u.id, name: u.name, username: u.username, role: u.role };
+      }
+    }
+    if (!staff) {
+      if (req.method === 'GET') return res.redirect(303, '/admin/login?next=' + encodeURIComponent(req.originalUrl));
+      return res.status(401).send('Login required');
+    }
+    req.staff = staff;
+    next();
+  }));
+
   router.use((req, res, next) => {
     Object.assign(res.locals, {
-      STATUSES, fmtDateTime, fmtDate, nights, phoneDisplay, reply, roomName,
+      STATUSES, fmtDateTime, fmtDate, nights, phoneDisplay, reply, roomName, rupiah: fmtRupiah,
       statusLabel: (id) => (STATUSES.find((s) => s.id === id) || {}).label || id,
       storage: repo.kind, flash: req.query.ok || '', flashErr: req.query.err || '',
       current: req.path, qs: (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v)).toString(),
+      me: req.staff, can: (area) => can(req.staff.role, area), roleLabel: (id) => (ROLES.find((r) => r.id === id) || {}).label || id,
     });
     next();
   });
 
+  /* ---------- who may open what ---------- */
+  const need = (area) => (req, res, next) => (can(req.staff.role, area) ? next()
+    : res.status(403).render('admin/forbidden', { title: 'Tidak ada akses' }));
+  router.use(['/inquiries', '/customers', '/calendar', '/channels', '/export/customers.csv', '/export/inquiries.csv'], need('reservations'));
+  router.use(['/website', '/instagram', '/survey', '/export/survey.csv'], need('website'));
+  router.use('/hr', need('hr'));
+  router.use('/payroll', need('payroll'));
+  router.use('/finance', need('finance'));
+  router.use('/users', need('users'));
+
+  mountUsers(router, { repo, ah, idParam });
+  mountWebsite(router, { site, ah, t });
+
   const stamp = () => todayISO();
-  const idParam = (req) => {
-    const id = Number(req.params.id);
-    return Number.isInteger(id) && id > 0 ? id : null;
-  };
 
   /* ---------- dashboard ---------- */
   router.get('/', ah(async (req, res) => {

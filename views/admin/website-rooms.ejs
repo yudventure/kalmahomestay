@@ -1,0 +1,22 @@
+<%- include('_top') %>
+<h1>Kamar & harga</h1>
+<p class="muted">Harga per orang per malam. Jumlah unit = berapa kamar sejenis yang bisa dipesan pada tanggal yang sama (dipakai kalender dan cek ketersediaan). Nama dan deskripsi kamar diubah di <a href="/admin/website/content?s=layanan">Teks website</a>.</p>
+<form method="post" action="/admin/website/rooms" class="panel">
+  <div class="table">
+  <table>
+    <thead><tr><th>Kamar</th><th>Harga / orang / malam (Rp)</th><th>Maks. tamu</th><th>Jumlah unit</th></tr></thead>
+    <tbody>
+    <% rooms.forEach(function (r) { var d = defaults.find(function (x) { return x.id === r.id; }); %>
+      <tr>
+        <td><b><%= roomLabel(r) %></b><br><small class="muted"><%= r.id %></small></td>
+        <td><div class="field"><input name="<%= r.id %>_price" inputmode="numeric" value="<%= r.price %>" aria-label="Harga <%= roomLabel(r) %>"></div><small class="muted">Bawaan <%= rupiah(d.price) %></small></td>
+        <td><div class="field"><input name="<%= r.id %>_maxGuests" type="number" min="1" max="20" value="<%= r.maxGuests %>" aria-label="Maks. tamu"></div></td>
+        <td><div class="field"><input name="<%= r.id %>_units" type="number" min="1" max="50" value="<%= r.units %>" aria-label="Jumlah unit"></div></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+  <div class="sticky-save"><button class="btn btn--primary btn--sm" type="submit">Simpan harga & kapasitas</button></div>
+</form>
+<%- include('_bottom') %>

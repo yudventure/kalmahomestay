@@ -1,0 +1,10 @@
+<%- include('_top') %>
+<h1>Partner</h1>
+<p class="muted">Nama partner yang berjalan di bawah strip fakta di halaman depan. Satu nama per baris, maksimal 40.</p>
+<form method="post" action="/admin/website/partners" class="panel stack">
+  <div class="field"><label for="p-list">Daftar partner</label><textarea id="p-list" name="partners" rows="10"><%= (partners || fallback).join('\n') %></textarea></div>
+  <% if (!partners) { %><p class="muted small">Sekarang memakai daftar bawaan dari content/partners.json.</p><% } %>
+  <div class="btns"><button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+  <% if (partners) { %><button class="btn btn--ghost btn--sm" type="submit" name="reset" value="1">Kembali ke daftar bawaan</button><% } %></div>
+</form>
+<%- include('_bottom') %>

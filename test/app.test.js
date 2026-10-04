@@ -211,10 +211,13 @@ const adminPost = (p, body, origin = base) => fetch(base + p, {
 });
 
 test('admin requires the password', async () => {
-  assert.equal((await fetch(base + '/admin')).status, 401);
+  const anon = await fetch(base + '/admin', { redirect: 'manual' });
+  assert.equal(anon.status, 303);
+  assert.equal(anon.headers.get('location'), '/admin/login?next=%2Fadmin');
   const bad = 'Basic ' + Buffer.from('admin:salah').toString('base64');
-  assert.equal((await fetch(base + '/admin', { headers: { Authorization: bad } })).status, 401);
-  assert.equal((await fetch(base + '/admin/export/customers.csv')).status, 401);
+  assert.equal((await fetch(base + '/admin', { headers: { Authorization: bad }, redirect: 'manual' })).status, 303);
+  assert.equal((await fetch(base + '/admin/export/customers.csv', { redirect: 'manual' })).status, 303);
+  assert.equal((await fetch(base + '/admin/inquiries/1', { method: 'POST', headers: { Origin: base } })).status, 401);
   const r = await adminGet('/admin');
   assert.equal(r.status, 200);
   assert.equal(r.headers.get('cache-control'), 'no-store');

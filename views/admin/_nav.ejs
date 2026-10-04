@@ -1,0 +1,37 @@
+<%
+// Admin menu. Each group shows only for roles that may open it (see src/staff.js).
+var NAV = [
+  { items: [{ href: '/admin', label: 'Ringkasan', match: function (p) { return p === '/'; } }] },
+  { title: 'Reservasi', area: 'reservations', items: [
+    { href: '/admin/inquiries', label: 'Permintaan & booking' },
+    { href: '/admin/calendar', label: 'Kalender', soon: !locals.navCalendar },
+    { href: '/admin/channels', label: 'Channel OTA & agen', soon: !locals.navCalendar },
+    { href: '/admin/customers', label: 'Customer' } ] },
+  { title: 'Website', area: 'website', items: [
+    { href: '/admin/website/content', label: 'Teks website' },
+    { href: '/admin/website/rooms', label: 'Kamar & harga' },
+    { href: '/admin/website/contact', label: 'Kontak & sosial media' },
+    { href: '/admin/website/partners', label: 'Partner' },
+    { href: '/admin/instagram', label: 'Komentar Instagram' },
+    { href: '/admin/survey', label: 'Survei tamu' } ] },
+  { title: 'SDM', area: 'hr', items: [
+    { href: '/admin/hr/employees', label: 'Karyawan', soon: !locals.navHr },
+    { href: '/admin/hr/attendance', label: 'Absensi', soon: !locals.navHr },
+    { href: '/admin/hr/leave', label: 'Cuti & izin', soon: !locals.navHr } ] },
+  { title: 'Penggajian', area: 'payroll', items: [
+    { href: '/admin/payroll', label: 'Penggajian', soon: !locals.navHr } ] },
+  { title: 'Keuangan', area: 'finance', items: [
+    { href: '/admin/finance', label: 'Transaksi', soon: !locals.navFinance },
+    { href: '/admin/finance/report', label: 'Laporan laba rugi', soon: !locals.navFinance } ] },
+  { title: 'Sistem', area: 'users', items: [{ href: '/admin/users', label: 'Pengguna & peran' }] },
+];
+var path = '/admin' + (current === '/' ? '' : current);
+%>
+<nav class="side__nav" aria-label="Menu admin">
+<% NAV.forEach(function (g) { if (g.area && !can(g.area)) return; var items = g.items.filter(function (i) { return !i.soon; }); if (!items.length) return; %>
+  <% if (g.title) { %><p class="side__group"><%= g.title %></p><% } %>
+  <% items.forEach(function (i) { var on = i.match ? i.match(current) : path === i.href || path.indexOf(i.href + '/') === 0; %>
+  <a href="<%= i.href %>"<%- on ? ' aria-current="page"' : '' %>><%= i.label %></a>
+  <% }) %>
+<% }) %>
+</nav>

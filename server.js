@@ -33,6 +33,7 @@ async function initStorage(attempt = 1) {
     await repo.init();
     status.ready = true;
     status.error = '';
+    app.locals.site.load().catch((e) => console.error('Website settings not loaded:', e.message)); // admin-edited settings
     app.locals.instagram.start().catch(() => {}); // guest comments from Instagram, refreshed daily
     console.log(repo.kind === 'mysql' ? `Storage: MySQL database ready (${repo.connection})` : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
   } catch (e) {

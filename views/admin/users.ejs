@@ -1,0 +1,54 @@
+<%- include('_top') %>
+<h1>Pengguna & peran</h1>
+<p class="muted">Setiap staf masuk dengan akunnya sendiri. Peran menentukan menu yang terlihat. Owner (username <b>admin</b>) memakai ADMIN_PASSWORD dari hPanel dan tidak muncul di daftar ini.</p>
+<% if (flashErr === 'password') { %><p class="alert alert--err" role="alert">Password minimal 8 karakter.</p><% } %>
+
+<div class="table" style="margin-bottom: var(--space-6)">
+<table>
+  <thead><tr><th>Nama</th><th>Username</th><th>Peran</th><th>Status</th><th>Terakhir masuk</th><th>Ubah</th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada staf. Tambahkan di bawah.</td></tr><% } %>
+  <% list.forEach(function (u) { %>
+    <tr>
+      <td><b><%= u.name %></b></td>
+      <td><%= u.username %></td>
+      <td><%= roleLabel(u.role) %></td>
+      <td><span class="chip <%= u.active ? 'chip--ok' : '' %>"><%= u.active ? 'Aktif' : 'Nonaktif' %></span></td>
+      <td><%= fmtDateTime(u.last_login_at) %></td>
+      <td>
+        <form method="post" action="/admin/users/<%= u.id %>" class="inline">
+          <select name="role" aria-label="Peran"><% ROLES.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === u.role ? ' selected' : '' %>><%= r.label %></option><% }) %></select>
+          <select name="active" aria-label="Status"><option value="1"<%= u.active ? ' selected' : '' %>>Aktif</option><option value="0"<%= u.active ? '' : ' selected' %>>Nonaktif</option></select>
+          <input name="password" type="password" placeholder="Password baru (opsional)" autocomplete="new-password" minlength="8">
+          <button class="btn btn--ghost btn--sm" type="submit">Simpan</button>
+        </form>
+        <form method="post" action="/admin/users/<%= u.id %>/delete" onsubmit="return confirm('Hapus akun <%= u.username %>?')" style="margin-top:6px"><button class="btn btn--danger btn--sm" type="submit">Hapus</button></form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<section class="panel">
+  <h2>Tambah staf</h2>
+  <% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+  <form method="post" action="/admin/users" class="stack">
+    <div class="row2">
+      <div class="field"><label for="u-name">Nama</label><input id="u-name" name="name" required maxlength="120" value="<%= form.name || '' %>"></div>
+      <div class="field"><label for="u-username">Username</label><input id="u-username" name="username" required maxlength="30" pattern="[a-z0-9._\-]{3,30}" value="<%= form.username || '' %>" autocomplete="off"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="u-role">Peran</label><select id="u-role" name="role" required>
+        <% ROLES.forEach(function (r) { %><option value="<%= r.id %>"<%= r.id === (form.role || 'reservation') ? ' selected' : '' %>><%= r.label %> — <%= r.desc %></option><% }) %></select></div>
+      <div class="field"><label for="u-pass">Password awal</label><input id="u-pass" name="password" type="password" required minlength="8" autocomplete="new-password"></div>
+    </div>
+    <button class="btn btn--primary btn--sm" type="submit">Tambah</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Hak akses per peran</h2>
+  <ul class="list"><% ROLES.forEach(function (r) { %><li><a><b><%= r.label %></b><span><%= r.desc %></span></a></li><% }) %></ul>
+</section>
+<%- include('_bottom') %>

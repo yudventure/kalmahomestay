@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql2/promise');
+const { createMysqlTable } = require('./tables');
 const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError, paging } = require('./shared');
 
 const MIGRATIONS_DIR = path.join(__dirname, '..', '..', 'migrations');
@@ -117,8 +118,11 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
     return e;
   }
 
+  const tables = {};
   const repo = {
     kind: 'mysql',
+    /** Generic CMS tables (see tables.js). */
+    table(name) { return (tables[name] ||= createMysqlTable(() => pool, name)); },
 
     async init() {
       await connect();
