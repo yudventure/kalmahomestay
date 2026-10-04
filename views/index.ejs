@@ -134,6 +134,20 @@
 </section>
 </div>
 
+<% if (partners.length) { %>
+<div class="partners" role="region" aria-label="Partner Kalma">
+  <% const sep = '<svg class="partners__sep" viewBox="0 0 24 12" aria-hidden="true"><path d="M1 6c2.5-4 5-4 7.5 0s5 4 7.5 0 5-4 7 0"/></svg>'; %>
+  <% let loop = partners.slice(); while (loop.length < 14) loop = loop.concat(partners); /* each copy wider than a large screen */ %>
+  <div class="partners__track">
+    <% [0, 1].forEach(function (copy) { %>
+    <ul class="partners__list"<%- copy ? ' aria-hidden="true"' : '' %>>
+      <% loop.forEach(function (p) { %><li><%= p %><%- sep %></li><% }) %>
+    </ul>
+    <% }) %>
+  </div>
+</div>
+<% } %>
+
 <!-- ============================== EXPERIENCES (categories) ============================== -->
 <section class="sec" id="pengalaman">
   <div class="wrap">

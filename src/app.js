@@ -17,6 +17,14 @@ const CONTENT = {
   id: require('../content/id.json'),
   en: require('../content/en.json'),
 };
+/** Partner names for the running text under the facts strip (content/partners.json). */
+function loadPartners() {
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(ROOT, 'content/partners.json'), 'utf8')).partners;
+    return Array.isArray(list) ? list.map((p) => String(p).trim()).filter(Boolean).slice(0, 40) : [];
+  } catch { return []; }
+}
+
 const EMPTY_VALUES = { name: '', contact: '', country: '', checkin: '', checkout: '', guests: '2', room: '', msg: '' };
 
 function translator(lang) {
@@ -123,6 +131,7 @@ function createApp(options = {}) {
       lang, t, rupiah,
       photo: photoFinder(),
       video: videoFinder(),
+      partners: loadPartners(),
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
