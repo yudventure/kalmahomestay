@@ -419,3 +419,13 @@ test('404, robots and sitemap', async () => {
   assert.equal(await (await fetch(base + '/google32888c7e38348c1f.html')).text(), 'google-site-verification: google32888c7e38348c1f.html');
   assert.match(await (await fetch(base + '/sitemap.xml')).text(), /https:\/\/kalma\.test\/en/);
 });
+
+test('decorative animations keep running when Windows or Android asks to reduce motion', () => {
+  const css = fs.readFileSync(path.join(__dirname, '..', 'public', 'css', 'home.css'), 'utf8')
+    + fs.readFileSync(path.join(__dirname, '..', 'public', 'css', 'style.css'), 'utf8');
+  for (const block of css.match(/@media \(prefers-reduced-motion: reduce\)[^]*?\}\s*\}/g) || []) {
+    assert.doesNotMatch(block, /animation|reveal|display: none/, block);
+  }
+  const js = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'main.js'), 'utf8');
+  assert.match(js, /var calm = Boolean\(conn\.saveData\);/, 'videos and the crab only rest for data saver');
+});

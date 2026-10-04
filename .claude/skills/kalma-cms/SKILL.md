@@ -34,3 +34,8 @@ dalam bahasa Indonesia sehari-hari. Nilai kosong ditulis "-".
 
 ## Branding
 Fraunces untuk judul, Plus Jakarta Sans untuk teks, warna dari `brand/tokens.css`. Jangan menambah font atau warna di luar token.
+
+## Animasi di Windows dan Android
+Banyak laptop Windows dan HP Android menyalakan pengaturan "kurangi animasi" (prefers-reduced-motion: reduce).
+Pemilik ingin semua animasi tetap jalan. Jangan menulis `@media (prefers-reduced-motion: reduce) { ... animation: none }`
+untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 1366×768 dan perangkat Android (Pixel 7).

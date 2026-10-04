@@ -62,10 +62,12 @@
 
   /* ---------------------------------------------------------------- hero video tiles
      The browser starts them itself (autoplay muted) for the fastest start; here we only pause
-     them for reduced-motion / data-saver visitors, when scrolled away, or in a background tab. */
+     them for data-saver visitors, when scrolled away, or in a background tab.
+     The site's motion is slow and decorative, so it also plays when Windows "Animation effects" or
+     Android "Remove animations" is switched off (prefers-reduced-motion); only smooth scrolling follows it. */
   var clips = Array.prototype.slice.call(document.querySelectorAll(".tile__video"));
   var conn = navigator.connection || {};
-  var calm = matchMedia("(prefers-reduced-motion: reduce)").matches || conn.saveData;
+  var calm = Boolean(conn.saveData);
   var playAll = function (on) {
     clips.forEach(function (v) {
       if (on) { var p = v.play(); if (p) p.catch(function () {}); } else v.pause();
