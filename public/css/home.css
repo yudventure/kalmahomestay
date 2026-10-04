@@ -276,6 +276,8 @@ a.soc:hover, a.soc:focus-visible { scale: 1.08; box-shadow: 0 18px 40px rgba(20,
 .quote figure { margin: 0; }
 .quote figcaption b { display: block; color: var(--heading); }
 .quote figcaption span { display: block; font-size: var(--text-sm); color: var(--muted); }
+.quote__src { display: inline-block; font-size: var(--text-sm); color: var(--kalma-lagoon-deep); text-decoration: none; }
+.quote__src:hover { text-decoration: underline; }
 .quote .stars { color: var(--kalma-coral); letter-spacing: 2px; font-size: var(--text-base); }
 .quote__arrows { position: absolute; right: var(--space-5); bottom: var(--space-5); }
 .quote__empty { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--heading); line-height: 1.45; }

@@ -42,7 +42,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, t }) {
+function createAdminRouter({ repo, config, instagram, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -176,6 +176,24 @@ function createAdminRouter({ repo, config, t }) {
     const ok = await repo.deleteCustomer(id);
     if (!ok) return next();
     res.redirect(303, '/admin/customers?ok=customer-deleted');
+  }));
+
+  /* ---------- Instagram comments ---------- */
+  router.get('/instagram', ah(async (req, res) => {
+    const [items, sync] = await Promise.all([repo.listIgComments(), instagram.status()]);
+    res.render('admin/instagram', { title: 'Komentar Instagram', items, sync, enabled: instagram.enabled });
+  }));
+
+  router.post('/instagram/sync', ah(async (req, res) => {
+    const s = await instagram.syncNow();
+    res.redirect(303, s.ok ? '/admin/instagram?ok=ig-synced' : '/admin/instagram?err=ig-sync');
+  }));
+
+  router.post('/instagram/:id/visibility', ah(async (req, res, next) => {
+    const id = String(req.params.id);
+    if (!/^\d{1,40}$/.test(id) || !(await repo.setIgCommentHidden(id, req.body.hidden === '1'))) return next();
+    await instagram.reload();
+    res.redirect(303, '/admin/instagram?ok=saved');
   }));
 
   /* ---------- survey ---------- */

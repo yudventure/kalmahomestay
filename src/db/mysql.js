@@ -307,6 +307,47 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
       const [res] = await pool.query('DELETE FROM survey_responses WHERE id = ?', [id]);
       return res.affectedRows > 0;
     },
+
+    /* ---------- settings ---------- */
+    async getSetting(k) {
+      const [[row]] = await pool.query('SELECT v FROM app_settings WHERE k = ?', [k]);
+      if (!row) return null;
+      try { return JSON.parse(row.v); } catch { return null; }
+    },
+
+    async setSetting(k, value) {
+      await pool.query('INSERT INTO app_settings (k, v, updated_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v), updated_at = VALUES(updated_at)',
+        [k, JSON.stringify(value), now()]);
+    },
+
+    /* ---------- Instagram comments ---------- */
+    /** Upsert fetched comments (keeping the admin's hidden flag); drop comments deleted on posts fetched in full. */
+    async saveIgComments(comments, completeMedia = []) {
+      const t = now();
+      for (const c of comments) {
+        await pool.query(`INSERT INTO ig_comments (id, media_id, permalink, username, text, like_count, commented_at, fetched_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE permalink = VALUES(permalink), username = VALUES(username), text = VALUES(text),
+            like_count = VALUES(like_count), fetched_at = VALUES(fetched_at)`,
+        [c.id, c.mediaId, c.permalink || null, c.username, c.text, c.likes || 0, new Date(c.timestamp), t]);
+      }
+      for (const mediaId of completeMedia) {
+        const keep = comments.filter((c) => c.mediaId === mediaId).map((c) => c.id);
+        if (keep.length) await pool.query('DELETE FROM ig_comments WHERE media_id = ? AND id NOT IN (?)', [mediaId, keep]);
+        else await pool.query('DELETE FROM ig_comments WHERE media_id = ?', [mediaId]);
+      }
+    },
+
+    async listIgComments({ visibleOnly = false, limit = 200 } = {}) {
+      const [rows] = await pool.query(`SELECT * FROM ig_comments ${visibleOnly ? 'WHERE hidden = 0' : ''}
+        ORDER BY like_count DESC, commented_at DESC LIMIT ?`, [limit]);
+      return rows.map((r) => ({ ...r, hidden: Boolean(r.hidden) }));
+    },
+
+    async setIgCommentHidden(id, hidden) {
+      const [res] = await pool.query('UPDATE ig_comments SET hidden = ? WHERE id = ?', [hidden ? 1 : 0, String(id)]);
+      return res.affectedRows > 0;
+    },
   };
   Object.defineProperty(repo, '_pool', { get: () => pool });
   Object.defineProperty(repo, 'connection', { get: () => (db.url ? 'url' : db.socket ? `socket ${db.socket}` : `tcp ${db.host}:${db.port}`) });

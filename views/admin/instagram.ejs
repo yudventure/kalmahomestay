@@ -1,0 +1,45 @@
+<%- include('_top') %>
+<h1>Komentar Instagram <small class="muted">(<%= items.length %>)</small></h1>
+<p class="muted">Komentar dari postingan terbaru Instagram Kalma diambil otomatis sekali sehari dan tampil di bagian "Kata tamu". Hanya komentar yang berbentuk cerita yang diambil (tanpa balasan akun sendiri, link, atau sekadar tag teman). Sembunyikan komentar yang tidak cocok; komentar itu tidak akan muncul lagi walau disinkronkan ulang.</p>
+
+<section class="panel">
+<% if (!enabled) { %>
+  <p class="alert alert--warn">Belum aktif: isi <code>INSTAGRAM_ACCESS_TOKEN</code> di environment variables hPanel lalu deploy ulang (lihat DEPLOY.md langkah 11).</p>
+<% } else if (sync) { %>
+  <p>Sinkron terakhir: <b><%= fmtDateTime(sync.at) %></b>
+    <% if (sync.ok) { %>· berhasil, <%= sync.count %> komentar cerita<% if (sync.username) { %> dari @<%= sync.username %><% } %><% } %></p>
+  <% if (!sync.ok) { %><p class="alert alert--warn">Gagal: <%= sync.error %>. Website mencoba lagi tiap jam.</p><% } %>
+<% } else { %>
+  <p class="muted">Belum pernah disinkronkan.</p>
+<% } %>
+<% if (enabled) { %>
+  <form method="post" action="/admin/instagram/sync"><button class="btn btn--ghost btn--sm" type="submit">Sinkronkan sekarang</button></form>
+<% } %>
+</section>
+
+<% if (items.length) { %>
+<div class="table">
+<table>
+  <thead><tr><th>Akun</th><th>Komentar</th><th>Suka</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% items.forEach(function (c) { %>
+    <tr<%- c.hidden ? ' class="muted"' : '' %>>
+      <td><% if (c.permalink) { %><a href="<%= c.permalink %>" target="_blank" rel="noopener">@<%= c.username %></a><% } else { %>@<%= c.username %><% } %></td>
+      <td class="admin__msg"><%= c.text %></td>
+      <td><%= c.like_count %></td>
+      <td><%= fmtDateTime(c.commented_at) %></td>
+      <td><%= c.hidden ? 'Disembunyikan' : 'Tampil' %></td>
+      <td>
+        <form method="post" action="/admin/instagram/<%= c.id %>/visibility">
+          <input type="hidden" name="hidden" value="<%= c.hidden ? '0' : '1' %>">
+          <button class="btn btn--ghost btn--sm" type="submit"><%= c.hidden ? 'Tampilkan' : 'Sembunyikan' %></button>
+        </form>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted small">Website menampilkan maksimal 12 komentar yang tampil, diurutkan dari yang paling banyak disukai.</p>
+<% } %>
+<%- include('_bottom') %>

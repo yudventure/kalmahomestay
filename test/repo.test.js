@@ -85,7 +85,7 @@ for (const [kind, make] of backends) {
       ({ repo, cleanup } = make());
       if (kind === 'mysql') {
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 0');
-        for (const tname of ['survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
+        for (const tname of ['ig_comments', 'app_settings', 'survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 1');
       }
       await repo.init();
@@ -218,6 +218,27 @@ for (const [kind, make] of backends) {
       assert.equal(await repo.setPayment('KALMA-NOPE', { status: 'paid' }), false);
       assert.equal(await repo.getInquiryByOrder('KALMA-NOPE'), null);
       await repo.deleteCustomer(customerId);
+    });
+
+    test('settings and Instagram comments: upsert keeps hidden, deleted comments drop out', async () => {
+      assert.equal(await repo.getSetting('ig_sync'), null);
+      await repo.setSetting('ig_sync', { ok: true, count: 2 });
+      await repo.setSetting('ig_sync', { ok: false, count: 0 });
+      assert.deepEqual(await repo.getSetting('ig_sync'), { ok: false, count: 0 });
+
+      const c = (id, mediaId, likes, text = 'Tempatnya tenang dan ramah sekali 😍') => ({ id, mediaId, permalink: 'https://www.instagram.com/p/X/', username: 'u' + id, text, likes, timestamp: '2026-09-01T10:00:00+0000' });
+      await repo.saveIgComments([c('1', 'm1', 1), c('2', 'm1', 5), c('3', 'm2', 0)], ['m1', 'm2']);
+      assert.deepEqual((await repo.listIgComments()).map((r) => r.id), ['2', '1', '3']);
+      assert.equal(await repo.setIgCommentHidden('2', true), true);
+      assert.equal(await repo.setIgCommentHidden('999', true), false);
+      await repo.saveIgComments([c('1', 'm1', 9, 'Edited on Instagram, still lovely'), c('2', 'm1', 5)], ['m1', 'm2']);
+      const all = await repo.listIgComments();
+      assert.deepEqual(all.map((r) => [r.id, r.hidden]), [['1', false], ['2', true]]);
+      assert.equal(all[0].text, 'Edited on Instagram, still lovely');
+      assert.equal(new Date(all[0].commented_at).toISOString(), '2026-09-01T10:00:00.000Z');
+      assert.deepEqual((await repo.listIgComments({ visibleOnly: true })).map((r) => r.id), ['1']);
+      await repo.saveIgComments([], ['m1']);
+      assert.equal((await repo.listIgComments()).length, 0);
     });
 
     test('data survives reopening the store', async () => {

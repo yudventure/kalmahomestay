@@ -46,7 +46,7 @@
   const ROOM_KEYS = ['r1', 'r2', 'r3'];
   const ROOM_PH = ['ph-lagoon', 'ph-beach', 'ph-family'];
   const EXP_PH = ['ph-reef', 'ph-karst', 'ph-deep', 'ph-jungle', 'ph-house', 'ph-dusk'];
-  const reviews = Array.isArray(t('reviews')) ? t('reviews') : [];
+  const reviews = (Array.isArray(t('reviews')) ? t('reviews') : []).concat(igReviews || []);
   // Social bubbles beside the guest stories, largest first; a network without a link in hPanel is shown but not clickable.
   const socials = [
     { key: 'instagram', name: 'Instagram', url: contact.instagramUrl,
@@ -283,7 +283,7 @@
           <% reviews.forEach(function (r, i) { %>
           <figure class="quote__item"<%- i ? ' hidden' : '' %>>
             <blockquote><%= r.quote %></blockquote>
-            <figcaption><b><%= r.name %></b><% if (r.from) { %><span><%= r.from %></span><% } %>
+            <figcaption><b><%= r.name %></b><% if (r.url) { %><a class="quote__src" href="<%= r.url %>" target="_blank" rel="noopener nofollow"><%= r.from %></a><% } else if (r.from) { %><span><%= r.from %></span><% } %>
               <% if (r.rating) { %><span class="stars" aria-label="<%= r.rating %>/5"><%= '★'.repeat(Math.max(0, Math.min(5, r.rating | 0))) %></span><% } %></figcaption>
           </figure>
           <% }) %>

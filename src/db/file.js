@@ -10,12 +10,14 @@ const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError
 
 function createFileRepo(dataDir) {
   const file = path.join(dataDir, 'kalma-db.json');
-  let db = { seq: { customer: 0, inquiry: 0, survey: 0 }, customers: [], inquiries: [], survey: [] };
+  let db = { seq: { customer: 0, inquiry: 0, survey: 0 }, customers: [], inquiries: [], survey: [], settings: {}, ig: [] };
 
   function load() {
     if (fs.existsSync(file)) db = JSON.parse(fs.readFileSync(file, 'utf8'));
     db.survey = db.survey || [];
     db.seq.survey = db.seq.survey || 0;
+    db.settings = db.settings || {};
+    db.ig = db.ig || [];
   }
   function save() {
     fs.mkdirSync(dataDir, { recursive: true });
@@ -200,6 +202,41 @@ function createFileRepo(dataDir) {
       db.survey = db.survey.filter((r) => r.id !== Number(id));
       save();
       return db.survey.length < n;
+    },
+
+    /* ---------- settings ---------- */
+    async getSetting(k) { return k in db.settings ? JSON.parse(JSON.stringify(db.settings[k])) : null; },
+    async setSetting(k, value) { db.settings[k] = value; save(); },
+
+    /* ---------- Instagram comments ---------- */
+    async saveIgComments(comments, completeMedia = []) {
+      const t = iso();
+      for (const mediaId of completeMedia) {
+        const keep = new Set(comments.filter((c) => c.mediaId === mediaId).map((c) => c.id));
+        db.ig = db.ig.filter((r) => r.media_id !== mediaId || keep.has(r.id));
+      }
+      for (const c of comments) {
+        const row = { id: c.id, media_id: c.mediaId, permalink: c.permalink || null, username: c.username, text: c.text,
+          like_count: c.likes || 0, commented_at: new Date(c.timestamp).toISOString(), fetched_at: t };
+        const old = db.ig.find((r) => r.id === c.id);
+        if (old) Object.assign(old, row); else db.ig.push({ ...row, hidden: false });
+      }
+      save();
+    },
+
+    async listIgComments({ visibleOnly = false, limit = 200 } = {}) {
+      return db.ig.filter((r) => !visibleOnly || !r.hidden)
+        .sort((a, b) => b.like_count - a.like_count || (b.commented_at > a.commented_at ? 1 : -1))
+        .slice(0, limit)
+        .map((r) => ({ ...r, commented_at: new Date(r.commented_at), fetched_at: new Date(r.fetched_at) }));
+    },
+
+    async setIgCommentHidden(id, hidden) {
+      const r = db.ig.find((x) => x.id === String(id));
+      if (!r) return false;
+      r.hidden = Boolean(hidden);
+      save();
+      return true;
     },
   };
 }
