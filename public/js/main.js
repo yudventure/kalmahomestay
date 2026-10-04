@@ -54,10 +54,11 @@
   var services = document.getElementById("kamar");
   var smooth = function () { return matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"; };
 
-  /* hero search → remember dates/guests and show the services; "Book" on a card opens the dialog with them */
+  /* hero "Book" → open the booking dialog with the chosen dates and guests already filled in */
   document.getElementById("quick").addEventListener("submit", function (e) {
     e.preventDefault();
-    services.scrollIntoView({ behavior: smooth() });
+    if (typeof openCheckout === "function") openCheckout();
+    else services.scrollIntoView({ behavior: smooth() });
   });
 
   /* ---------------------------------------------------------------- hero video tiles

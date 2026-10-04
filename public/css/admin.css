@@ -309,3 +309,7 @@ input.copy { min-width: 260px; font: 400 var(--text-xs) ui-monospace, monospace 
 .admin [id] { scroll-margin-top: 100px; }
 .thumb--logo { aspect-ratio: 2 / 1; background: #fff; }
 .thumb--logo img { object-fit: contain; padding: 12px; }
+.fbk__msg { font-size: var(--text-base); line-height: 1.6; margin: 6px 0 10px; color: var(--kalma-ink); }
+.fbk__stars { color: var(--kalma-coral); letter-spacing: 1px; }
+.fbk__form { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--a-line-soft); }
+.fbk__form select { min-height: 40px; border: 1px solid #CFDCE4; border-radius: 10px; padding: 0 10px; font: 400 var(--text-sm) var(--font-body); }
