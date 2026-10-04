@@ -189,11 +189,37 @@ function createAdminRouter({ repo, config, instagram, t }) {
     res.redirect(303, s.ok ? '/admin/instagram?ok=ig-synced' : '/admin/instagram?err=ig-sync');
   }));
 
+  // Comments copied from Instagram by hand (until the account's API token is available).
+  router.post('/instagram/add', ah(async (req, res) => {
+    const username = String(req.body.username || '').trim().replace(/^@/, '');
+    const text = String(req.body.text || '').replace(/\s+/g, ' ').trim();
+    const link = String(req.body.link || '').trim();
+    if (!/^[\w.]{1,30}$/.test(username) || text.length < 4 || text.length > 600
+      || (link && !/^https:\/\/(www\.)?instagram\.com\/\S+$/i.test(link))) {
+      return res.redirect(303, '/admin/instagram?err=ig-invalid');
+    }
+    await repo.saveIgComments([{
+      id: 'manual-' + crypto.randomBytes(6).toString('hex'), mediaId: 'manual', permalink: link || null,
+      kind: req.body.kind === 'reel' ? 'reel' : 'post', username, text, likes: 0, timestamp: new Date().toISOString(),
+    }], []);
+    await instagram.reload();
+    res.redirect(303, '/admin/instagram?ok=ig-added');
+  }));
+
+  const igId = (req) => (/^[\w-]{1,40}$/.test(String(req.params.id)) ? String(req.params.id) : null);
+
   router.post('/instagram/:id/visibility', ah(async (req, res, next) => {
-    const id = String(req.params.id);
-    if (!/^\d{1,40}$/.test(id) || !(await repo.setIgCommentHidden(id, req.body.hidden === '1'))) return next();
+    const id = igId(req);
+    if (!id || !(await repo.setIgCommentHidden(id, req.body.hidden === '1'))) return next();
     await instagram.reload();
     res.redirect(303, '/admin/instagram?ok=saved');
+  }));
+
+  router.post('/instagram/:id/delete', ah(async (req, res, next) => {
+    const id = igId(req);
+    if (!id || !id.startsWith('manual-') || !(await repo.deleteIgComment(id))) return next();
+    await instagram.reload();
+    res.redirect(303, '/admin/instagram?ok=ig-deleted');
   }));
 
   /* ---------- survey ---------- */

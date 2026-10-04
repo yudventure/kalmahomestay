@@ -325,11 +325,11 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
     async saveIgComments(comments, completeMedia = []) {
       const t = now();
       for (const c of comments) {
-        await pool.query(`INSERT INTO ig_comments (id, media_id, permalink, username, text, like_count, commented_at, fetched_at)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE permalink = VALUES(permalink), username = VALUES(username), text = VALUES(text),
+        await pool.query(`INSERT INTO ig_comments (id, media_id, permalink, media_kind, username, text, like_count, commented_at, fetched_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE permalink = VALUES(permalink), media_kind = VALUES(media_kind), username = VALUES(username), text = VALUES(text),
             like_count = VALUES(like_count), fetched_at = VALUES(fetched_at)`,
-        [c.id, c.mediaId, c.permalink || null, c.username, c.text, c.likes || 0, new Date(c.timestamp), t]);
+        [c.id, c.mediaId, c.permalink || null, c.kind || null, c.username, c.text, c.likes || 0, new Date(c.timestamp), t]);
       }
       for (const mediaId of completeMedia) {
         const keep = comments.filter((c) => c.mediaId === mediaId).map((c) => c.id);
@@ -342,6 +342,11 @@ function createMysqlRepo(db, { autoMigrate = true, socketCandidates } = {}) {
       const [rows] = await pool.query(`SELECT * FROM ig_comments ${visibleOnly ? 'WHERE hidden = 0' : ''}
         ORDER BY like_count DESC, commented_at DESC LIMIT ?`, [limit]);
       return rows.map((r) => ({ ...r, hidden: Boolean(r.hidden) }));
+    },
+
+    async deleteIgComment(id) {
+      const [res] = await pool.query('DELETE FROM ig_comments WHERE id = ?', [String(id)]);
+      return res.affectedRows > 0;
     },
 
     async setIgCommentHidden(id, hidden) {

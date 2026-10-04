@@ -196,17 +196,6 @@
     update();
   });
 
-  /* ---------------------------------------------------------------- guest stories */
-  var slides = document.querySelectorAll(".quote__item");
-  var current = 0;
-  document.querySelectorAll("[data-q]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      slides[current].hidden = true;
-      current = (current + Number(b.dataset.q) + slides.length) % slides.length;
-      slides[current].hidden = false;
-    });
-  });
-
   /* ---------------------------------------------------------------- book & pay dialog
      Prices are per person per night. With Midtrans keys set the server returns a Snap token and the
      payment popup opens here; without them the booking goes to WhatsApp like before. */

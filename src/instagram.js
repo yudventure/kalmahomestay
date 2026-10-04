@@ -1,12 +1,13 @@
 'use strict';
 
 /**
- * Guest comments from Kalma's own Instagram posts, shown under "Guest stories".
+ * Guest comments from Kalma's own Instagram posts and reels, shown as scrolling bubbles under "Guest stories".
  *
  * Uses the official Instagram API with Instagram Login (graph.instagram.com) and a long-lived
  * access token for the Kalma business/creator account (INSTAGRAM_ACCESS_TOKEN). Once a day the
- * site reads the comments on the latest posts, keeps the ones that read like a guest story,
- * and saves them; the admin can hide any comment at /admin/instagram.
+ * site reads the comments on every post and reel (back to the first one), keeps the ones that read like a guest story,
+ * and saves them. At /admin/instagram the admin can hide comments or paste comments in by hand
+ * (for when there is no token yet).
  *
  * Long-lived tokens expire after 60 days unless refreshed, so each sync also refreshes the
  * token (allowed once it is a day old) and stores the new one in the database.
@@ -16,9 +17,10 @@ const crypto = require('crypto');
 const API = 'https://graph.instagram.com';
 const DAY = 24 * 60 * 60 * 1000;
 const RETRY_AFTER_ERROR = 60 * 60 * 1000;
-const MEDIA_LIMIT = 25;       // latest posts to read
+const MEDIA_PAGE = 50;        // posts per page; pages are followed back to the first post
+const MEDIA_PAGES = 40;       // safety cap: up to 2000 posts
 const COMMENT_PAGES = 5;      // up to 5 × 50 comments per post
-const SHOW = 12;              // comments shown on the website
+const SHOW = 40;              // comments shown on the website
 
 const fingerprint = (s) => crypto.createHash('sha256').update(String(s)).digest('hex').slice(0, 16);
 
@@ -51,17 +53,24 @@ async function getJSON(fetchImpl, url) {
 async function fetchComments(token, { fetchImpl = fetch, api = API } = {}) {
   const q = (p, params) => `${api}${p}?${new URLSearchParams({ ...params, access_token: token })}`;
   const me = await getJSON(fetchImpl, q('/me', { fields: 'user_id,username' }));
-  const media = await getJSON(fetchImpl, q('/me/media', { fields: 'id,permalink,timestamp,comments_count', limit: String(MEDIA_LIMIT) }));
+  const media = [];
+  let next = q('/me/media', { fields: 'id,permalink,timestamp,comments_count,media_type,media_product_type', limit: String(MEDIA_PAGE) });
+  for (let i = 0; next && i < MEDIA_PAGES; i += 1) {
+    const page = await getJSON(fetchImpl, next);
+    media.push(...(page.data || []));
+    next = page.paging && page.paging.next;
+  }
   const comments = [];
   const completeMedia = [];
-  for (const m of media.data || []) {
+  for (const m of media) {
+    const kind = m.media_product_type === 'REELS' || m.media_type === 'VIDEO' ? 'reel' : 'post';
     if (!m.comments_count) { completeMedia.push(m.id); continue; }
     let url = q(`/${m.id}/comments`, { fields: 'id,text,username,timestamp,like_count', limit: '50' });
     let pages = 0;
     while (url && pages < COMMENT_PAGES) {
       const page = await getJSON(fetchImpl, url);
       for (const c of page.data || []) {
-        comments.push({ id: c.id, mediaId: m.id, permalink: m.permalink, username: c.username, text: c.text, likes: c.like_count || 0, timestamp: c.timestamp });
+        comments.push({ id: c.id, mediaId: m.id, permalink: m.permalink, kind, username: c.username, text: c.text, likes: c.like_count || 0, timestamp: c.timestamp });
       }
       url = page.paging && page.paging.next;
       pages += 1;
@@ -95,7 +104,7 @@ function createInstagramSync({ repo, token: envToken, fetchImpl = fetch, api = A
 
   async function reload() {
     const rows = await repo.listIgComments({ visibleOnly: true, limit: SHOW });
-    visible = rows.map((r) => ({ quote: r.text, name: '@' + r.username, from: 'Instagram', url: r.permalink || null }));
+    visible = rows.map((r) => ({ quote: r.text, name: '@' + r.username, from: 'Instagram', kind: r.media_kind || null, url: r.permalink || null }));
     return visible;
   }
 

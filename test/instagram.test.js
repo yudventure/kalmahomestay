@@ -33,12 +33,14 @@ before(async () => {
     if (fail) { res.statusCode = 400; return res.end(JSON.stringify({ error: { message: 'Invalid OAuth access token' } })); }
     const send = (o) => res.end(JSON.stringify(o));
     if (url.pathname === '/me') return send({ user_id: '1', username: 'kalma.rajaampat' });
+    if (url.pathname === '/me/media' && url.searchParams.get('after') === 'page2') {
+      return send({ data: [{ id: 'm3', permalink: 'https://www.instagram.com/p/CCC/', comments_count: 0, media_type: 'CAROUSEL_ALBUM' }] });
+    }
     if (url.pathname === '/me/media') {
       return send({ data: [
-        { id: 'm1', permalink: 'https://www.instagram.com/p/AAA/', comments_count: 4 },
-        { id: 'm2', permalink: 'https://www.instagram.com/p/BBB/', comments_count: 1 },
-        { id: 'm3', permalink: 'https://www.instagram.com/p/CCC/', comments_count: 0 },
-      ] });
+        { id: 'm1', permalink: 'https://www.instagram.com/reel/AAA/', comments_count: 4, media_product_type: 'REELS', media_type: 'VIDEO' },
+        { id: 'm2', permalink: 'https://www.instagram.com/p/BBB/', comments_count: 1, media_product_type: 'FEED', media_type: 'IMAGE' },
+      ], paging: { next: `${api}/me/media?after=page2&access_token=${url.searchParams.get('access_token')}` } });
     }
     if (url.pathname === '/refresh_access_token') return send({ access_token: 'refreshed-' + url.searchParams.get('access_token'), expires_in: 5184000 });
     const m = url.pathname.match(/^\/(m\d)\/comments$/);
@@ -82,7 +84,9 @@ test('a daily sync saves guest comments, refreshes the token and respects hidden
   assert.equal(s.count, 2);
   assert.deepEqual(sync.comments.map((c) => c.name), ['@rina.travels', '@tom.dives'], 'most liked first');
   assert.equal(sync.comments[1].quote, 'Best snorkeling trip of my life, the reef was unreal', 'leading mention removed');
-  assert.equal(sync.comments[0].url, 'https://www.instagram.com/p/AAA/');
+  assert.equal(sync.comments[0].url, 'https://www.instagram.com/reel/AAA/');
+  assert.deepEqual(sync.comments.map((c) => c.kind), ['reel', 'post']);
+  assert.equal(calls.filter((c) => c === '/me/media').length, 2, 'follows posts back to the first one');
   assert.equal((await repo.getSetting('ig_token')).token, 'refreshed-tok-1');
 
   // not due again within a day
@@ -151,7 +155,8 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
 
     html = await (await fetch(base + '/en')).text();
     assert.match(html, /Tempatnya tenang banget/);
-    assert.match(html, /<b>@rina\.travels<\/b><a class="quote__src" href="https:\/\/www\.instagram\.com\/p\/AAA\/"/);
+    assert.match(html, /<b>@rina\.travels<\/b>\s*<a class="bubble__tag" href="https:\/\/www\.instagram\.com\/reel\/AAA\/"[^>]*>Reels<\/a>/);
+    assert.match(html, /class="bubbles"/);
     assert.doesNotMatch(html, /Terima kasih banyak Rina/);
 
     const page = await (await fetch(base + '/admin/instagram', { headers: auth })).text();
@@ -162,6 +167,19 @@ test('Instagram comments appear under guest stories and can be hidden in the adm
     html = await (await fetch(base + '/en')).text();
     assert.doesNotMatch(html, /Tempatnya tenang banget/);
     assert.match(html, /Best snorkeling trip/);
+
+    // comments pasted in by hand show up right away and can be deleted
+    const form = (body) => fetch(base + '/admin/instagram/add', { method: 'POST', headers: { ...auth, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(body), redirect: 'manual' });
+    assert.equal((await form({ username: '@sari', text: 'Sunset di dermaga Kalma juara!', kind: 'post', link: 'https://www.instagram.com/p/ZZZ/' })).headers.get('location'), '/admin/instagram?ok=ig-added');
+    assert.equal((await form({ username: 'sari', text: 'ok', kind: 'post' })).headers.get('location'), '/admin/instagram?err=ig-invalid');
+    assert.equal((await form({ username: 'sari', text: 'Bagus sekali tempatnya', link: 'javascript:alert(1)' })).headers.get('location'), '/admin/instagram?err=ig-invalid');
+    html = await (await fetch(base + '/')).text();
+    assert.match(html, /<b>@sari<\/b>\s*<a class="bubble__tag" href="https:\/\/www\.instagram\.com\/p\/ZZZ\/"[^>]*>Foto<\/a>/);
+    const manual = (await app.locals.repo.listIgComments()).find((c) => c.username === 'sari');
+    assert.equal(manual.media_kind, 'post');
+    assert.equal((await fetch(base + '/admin/instagram/201/delete', { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' })).status, 404, 'synced comments are hidden, not deleted');
+    assert.equal((await fetch(base + `/admin/instagram/${manual.id}/delete`, { method: 'POST', headers: { ...auth, Origin: base }, redirect: 'manual' })).status, 303);
+    assert.doesNotMatch(await (await fetch(base + '/')).text(), /Sunset di dermaga/);
 
     const forged = await fetch(base + '/admin/instagram/201/visibility', { method: 'POST', headers: { ...auth, Origin: 'https://evil.example', 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'hidden=1' });
     assert.equal(forged.status, 403);

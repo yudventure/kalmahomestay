@@ -272,21 +272,41 @@ a.soc:hover, a.soc:focus-visible { scale: 1.08; box-shadow: 0 18px 40px rgba(20,
 @media (prefers-reduced-motion: reduce) { .soc, .socials__ring { animation: none; } }
 .quote { position: relative; background: #fff; border: 1px solid var(--line); border-radius: var(--radius-lg); padding: var(--space-6); box-shadow: var(--card-shadow); }
 .quote__mark { width: 44px; height: 34px; fill: var(--kalma-lagoon); margin-bottom: var(--space-4); }
-.quote blockquote { margin: 0 0 var(--space-5); font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--heading); line-height: 1.45; }
-.quote figure { margin: 0; }
-.quote figcaption b { display: block; color: var(--heading); }
-.quote figcaption span { display: block; font-size: var(--text-sm); color: var(--muted); }
-.quote__src { display: inline-block; font-size: var(--text-sm); color: var(--kalma-lagoon-deep); text-decoration: none; }
-.quote__src:hover { text-decoration: underline; }
-.quote .stars { color: var(--kalma-coral); letter-spacing: 2px; font-size: var(--text-base); }
-.quote__arrows { position: absolute; right: var(--space-5); bottom: var(--space-5); }
 .quote__empty { font-family: var(--font-display); font-style: italic; font-size: var(--text-xl); color: var(--heading); line-height: 1.45; }
+.stars { color: var(--kalma-coral); letter-spacing: 2px; font-size: var(--text-sm); }
+
+/* Instagram comment bubbles: two columns drifting in opposite directions, paused on hover */
+.bubbles { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; height: 460px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent); mask-image: linear-gradient(transparent, #000 14%, #000 86%, transparent); }
+.bubbles__track { display: flex; flex-direction: column; animation: bubbles-up var(--dur, 40s) linear infinite; will-change: transform; }
+.bubbles__col--down .bubbles__track { animation-name: bubbles-down; animation-duration: calc(var(--dur, 40s) * 1.25); }
+.bubbles:hover .bubbles__track, .bubbles:focus-within .bubbles__track { animation-play-state: paused; }
+.bubbles__list { display: flex; flex-direction: column; gap: 16px; margin: 0; padding: 0 0 16px; list-style: none; }
+@keyframes bubbles-up { from { transform: translateY(0); } to { transform: translateY(-50%); } }
+@keyframes bubbles-down { from { transform: translateY(-50%); } to { transform: translateY(0); } }
+.bubble { display: flex; gap: 12px; align-items: flex-start; }
+.bubble__av { flex: none; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; color: #fff; font-weight: 700; font-size: var(--text-sm);
+  background: radial-gradient(circle at 30% 107%, #fdf497 0, #fd5949 45%, #d6249f 60%, #285AEB 90%); box-shadow: 0 0 0 3px #fff, 0 4px 12px rgba(20, 60, 90, .15); }
+.bubble__body { background: #fff; border: 1px solid var(--line); border-radius: 18px 18px 18px 4px; padding: 12px 16px; box-shadow: var(--card-shadow); min-width: 0; }
+.bubble__who { margin: 0 0 4px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; font-size: var(--text-sm); }
+.bubble__who b { color: var(--heading); }
+.bubble__tag { font-size: var(--text-xs); padding: 2px 8px; border-radius: 99px; background: var(--tint); color: var(--kalma-lagoon-deep); text-decoration: none; }
+a.bubble__tag:hover { text-decoration: underline; }
+.bubble__text { margin: 0; color: var(--kalma-ink); line-height: 1.5; overflow-wrap: anywhere; }
+.bubbles__col--down .bubble { flex-direction: row-reverse; }
+.bubbles__col--down .bubble__body { border-radius: 18px 18px 4px 18px; }
+@media (prefers-reduced-motion: reduce) {
+  .bubbles { overflow-y: auto; -webkit-mask-image: none; mask-image: none; grid-template-columns: 1fr; }
+  .bubbles__track { animation: none; }
+  .bubbles__list[aria-hidden], .bubbles__col--down, .bubble[aria-hidden] { display: none; }
+}
 @media (max-width: 860px) {
   .reviews { grid-template-columns: 1fr; gap: var(--space-4); }
   .reviews__art { height: 220px; }
   .socials { --soc-scale: .72; }
   .quote { padding: var(--space-5); }
-  .quote__arrows { position: static; margin-top: var(--space-4); }
+  .bubbles { height: 420px; grid-template-columns: 1fr; }
+  .bubbles__col--down { display: none; }
 }
 
 /* ------------------------------------------------ getting there */

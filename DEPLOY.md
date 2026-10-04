@@ -162,7 +162,11 @@ Catatan:
 
 ## 11. Komentar Instagram di "Kata tamu"
 
-Komentar dari postingan terbaru Instagram Kalma diambil otomatis **sekali sehari** lewat API resmi Instagram, lalu tampil bergantian di kotak "Kata tamu". Yang diambil hanya komentar berbentuk cerita (minimal 4 kata, tanpa link, bukan balasan dari akun Kalma sendiri, bukan sekadar tag teman). Maksimal 12 komentar yang paling banyak disukai yang ditampilkan.
+Komentar Instagram tampil sebagai gelembung yang bergulir pelan (dua kolom berlawanan arah, berhenti saat disentuh kursor) di bagian "Kata tamu". Maksimal 40 komentar, yang paling banyak disukai lebih dulu.
+
+**Tanpa token (sementara):** buka `/admin/instagram` → **Tambah komentar manual**: salin username, isi komentar, pilih Postingan foto / Reels, dan (opsional) tempel link postingannya. Komentar langsung tampil; komentar manual bisa disembunyikan atau dihapus.
+
+**Dengan token (otomatis):** komentar dari semua postingan dan reels, sampai postingan pertama, diambil **sekali sehari** lewat API resmi Instagram. Yang diambil hanya komentar berbentuk cerita (minimal 4 kata, tanpa link, bukan balasan dari akun Kalma sendiri, bukan sekadar tag teman). Komentar manual tetap ada.
 
 1. Pastikan akun Instagram Kalma adalah **akun profesional** (Bisnis atau Kreator): di aplikasi Instagram → Pengaturan → Jenis akun dan alat.
 2. Buka [developers.facebook.com](https://developers.facebook.com) → **My Apps → Create app** → pilih use case **Instagram** (kelola pesan & konten di Instagram), tipe **Business**.

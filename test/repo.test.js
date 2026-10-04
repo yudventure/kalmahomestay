@@ -226,7 +226,7 @@ for (const [kind, make] of backends) {
       await repo.setSetting('ig_sync', { ok: false, count: 0 });
       assert.deepEqual(await repo.getSetting('ig_sync'), { ok: false, count: 0 });
 
-      const c = (id, mediaId, likes, text = 'Tempatnya tenang dan ramah sekali 😍') => ({ id, mediaId, permalink: 'https://www.instagram.com/p/X/', username: 'u' + id, text, likes, timestamp: '2026-09-01T10:00:00+0000' });
+      const c = (id, mediaId, likes, text = 'Tempatnya tenang dan ramah sekali 😍') => ({ id, mediaId, permalink: 'https://www.instagram.com/p/X/', kind: 'reel', username: 'u' + id, text, likes, timestamp: '2026-09-01T10:00:00+0000' });
       await repo.saveIgComments([c('1', 'm1', 1), c('2', 'm1', 5), c('3', 'm2', 0)], ['m1', 'm2']);
       assert.deepEqual((await repo.listIgComments()).map((r) => r.id), ['2', '1', '3']);
       assert.equal(await repo.setIgCommentHidden('2', true), true);
@@ -237,6 +237,9 @@ for (const [kind, make] of backends) {
       assert.equal(all[0].text, 'Edited on Instagram, still lovely');
       assert.equal(new Date(all[0].commented_at).toISOString(), '2026-09-01T10:00:00.000Z');
       assert.deepEqual((await repo.listIgComments({ visibleOnly: true })).map((r) => r.id), ['1']);
+      assert.equal(all[0].media_kind, 'reel');
+      assert.equal(await repo.deleteIgComment('2'), true);
+      assert.equal(await repo.deleteIgComment('2'), false);
       await repo.saveIgComments([], ['m1']);
       assert.equal((await repo.listIgComments()).length, 0);
     });

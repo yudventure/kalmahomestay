@@ -216,7 +216,7 @@ function createFileRepo(dataDir) {
         db.ig = db.ig.filter((r) => r.media_id !== mediaId || keep.has(r.id));
       }
       for (const c of comments) {
-        const row = { id: c.id, media_id: c.mediaId, permalink: c.permalink || null, username: c.username, text: c.text,
+        const row = { id: c.id, media_id: c.mediaId, permalink: c.permalink || null, media_kind: c.kind || null, username: c.username, text: c.text,
           like_count: c.likes || 0, commented_at: new Date(c.timestamp).toISOString(), fetched_at: t };
         const old = db.ig.find((r) => r.id === c.id);
         if (old) Object.assign(old, row); else db.ig.push({ ...row, hidden: false });
@@ -229,6 +229,13 @@ function createFileRepo(dataDir) {
         .sort((a, b) => b.like_count - a.like_count || (b.commented_at > a.commented_at ? 1 : -1))
         .slice(0, limit)
         .map((r) => ({ ...r, commented_at: new Date(r.commented_at), fetched_at: new Date(r.fetched_at) }));
+    },
+
+    async deleteIgComment(id) {
+      const n = db.ig.length;
+      db.ig = db.ig.filter((r) => r.id !== String(id));
+      save();
+      return db.ig.length < n;
     },
 
     async setIgCommentHidden(id, hidden) {

@@ -1,6 +1,20 @@
 <%- include('_top') %>
 <h1>Komentar Instagram <small class="muted">(<%= items.length %>)</small></h1>
-<p class="muted">Komentar dari postingan terbaru Instagram Kalma diambil otomatis sekali sehari dan tampil di bagian "Kata tamu". Hanya komentar yang berbentuk cerita yang diambil (tanpa balasan akun sendiri, link, atau sekadar tag teman). Sembunyikan komentar yang tidak cocok; komentar itu tidak akan muncul lagi walau disinkronkan ulang.</p>
+<p class="muted">Komentar di sini tampil sebagai gelembung yang bergulir di bagian "Kata tamu". Selama token Instagram belum ada, salin komentar dari postingan atau reels Kalma lewat formulir di bawah. Setelah token diisi, komentar dari semua postingan dan reels (sampai postingan pertama) diambil otomatis sekali sehari; hanya yang berbentuk cerita (tanpa balasan akun sendiri, link, atau sekadar tag teman). Komentar yang disembunyikan tidak akan muncul lagi walau disinkronkan ulang.</p>
+<% if (flashErr === 'ig-invalid') { %><p class="alert alert--warn" role="alert">Komentar belum tersimpan: isi username (tanpa spasi), komentar minimal 4 huruf, dan link (jika diisi) harus link instagram.com.</p><% } %>
+
+<section class="panel">
+  <h2>Tambah komentar manual</h2>
+  <form method="post" action="/admin/instagram/add" class="stack">
+    <div class="row2">
+      <div class="field"><label for="ig-user">Username Instagram</label><input id="ig-user" name="username" required maxlength="31" placeholder="@namaakun" autocomplete="off"></div>
+      <div class="field"><label for="ig-kind">Dari</label><select id="ig-kind" name="kind"><option value="post">Postingan foto</option><option value="reel">Reels</option></select></div>
+    </div>
+    <div class="field"><label for="ig-text">Komentar</label><textarea id="ig-text" name="text" required minlength="4" maxlength="600"></textarea></div>
+    <div class="field"><label for="ig-link">Link postingan (opsional)</label><input id="ig-link" name="link" type="url" placeholder="https://www.instagram.com/p/…" maxlength="255"></div>
+    <button class="btn btn--sm" type="submit">Tambahkan</button>
+  </form>
+</section>
 
 <section class="panel">
 <% if (!enabled) { %>
@@ -20,11 +34,12 @@
 <% if (items.length) { %>
 <div class="table">
 <table>
-  <thead><tr><th>Akun</th><th>Komentar</th><th>Suka</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
+  <thead><tr><th>Akun</th><th>Dari</th><th>Komentar</th><th>Suka</th><th>Tanggal</th><th>Status</th><th></th></tr></thead>
   <tbody>
   <% items.forEach(function (c) { %>
     <tr<%- c.hidden ? ' class="muted"' : '' %>>
       <td><% if (c.permalink) { %><a href="<%= c.permalink %>" target="_blank" rel="noopener">@<%= c.username %></a><% } else { %>@<%= c.username %><% } %></td>
+      <td><%= c.media_id === 'manual' ? 'Manual · ' : '' %><%= c.media_kind === 'reel' ? 'Reels' : 'Foto' %></td>
       <td class="admin__msg"><%= c.text %></td>
       <td><%= c.like_count %></td>
       <td><%= fmtDateTime(c.commented_at) %></td>
@@ -34,12 +49,17 @@
           <input type="hidden" name="hidden" value="<%= c.hidden ? '0' : '1' %>">
           <button class="btn btn--ghost btn--sm" type="submit"><%= c.hidden ? 'Tampilkan' : 'Sembunyikan' %></button>
         </form>
+        <% if (c.media_id === 'manual') { %>
+        <form method="post" action="/admin/instagram/<%= c.id %>/delete" onsubmit="return confirm('Hapus komentar ini?')">
+          <button class="btn btn--ghost btn--sm" type="submit">Hapus</button>
+        </form>
+        <% } %>
       </td>
     </tr>
   <% }) %>
   </tbody>
 </table>
 </div>
-<p class="muted small">Website menampilkan maksimal 12 komentar yang tampil, diurutkan dari yang paling banyak disukai.</p>
+<p class="muted small">Website menampilkan maksimal 40 komentar, diurutkan dari yang paling banyak disukai lalu yang terbaru.</p>
 <% } %>
 <%- include('_bottom') %>
