@@ -56,14 +56,20 @@ test('English page renders at /en', async () => {
   assert.match(html, /href="\/en" hreflang="en" lang="en" aria-current="page"/);
 });
 
-test('partner running text lists each partner twice for a seamless loop', async () => {
+test('partners scroll three at a time with a logo or initials, each listed twice for a seamless loop', async () => {
   const html = await (await fetch(base + '/')).text();
   const names = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'content', 'partners.json'), 'utf8')).partners;
   if (!names.length) return assert.doesNotMatch(html, /class="partners"/);
-  assert.match(html, /<div class="partners" role="region"/);
-  const perCopy = Math.max(1, Math.ceil(14 / names.length)); // the list repeats to fill wide screens
-  assert.equal(html.split('<li>' + names[0] + '<').length - 1, 2 * perCopy);
+  assert.match(html, /<div class="partners" role="region"[^>]*>\s*<div class="partners__viewport">/);
+  const perCopy = Math.max(1, Math.ceil(6 / names.length)); // short lists repeat to fill two windows of three
+  assert.equal(html.split('<span class="partners__name">' + names[0] + '<').length - 1, 2 * perCopy);
+  assert.match(html, /<span class="partners__logo partners__logo--mono" aria-hidden="true">P1<\/span>/, 'initials when there is no logo');
   assert.match(html, /<ul class="partners__list" aria-hidden="true">/);
+});
+
+test('each fact in the strip has an icon', async () => {
+  const html = await (await fetch(base + '/')).text();
+  assert.equal((html.match(/<div class="fact"><span class="fact__ic" aria-hidden="true"><svg/g) || []).length, 4);
 });
 
 test('without guest stories the homepage shows labelled sample bubbles and the WhatsApp invite', async () => {

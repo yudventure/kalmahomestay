@@ -307,3 +307,5 @@ input.copy { min-width: 260px; font: 400 var(--text-xs) ui-monospace, monospace 
 .upload__drop > span { display: grid; gap: 2px; line-height: 1.35; }
 .upload__drop small { display: block; }
 .admin [id] { scroll-margin-top: 100px; }
+.thumb--logo { aspect-ratio: 2 / 1; background: #fff; }
+.thumb--logo img { object-fit: contain; padding: 12px; }

@@ -129,3 +129,25 @@ test('employee documents and receipts are private to the roles that own them', a
   assert.equal(await app.locals.repo.table('media').get(doc.id), null);
   assert.deepEqual(fs.readdirSync(path.join(dataDir, 'uploads')), []);
 });
+
+test('partner logos are uploaded per partner and shown in the running strip', async () => {
+  const r = await upload('/admin/website/partners/logo', JPG, 'logo.jpg', { name: 'Partner 2' });
+  assert.equal(r.headers.get('location'), '/admin/website/partners?ok=uploaded');
+  const url = app.locals.media.logoUrl('partner 2');
+  assert.match(url, /^\/media\/[a-f0-9]{24}\.jpg$/);
+  assert.equal((await fetch(base + url)).status, 200, 'logos are public');
+  assert.match(await home(), new RegExp(`<img class="partners__logo" src="${url}"`));
+  const page = await (await fetch(base + '/admin/website/partners', { headers: AUTH })).text();
+  assert.match(page, new RegExp(`<img src="${url}" alt="Logo Partner 2"`));
+
+  // a second logo replaces the first; unknown names are refused
+  await upload('/admin/website/partners/logo', JPG, 'logo2.jpg', { name: 'Partner 2' });
+  assert.notEqual(app.locals.media.logoUrl('Partner 2'), url);
+  assert.equal((await fetch(base + url)).status, 404);
+  assert.match((await upload('/admin/website/partners/logo', JPG, 'x.jpg', { name: 'Bukan partner' })).headers.get('location'), /err=partner/);
+
+  const del = await fetch(base + '/admin/website/partners/logo/delete', { method: 'POST', redirect: 'manual', headers: { ...AUTH, Origin: base, 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'name=Partner+2' });
+  assert.equal(del.status, 303);
+  assert.equal(app.locals.media.logoUrl('Partner 2'), '');
+  assert.deepEqual(fs.readdirSync(path.join(dataDir, 'uploads')), []);
+});

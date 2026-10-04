@@ -202,7 +202,7 @@ Buka `https://halokalma.com/admin` → halaman **Masuk**.
 - **Teks website**. semua tulisan per bagian, Indonesia & Inggris. Kosongkan kolom untuk kembali ke teks bawaan.
 - **Kamar & harga**. harga per orang per malam, maksimal tamu, dan jumlah unit tiap kamar.
 - **Kontak & sosial media**. WhatsApp, email, Instagram, Facebook, TikTok, Google. Mengganti nilai dari hPanel.
-- **Partner**. nama partner di running text.
+- **Partner**. Nama partner dan logonya (tombol unggah per partner), tampil bergulir tiga sekaligus.
 
 ## 13. Kalender & sinkron OTA / agen
 
