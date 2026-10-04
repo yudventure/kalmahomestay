@@ -19,6 +19,8 @@ function loadConfig(env = process.env) {
     db: loadDb(env),
     dbAutoMigrate: env.DB_AUTO_MIGRATE !== 'false',
     payments: loadPayments(env),
+    // Long-lived token for Kalma's Instagram business/creator account; guest comments sync daily when set.
+    instagram: { token: String(env.INSTAGRAM_ACCESS_TOKEN || '').trim() },
     contact: {
       whatsapp,
       whatsappDisplay: env.WHATSAPP_DISPLAY || '+' + whatsapp,

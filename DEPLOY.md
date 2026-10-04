@@ -44,6 +44,7 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `INSTAGRAM_HANDLE` | `kalma.rajaampat` | Opsional |
 | `FACEBOOK_URL` | `https://facebook.com/kalma` | Opsional, link ikon Facebook |
 | `TIKTOK_URL` | `https://tiktok.com/@kalma` | Opsional, link ikon TikTok |
+| `INSTAGRAM_ACCESS_TOKEN` | `IGAA…` | Opsional, komentar Instagram di "Kata tamu" (langkah 11). Rahasia |
 | `GOOGLE_BUSINESS_URL` | `https://maps.app.goo.gl/…` | Opsional, link ikon Google (profil Google Maps / ulasan) |
 | `ADMIN_PASSWORD` | password kuat | Untuk login `/admin` (user `admin`) |
 | `DB_HOST` | `localhost` | Dari langkah 1 |
@@ -158,3 +159,18 @@ Catatan:
 - Status pembayaran hanya berubah lewat notifikasi Midtrans yang tanda tangannya (signature) cocok dengan Server Key dan jumlahnya sama dengan pesanan.
 - Pembayaran tidak memeriksa ketersediaan kamar secara otomatis; cek pesanan baru di `/admin` dan hubungi tamu bila tanggal penuh (refund lewat dashboard Midtrans).
 
+
+## 11. Komentar Instagram di "Kata tamu"
+
+Komentar dari postingan terbaru Instagram Kalma diambil otomatis **sekali sehari** lewat API resmi Instagram, lalu tampil bergantian di kotak "Kata tamu". Yang diambil hanya komentar berbentuk cerita (minimal 4 kata, tanpa link, bukan balasan dari akun Kalma sendiri, bukan sekadar tag teman). Maksimal 12 komentar yang paling banyak disukai yang ditampilkan.
+
+1. Pastikan akun Instagram Kalma adalah **akun profesional** (Bisnis atau Kreator): di aplikasi Instagram → Pengaturan → Jenis akun dan alat.
+2. Buka [developers.facebook.com](https://developers.facebook.com) → **My Apps → Create app** → pilih use case **Instagram** (kelola pesan & konten di Instagram), tipe **Business**.
+3. Di menu **Instagram → API setup with Instagram login** → **Generate access tokens** → **Add account** → masuk dengan akun Instagram Kalma dan setujui izin `instagram_business_basic` dan `instagram_business_manage_comments`. Salin token yang muncul.
+4. Di hPanel isi environment variable `INSTAGRAM_ACCESS_TOKEN` dengan token itu (jangan kirim token lewat chat), lalu deploy ulang.
+5. Buka `/admin/instagram`: klik **Sinkronkan sekarang** untuk langsung mengambil komentar. Klik **Sembunyikan** pada komentar yang tidak cocok; komentar itu tidak akan muncul lagi.
+
+Catatan:
+- Token berlaku 60 hari, tetapi website memperbaruinya otomatis setiap hari dan menyimpannya di database, jadi tidak perlu diganti selama sinkronisasi berjalan. Kalau sinkronisasi gagal lebih dari 60 hari, buat token baru (langkah 3) dan ganti isi `INSTAGRAM_ACCESS_TOKEN`.
+- Jika Instagram sedang bermasalah, komentar terakhir yang tersimpan tetap tampil dan website mencoba lagi tiap jam.
+- Nama akun (@username) dan isi komentar ditampilkan di website dengan link ke postingannya.

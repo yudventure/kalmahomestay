@@ -6,6 +6,7 @@ const { loadConfig, ROOMS, GUEST_OPTIONS } = require('./config');
 const { normalize, validate, buildMessage } = require('./inquiry');
 const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
+const { createInstagramSync } = require('./instagram');
 const survey = require('./survey');
 const payments = require('./payments');
 const { parseContact } = require('./db/shared');
@@ -120,6 +121,8 @@ function createApp(options = {}) {
   app.use(express.json({ limit: '10kb' }));
 
   const pay = config.payments || { enabled: false, percent: 100 };
+  const instagram = options.instagramSync || createInstagramSync({ repo, token: (config.instagram || {}).token, api: options.instagramApi });
+  app.locals.instagram = instagram;
 
   function renderHome(res, lang, extra = {}) {
     const t = translator(lang);
@@ -132,6 +135,7 @@ function createApp(options = {}) {
       photo: photoFinder(),
       video: videoFinder(),
       partners: loadPartners(),
+      igReviews: instagram.comments,
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,
       contact: config.contact,
@@ -317,7 +321,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, t: translator('id') }));
 
   app.get('/robots.txt', (req, res) => res.type('text/plain').send(`User-agent: *\nDisallow: /admin\nSitemap: ${config.siteUrl}/sitemap.xml\n`));
   // Sitemap for Google Search Console: both language versions linked with hreflang, lastmod = last content change.
