@@ -9,6 +9,7 @@ const { createAdminRouter } = require('./admin');
 const { createInstagramSync } = require('./instagram');
 const { createSite } = require('./site');
 const { createCalendar } = require('./calendar');
+const { recordWebsitePayment } = require('./admin-finance');
 const survey = require('./survey');
 const payments = require('./payments');
 const { parseContact } = require('./db/shared');
@@ -290,6 +291,10 @@ function createApp(options = {}) {
     if (!item) return res.status(200).json({ ok: true, ignored: 'unknown order' }); // e.g. Midtrans dashboard test
     if (Math.round(Number(n.gross_amount)) !== Number(item.amount)) return res.status(400).json({ ok: false, error: 'amount mismatch' });
     const status = payments.paymentStatus(n);
+    if (status === 'paid') {
+      // book the online payment as income in Keuangan (once per order)
+      await recordWebsitePayment(repo, item, { amount: item.amount, method: 'midtrans' }).catch((e) => console.error('Could not record payment:', e.message));
+    }
     if (status) {
       await repo.setPayment(item.order_id, {
         status,

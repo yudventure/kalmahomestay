@@ -1,0 +1,19 @@
+<%- include('_top') %>
+<h1>SDM</h1>
+<%- include('_hrtabs') %>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance?view=recap&m=<%= prev %>">← Bulan lalu</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance?view=recap&m=<%= next %>">Bulan depan →</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance">Isi absensi hari ini</a>
+</div>
+<h2>Rekap absensi <%= m %></h2>
+<div class="table">
+<table>
+  <thead><tr><th>Karyawan</th><% ATTENDANCE.forEach(function (a) { %><th class="num"><%= a.label %></th><% }) %></tr></thead>
+  <tbody>
+  <% if (!recap.length) { %><tr><td colspan="7" class="muted">Belum ada karyawan aktif.</td></tr><% } %>
+  <% recap.forEach(function (r) { %><tr><td><a href="/admin/hr/employees/<%= r.e.id %>"><%= r.e.name %></a></td><% ATTENDANCE.forEach(function (a) { %><td class="num"><%= r.counts[a.id] || '' %></td><% }) %></tr><% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('_bottom') %>

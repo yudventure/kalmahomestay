@@ -1,0 +1,46 @@
+<%- include('_top') %>
+<h1>SDM</h1>
+<%- include('_hrtabs') %>
+<% if (flashErr === 'leave') { %><p class="alert alert--err" role="alert">Pilih karyawan dan jenis, dan pastikan tanggal selesai tidak sebelum tanggal mulai.</p><% } %>
+<nav class="tabs" aria-label="Status cuti">
+  <a href="/admin/hr/leave"<%- !status ? ' aria-current="page"' : '' %>>Semua</a>
+  <a href="/admin/hr/leave?status=pending"<%- status === 'pending' ? ' aria-current="page"' : '' %>>Menunggu</a>
+  <a href="/admin/hr/leave?status=approved"<%- status === 'approved' ? ' aria-current="page"' : '' %>>Disetujui</a>
+  <a href="/admin/hr/leave?status=rejected"<%- status === 'rejected' ? ' aria-current="page"' : '' %>>Ditolak</a>
+</nav>
+<div class="table" style="margin-bottom: var(--space-6)">
+<table>
+  <thead><tr><th>Karyawan</th><th>Jenis</th><th>Tanggal</th><th>Alasan</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada pengajuan.</td></tr><% } %>
+  <% list.forEach(function (l) { var days = nights(l.start_date, l.end_date) + 1; %>
+    <tr><td><b><%= nameOf(l.employee_id) %></b></td>
+      <td><%= (LEAVE_KINDS.find(function (k) { return k.id === l.kind; }) || {}).label %></td>
+      <td><%= fmtDate(l.start_date) %> – <%= fmtDate(l.end_date) %><br><small class="muted"><%= days %> hari</small></td>
+      <td class="admin__msg"><%= l.reason || '—' %></td>
+      <td><span class="chip <%= l.status === 'approved' ? 'chip--ok' : l.status === 'rejected' ? 'chip--err' : 'chip--warn' %>"><%= { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' }[l.status] %></span><% if (l.decided_by) { %><br><small class="muted">oleh <%= l.decided_by %></small><% } %></td>
+      <td class="inline">
+        <% if (l.status !== 'approved') { %><form method="post" action="/admin/hr/leave/<%= l.id %>"><input type="hidden" name="status" value="approved"><button class="btn btn--primary btn--sm" type="submit">Setujui</button></form><% } %>
+        <% if (l.status !== 'rejected') { %><form method="post" action="/admin/hr/leave/<%= l.id %>"><input type="hidden" name="status" value="rejected"><button class="btn btn--ghost btn--sm" type="submit">Tolak</button></form><% } %>
+        <form method="post" action="/admin/hr/leave/<%= l.id %>/delete" onsubmit="return confirm('Hapus pengajuan ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
+      </td></tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<section class="panel">
+  <h2>Ajukan cuti / izin</h2>
+  <form method="post" action="/admin/hr/leave" class="stack admin">
+    <div class="row3">
+      <div class="field"><label for="l-emp">Karyawan</label><select id="l-emp" name="employee_id" required><option value="">—</option><% staff.forEach(function (e) { %><option value="<%= e.id %>"><%= e.name %></option><% }) %></select></div>
+      <div class="field"><label for="l-kind">Jenis</label><select id="l-kind" name="kind"><% LEAVE_KINDS.forEach(function (k) { %><option value="<%= k.id %>"><%= k.label %></option><% }) %></select></div>
+      <div class="field"><label for="l-reason">Alasan</label><input id="l-reason" name="reason" maxlength="2000"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="l-start">Mulai</label><input id="l-start" name="start_date" type="date" required></div>
+      <div class="field"><label for="l-end">Sampai (hari terakhir libur)</label><input id="l-end" name="end_date" type="date" required></div>
+    </div>
+    <button class="btn btn--primary btn--sm" type="submit">Ajukan</button>
+  </form>
+</section>
+<%- include('_bottom') %>

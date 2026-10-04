@@ -1,0 +1,59 @@
+<%- include('_top') %>
+<h1>Keuangan</h1>
+<%- include('_fintabs') %>
+<% if (flashErr === 'tx') { %><p class="alert alert--err" role="alert">Isi tanggal, kategori, dan jumlah.</p><% } %>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/finance?m=<%= prev %>">← <%= prev %></a>
+  <b style="align-self:center"><%= new Date(m + '-01T00:00:00Z').toLocaleDateString('id-ID', { month: 'long', year: 'numeric', timeZone: 'UTC' }) %></b>
+  <a class="btn btn--ghost btn--sm" href="/admin/finance?m=<%= next %>"><%= next %> →</a>
+</div>
+<div class="cards cards--3">
+  <div class="card-stat"><b><%= rupiah(income) %></b><span>Pemasukan</span></div>
+  <div class="card-stat"><b><%= rupiah(expense) %></b><span>Pengeluaran</span></div>
+  <div class="card-stat <%= income - expense >= 0 ? 'card-stat--new' : '' %>"><b><%= rupiah(income - expense) %></b><span>Laba bersih</span></div>
+</div>
+
+<section class="panel">
+  <h2>Catat transaksi</h2>
+  <form method="post" action="/admin/finance" class="stack admin">
+    <div class="row4">
+      <div class="field"><label for="t-date">Tanggal</label><input id="t-date" name="date" type="date" required value="<%= today %>"></div>
+      <div class="field"><label for="t-kind">Jenis</label><select id="t-kind" name="kind" onchange="var k=this.value;document.querySelectorAll('#t-cat optgroup').forEach(function(g){g.disabled=g.dataset.kind!==k});document.getElementById('t-cat').value=document.querySelector('#t-cat optgroup[data-kind='+k+'] option').value"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div>
+      <div class="field"><label for="t-cat">Kategori</label><select id="t-cat" name="category">
+        <optgroup label="Pemasukan" data-kind="income"><% CATEGORIES.income.forEach(function (c) { %><option><%= c %></option><% }) %></optgroup>
+        <optgroup label="Pengeluaran" data-kind="expense" disabled><% CATEGORIES.expense.forEach(function (c) { %><option><%= c %></option><% }) %></optgroup>
+      </select></div>
+      <div class="field"><label for="t-amt">Jumlah (Rp)</label><input id="t-amt" name="amount" inputmode="numeric" required></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label for="t-method">Metode</label><select id="t-method" name="method"><% METHODS.forEach(function (x) { %><option><%= x %></option><% }) %></select></div>
+      <div class="field"><label for="t-desc">Keterangan</label><input id="t-desc" name="description" maxlength="2000"></div>
+    </div>
+    <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+  </form>
+</section>
+
+<form class="filters" method="get" action="/admin/finance">
+  <input type="hidden" name="m" value="<%= m %>">
+  <select name="kind" aria-label="Jenis"><option value="">Semua</option><option value="income"<%= kind === 'income' ? ' selected' : '' %>>Pemasukan</option><option value="expense"<%= kind === 'expense' ? ' selected' : '' %>>Pengeluaran</option></select>
+  <select name="category" aria-label="Kategori"><option value="">Semua kategori</option><% CATEGORIES.income.concat(CATEGORIES.expense).filter(function (c, i, a) { return a.indexOf(c) === i; }).forEach(function (c) { %><option<%= category === c ? ' selected' : '' %>><%= c %></option><% }) %></select>
+  <button class="btn btn--ghost btn--sm" type="submit">Saring</button>
+  <a class="filters__right link" href="/admin/finance/export.csv?y=<%= m.slice(0, 4) %>">Unduh CSV <%= m.slice(0, 4) %></a>
+</form>
+<div class="table">
+<table>
+  <thead><tr><th>Tanggal</th><th>Kategori</th><th>Keterangan</th><th>Metode</th><th class="num">Jumlah</th><th></th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada transaksi.</td></tr><% } %>
+  <% list.forEach(function (t) { %>
+    <tr><td><%= fmtDate(t.date) %></td>
+      <td><span class="chip <%= t.kind === 'income' ? 'chip--ok' : 'chip--err' %>"><%= t.kind === 'income' ? '+' : '−' %></span> <%= t.category %></td>
+      <td class="admin__msg"><% if (t.ref_type === 'inquiry') { %><a href="/admin/inquiries/<%= t.ref_id %>"><%= t.description %></a><% } else { %><%= t.description || '—' %><% } %><br><small class="muted"><%= t.created_by || '' %></small></td>
+      <td><%= t.method || '—' %></td>
+      <td class="num"><b><%= t.kind === 'income' ? '' : '−' %><%= rupiah(t.amount) %></b></td>
+      <td><form method="post" action="/admin/finance/<%= t.id %>/delete" onsubmit="return confirm('Hapus transaksi ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('_bottom') %>

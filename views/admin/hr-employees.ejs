@@ -1,0 +1,31 @@
+<%- include('_top') %>
+<h1>SDM</h1>
+<%- include('_hrtabs') %>
+<% if (flashErr === 'name') { %><p class="alert alert--err" role="alert">Nama karyawan wajib diisi.</p><% } %>
+<form class="filters" method="get" action="/admin/hr/employees">
+  <input name="q" value="<%= q %>" placeholder="Cari nama, jabatan, bagian, HP" aria-label="Cari">
+  <select name="status" aria-label="Status"><option value="">Aktif</option><option value="inactive"<%= status === 'inactive' ? ' selected' : '' %>>Tidak aktif</option><option value="all"<%= status === '' ? ' selected' : '' %>>Semua</option></select>
+  <button class="btn btn--ghost btn--sm" type="submit">Tampilkan</button>
+  <span class="filters__right muted small">Total gaji + tunjangan aktif / bulan: <b><%= rupiah(payrollTotal) %></b></span>
+</form>
+<div class="table" style="margin-bottom: var(--space-6)">
+<table>
+  <thead><tr><th>Nama</th><th>Jabatan</th><th>Bagian</th><th>HP</th><th>Mulai</th><th class="num">Gaji + tunjangan</th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada karyawan.</td></tr><% } %>
+  <% list.forEach(function (e) { %>
+    <tr><td><a href="/admin/hr/employees/<%= e.id %>"><b><%= e.name %></b></a><% if (e.status === 'inactive') { %> <span class="chip">Tidak aktif</span><% } %></td>
+      <td><%= e.position || '—' %></td><td><%= e.department || '—' %></td><td><%= e.phone || '—' %></td><td><%= fmtDate(e.join_date) %></td>
+      <td class="num"><%= rupiah((e.salary || 0) + (e.allowance || 0)) %></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<section class="panel">
+  <h2>Tambah karyawan</h2>
+  <form method="post" action="/admin/hr/employees" class="stack admin">
+    <%- include('_employee-fields', { e: {} }) %>
+    <button class="btn btn--primary btn--sm" type="submit">Tambah</button>
+  </form>
+</section>
+<%- include('_bottom') %>

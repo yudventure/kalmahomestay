@@ -1,0 +1,16 @@
+<div class="row3">
+  <div class="field"><label for="e-name">Nama</label><input id="e-name" name="name" required maxlength="120" value="<%= e.name || '' %>"></div>
+  <div class="field"><label for="e-pos">Jabatan</label><input id="e-pos" name="position" maxlength="80" value="<%= e.position || '' %>" placeholder="mis. Housekeeping"></div>
+  <div class="field"><label for="e-dep">Bagian</label><select id="e-dep" name="department"><option value="">—</option><% DEPARTMENTS.forEach(function (d) { %><option<%= e.department === d ? ' selected' : '' %>><%= d %></option><% }) %></select></div>
+</div>
+<div class="row3">
+  <div class="field"><label for="e-phone">HP / WhatsApp</label><input id="e-phone" name="phone" maxlength="32" value="<%= e.phone || '' %>"></div>
+  <div class="field"><label for="e-email">Email</label><input id="e-email" name="email" type="email" maxlength="190" value="<%= e.email || '' %>"></div>
+  <div class="field"><label for="e-join">Mulai bekerja</label><input id="e-join" name="join_date" type="date" value="<%= e.join_date || '' %>"></div>
+</div>
+<div class="row3">
+  <div class="field"><label for="e-sal">Gaji pokok / bulan (Rp)</label><input id="e-sal" name="salary" inputmode="numeric" value="<%= e.salary || '' %>"></div>
+  <div class="field"><label for="e-all">Tunjangan tetap / bulan (Rp)</label><input id="e-all" name="allowance" inputmode="numeric" value="<%= e.allowance || '' %>"></div>
+  <div class="field"><label for="e-status">Status</label><select id="e-status" name="status"><option value="active"<%= e.status !== 'inactive' ? ' selected' : '' %>>Aktif</option><option value="inactive"<%= e.status === 'inactive' ? ' selected' : '' %>>Tidak aktif</option></select></div>
+</div>
+<div class="field"><label for="e-notes">Catatan (kontrak, rekening, keahlian, …)</label><textarea id="e-notes" name="notes" maxlength="4000"><%= e.notes || '' %></textarea></div>

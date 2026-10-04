@@ -8,6 +8,9 @@ const { todayISO } = require('./inquiry');
 const survey = require('./survey');
 const { mountUsers, mountWebsite } = require('./admin-cms');
 const { mountCalendar } = require('./admin-calendar');
+const { mountHr } = require('./admin-hr');
+const { mountFinance, soldNights } = require('./admin-finance');
+const { addDays } = require('./ical');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
 
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -168,13 +171,45 @@ function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
   mountUsers(router, { repo, ah, idParam });
   mountWebsite(router, { site, ah, t });
   mountCalendar(router, { repo, calendar, config, ah, idParam, t });
+  mountHr(router, { repo, ah, idParam });
+  mountFinance(router, { repo, calendar, ah, idParam, toCSV });
 
   const stamp = () => todayISO();
 
   /* ---------- dashboard ---------- */
   router.get('/', ah(async (req, res) => {
-    const [stats, recent] = await Promise.all([repo.stats(todayISO()), repo.listInquiries({ status: 'new' })]);
-    res.render('admin/dashboard', { title: 'Ringkasan', stats, recent: recent.items.slice(0, 8), newTotal: recent.total });
+    const role = req.staff.role;
+    const today = todayISO();
+    const month = today.slice(0, 7);
+    const monthStart = `${month}-01`;
+    const nextMonth = addDays(monthStart, 32).slice(0, 7) + '-01';
+    const view = { title: 'Ringkasan', today };
+    if (can(role, 'reservations')) {
+      const [stats, recent, items] = await Promise.all([repo.stats(today), repo.listInquiries({ status: 'new' }), calendar.items(monthStart < today ? monthStart : today, nextMonth)]);
+      const held = items.filter((it) => it.counts && it.type !== 'block');
+      const units = ROOMS.reduce((s, r) => s + (r.units || 1), 0);
+      const days = Math.round((Date.parse(nextMonth) - Date.parse(monthStart)) / 864e5);
+      Object.assign(view, {
+        stats, recent: recent.items.slice(0, 8), newTotal: recent.total,
+        arrivals: held.filter((it) => it.start === today), departures: held.filter((it) => it.end === today),
+        inHouse: held.filter((it) => it.start <= today && it.end > today),
+        occupancy: Math.round((soldNights(items, monthStart, nextMonth) / (units * days)) * 100),
+      });
+    }
+    if (can(role, 'finance')) {
+      const tx = await repo.table('transactions').list({ range: { col: 'date', from: monthStart, to: nextMonth } });
+      view.income = tx.filter((t) => t.kind === 'income').reduce((s, t) => s + t.amount, 0);
+      view.expense = tx.filter((t) => t.kind === 'expense').reduce((s, t) => s + t.amount, 0);
+    }
+    if (can(role, 'hr')) {
+      const [staff, att, pending] = await Promise.all([
+        repo.table('employees').count({ where: { status: 'active' } }),
+        repo.table('attendance').list({ where: { date: today } }),
+        repo.table('leave_requests').count({ where: { status: 'pending' } }),
+      ]);
+      Object.assign(view, { staffCount: staff, presentToday: att.filter((a) => a.status === 'hadir').length, attendanceFilled: att.length, pendingLeave: pending });
+    }
+    res.render('admin/dashboard', view);
   }));
 
   /* ---------- inquiries ---------- */
@@ -189,7 +224,8 @@ function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
     const id = idParam(req); if (!id) return next();
     const item = await repo.getInquiry(id);
     if (!item) return next();
-    res.render('admin/inquiry', { title: `Permintaan #${item.id}`, item });
+    const payments = can(req.staff.role, 'finance') ? await repo.table('transactions').list({ where: { ref_type: 'inquiry', ref_id: id, kind: 'income' }, order: [['date', 'asc']] }) : [];
+    res.render('admin/inquiry', { title: `Permintaan #${item.id}`, item, payments });
   }));
 
   router.post('/inquiries/:id', ah(async (req, res, next) => {

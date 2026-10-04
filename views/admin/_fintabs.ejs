@@ -1,0 +1,5 @@
+<nav class="tabs" aria-label="Keuangan">
+  <a href="/admin/finance"<%- current === '/finance' ? ' aria-current="page"' : '' %>>Transaksi</a>
+  <a href="/admin/finance/report"<%- current.indexOf('/finance/report') === 0 ? ' aria-current="page"' : '' %>>Laporan laba rugi</a>
+  <a href="/admin/payroll">Penggajian</a>
+</nav>

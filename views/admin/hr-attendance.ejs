@@ -1,0 +1,31 @@
+<%- include('_top') %>
+<h1>SDM</h1>
+<%- include('_hrtabs') %>
+<div class="btns" style="margin-bottom: var(--space-4)">
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance?date=<%= prev %>">← Kemarin</a>
+  <form method="get" action="/admin/hr/attendance" class="inline"><input type="date" name="date" value="<%= date %>" aria-label="Tanggal" onchange="this.form.submit()"></form>
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance?date=<%= next %>">Besok →</a>
+  <a class="btn btn--ghost btn--sm" href="/admin/hr/attendance?view=recap&m=<%= date.slice(0, 7) %>">Rekap bulanan</a>
+</div>
+<h2><%= fmtDate(date) %><%= date === today ? ' · hari ini' : '' %></h2>
+<% if (!sheet.length) { %><p class="muted">Belum ada karyawan aktif. Tambahkan di menu Karyawan.</p><% } else { %>
+<form method="post" action="/admin/hr/attendance">
+  <input type="hidden" name="date" value="<%= date %>">
+  <div class="table">
+  <table>
+    <thead><tr><th>Karyawan</th><th>Status</th><th>Masuk</th><th>Pulang</th><th>Catatan</th></tr></thead>
+    <tbody>
+    <% sheet.forEach(function (row) { var e = row.e; %>
+      <tr><td><b><%= e.name %></b><br><small class="muted"><%= e.position || e.department || '' %></small><% if (row.leave) { %><br><span class="chip chip--warn"><%= row.leave.kind %> disetujui</span><% } %><% if (!row.r) { %><br><small class="muted">belum diisi</small><% } %></td>
+        <td><select name="status_<%= e.id %>" aria-label="Status <%= e.name %>"><% ATTENDANCE.forEach(function (a) { %><option value="<%= a.id %>"<%= row.suggested === a.id ? ' selected' : '' %>><%= a.label %></option><% }) %></select></td>
+        <td><input type="time" name="in_<%= e.id %>" value="<%= row.r && row.r.check_in || '' %>" aria-label="Jam masuk"></td>
+        <td><input type="time" name="out_<%= e.id %>" value="<%= row.r && row.r.check_out || '' %>" aria-label="Jam pulang"></td>
+        <td><input name="note_<%= e.id %>" maxlength="255" value="<%= row.r && row.r.note || '' %>" aria-label="Catatan"></td></tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+  <div class="sticky-save"><button class="btn btn--primary btn--sm" type="submit">Simpan absensi <%= fmtDate(date) %></button></div>
+</form>
+<% } %>
+<%- include('_bottom') %>
