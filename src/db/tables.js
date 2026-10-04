@@ -39,6 +39,10 @@ const TABLES = {
     columns: { kind: 'str', file: 'str', original_name: 'str', mime: 'str', size: 'int', slot: 'str', owner_type: 'str', owner_id: 'int',
       label: 'str', public: 'bool', uploaded_by: 'str' },
   },
+  feedback: {
+    columns: { kind: 'str', topic: 'str', rating: 'int', message: 'text', name: 'str', contact: 'str', stay_date: 'date',
+      lang: 'str', status: 'str', admin_note: 'text', handled_by: 'str' },
+  },
   transactions: {
     columns: { date: 'date', kind: 'str', category: 'str', amount: 'money', method: 'str', description: 'text',
       ref_type: 'str', ref_id: 'int', created_by: 'str' },

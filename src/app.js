@@ -359,6 +359,44 @@ function createApp(options = {}) {
     res.redirect(303, target);
   }));
 
+  /* ---------- "We hear you": suggestions, complaints, compliments ---------- */
+  const FB_KINDS = ['saran', 'keluhan', 'pujian', 'pertanyaan'];
+  const FB_TOPICS = ['kamar', 'makanan', 'layanan', 'trip', 'kebersihan', 'pemesanan', 'website', 'lainnya'];
+  const fbPath = (lang) => (lang === 'en' ? '/en/feedback' : '/masukan');
+  function renderFeedback(res, lang, extra = {}) {
+    res.render('feedback', {
+      lang, t: translator(lang), base: lang === 'en' ? '/en' : '', home: lang === 'en' ? '/en' : '/', siteUrl: config.siteUrl, contact: config.contact,
+      action: fbPath(lang), KINDS: FB_KINDS, TOPICS: FB_TOPICS, values: { kind: '', topic: '', rating: '', message: '', name: '', contact: '', stay_date: '' },
+      error: '', thanks: false, ...extra,
+    });
+  }
+  app.get(['/masukan', '/en/feedback'], (req, res) => renderFeedback(res, req.path.startsWith('/en') ? 'en' : 'id', { thanks: req.query.thanks === '1' }));
+  app.get('/feedback', (req, res) => res.redirect(301, '/masukan'));
+  app.post(['/masukan', '/en/feedback'], ah(async (req, res) => {
+    const lang = req.path.startsWith('/en') ? 'en' : 'id';
+    const t = translator(lang);
+    const b = req.body || {};
+    const done = fbPath(lang) + '?thanks=1';
+    if (b.website) return res.redirect(303, done); // honeypot
+    const v = {
+      kind: FB_KINDS.includes(b.kind) ? b.kind : '', topic: FB_TOPICS.includes(b.topic) ? b.topic : 'lainnya',
+      rating: /^[1-5]$/.test(String(b.rating || '')) ? Number(b.rating) : '', message: String(b.message || '').trim().slice(0, 4000),
+      name: String(b.name || '').trim().slice(0, 120), contact: String(b.contact || '').trim().slice(0, 120),
+      stay_date: /^\d{4}-\d{2}-\d{2}$/.test(String(b.stay_date || '')) ? b.stay_date : '',
+    };
+    let error = '';
+    if (!v.kind) error = t('fb.errKind');
+    else if (v.message.length < 10) error = t('fb.errMessage');
+    else if (rateLimited(req.ip, 'feedback')) error = t('fb.errRate');
+    if (error) { res.status(400); return renderFeedback(res, lang, { values: v, error }); }
+    try {
+      await repo.table('feedback').insert({ ...v, rating: v.rating || null, stay_date: v.stay_date || null, lang, status: 'baru' });
+    } catch (e) {
+      console.error('Could not save feedback:', e.message);
+    }
+    res.redirect(303, done);
+  }));
+
   /* ---------- admin ---------- */
   app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, t: translator('id') }));
 

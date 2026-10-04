@@ -429,3 +429,15 @@ test('decorative animations keep running when Windows or Android asks to reduce 
   const js = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'main.js'), 'utf8');
   assert.match(js, /var calm = Boolean\(conn\.saveData\);/, 'videos and the crab only rest for data saver');
 });
+
+test('every stylesheet has balanced braces (one stray brace hides all rules after it)', () => {
+  const dir = path.join(__dirname, '..', 'public', 'css');
+  for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.css'))) {
+    let depth = 0;
+    for (const ch of fs.readFileSync(path.join(dir, f), 'utf8').replace(/\/\*[^]*?\*\//g, '').replace(/"[^"]*"|'[^']*'/g, '')) {
+      if (ch === '{') depth += 1;
+      if (ch === '}') { depth -= 1; assert.ok(depth >= 0, `${f}: closing brace without opening`); }
+    }
+    assert.equal(depth, 0, `${f}: unclosed block`);
+  }
+});

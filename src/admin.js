@@ -11,6 +11,7 @@ const { mountCalendar } = require('./admin-calendar');
 const { mountHr } = require('./admin-hr');
 const { mountFinance, soldNights } = require('./admin-finance');
 const { mountMedia } = require('./admin-media');
+const { mountFeedback } = require('./admin-feedback');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
@@ -175,6 +176,8 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, t }
           repo.listInquiries({ status: 'new' }), calendar.items(addDays(today, -1), addDays(today, 1)), repo.table('channels').list({ where: { active: true } }),
         ]);
         if (fresh.total) alerts.push({ label: `${fresh.total} permintaan baru`, sub: 'Tamu menunggu balasan', href: '/admin/inquiries?status=new' });
+        const fb = await repo.table('feedback').count({ where: { status: 'baru' } });
+        if (fb) alerts.push({ label: `${fb} masukan tamu baru`, sub: 'Dari tombol We hear you', href: '/admin/feedback?status=baru' });
         const held = items.filter((it) => it.counts && it.type !== 'block');
         const arr = held.filter((it) => it.start === today).length;
         const dep = held.filter((it) => it.end === today).length;
@@ -205,7 +208,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, t }
   /* ---------- who may open what ---------- */
   const need = (area) => (req, res, next) => (can(req.staff.role, area) ? next()
     : res.status(403).render('admin/forbidden', { title: 'Tidak ada akses' }));
-  router.use(['/inquiries', '/customers', '/calendar', '/channels', '/export/customers.csv', '/export/inquiries.csv'], need('reservations'));
+  router.use(['/inquiries', '/customers', '/calendar', '/channels', '/feedback', '/export/customers.csv', '/export/inquiries.csv'], need('reservations'));
   router.use(['/website', '/instagram', '/survey', '/export/survey.csv'], need('website'));
   router.use('/hr', need('hr'));
   router.use('/payroll', need('payroll'));
@@ -218,6 +221,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, t }
   mountHr(router, { repo, ah, idParam });
   mountFinance(router, { repo, calendar, ah, idParam, toCSV });
   mountMedia(router, { repo, media, ah, idParam, t });
+  mountFeedback(router, { repo, ah, idParam });
 
   const stamp = () => todayISO();
 

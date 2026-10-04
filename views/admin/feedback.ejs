@@ -1,0 +1,42 @@
+<%- include('_top') %>
+<h1>Masukan tamu</h1>
+<p class="muted">Pesan dari tombol <b>We hear you</b> di website. Tandai "Sedang ditangani" saat mulai ditindaklanjuti dan "Selesai" setelah tamu dibalas.</p>
+<div class="cards">
+  <a class="card-stat<%= counts.baru ? ' card-stat--new' : '' %>" href="/admin/feedback?status=baru"><span>Pesan baru</span><b><%= counts.baru %></b><em>belum dibaca</em></a>
+  <a class="card-stat" href="/admin/feedback?status=diproses"><span>Sedang ditangani</span><b><%= counts.diproses %></b><em>dalam proses</em></a>
+  <a class="card-stat" href="/admin/feedback?kind=keluhan"><span>Keluhan terbuka</span><b><%= openComplaints %></b><em class="<%= openComplaints ? 'warn' : 'good' %>"><%= openComplaints ? 'Perlu ditindaklanjuti' : 'Semua beres' %></em></a>
+  <div class="card-stat"><span>Rata-rata nilai</span><b><%= avgRating %><% if (avgRating !== '-') { %> <small style="font-size:.5em">/ 5</small><% } %></b><em>dari tamu yang memberi bintang</em></div>
+</div>
+<nav class="tabs" aria-label="Status">
+  <a href="/admin/feedback"<%- !status && !kind ? ' aria-current="page"' : '' %>>Semua</a>
+  <% Object.keys(STATUSES).forEach(function (s) { %><a href="/admin/feedback?status=<%= s %>"<%- status === s ? ' aria-current="page"' : '' %>><%= STATUSES[s] %> (<%= counts[s] %>)</a><% }) %>
+  <% Object.keys(KINDS).forEach(function (k) { %><a href="/admin/feedback?kind=<%= k %>"<%- kind === k ? ' aria-current="page"' : '' %>><%= KINDS[k] %></a><% }) %>
+</nav>
+<% if (!list.length) { %><section class="panel"><p class="muted">Belum ada pesan di sini.</p></section><% } %>
+<% list.forEach(function (f) { var chip = { keluhan: 'chip--err', pujian: 'chip--ok', saran: 'chip--warn' }[f.kind] || ''; %>
+<section class="panel fbk" id="f<%= f.id %>">
+  <div class="panel__head">
+    <div>
+      <p class="eyebrow-a"><span class="chip <%= chip %>"><%= KINDS[f.kind] || f.kind %></span> · <%= TOPICS[f.topic] || '-' %><% if (f.rating) { %> · <span class="fbk__stars"><%= '★'.repeat(f.rating) %><%= '☆'.repeat(5 - f.rating) %></span><% } %></p>
+      <h2><%= f.name || 'Tanpa nama' %></h2>
+    </div>
+    <span class="chip <%= f.status === 'selesai' ? 'chip--ok' : f.status === 'baru' ? 'chip--warn' : '' %>"><%= STATUSES[f.status] || f.status %></span>
+  </div>
+  <p class="pre fbk__msg"><%= f.message %></p>
+  <p class="muted small"><%= fmtDateTime(f.created_at) %> · <%= f.lang === 'en' ? 'English' : 'Indonesia' %><% if (f.stay_date) { %> · menginap <%= fmtDate(f.stay_date) %><% } %><% if (f.contact) { %> · <b><%= f.contact %></b><% } %><% if (f.handled_by) { %> · ditangani <%= f.handled_by %><% } %></p>
+  <form method="post" action="/admin/feedback/<%= f.id %>" class="fbk__form">
+    <div class="field"><label for="fn<%= f.id %>">Catatan tindak lanjut</label><textarea id="fn<%= f.id %>" name="admin_note" rows="2" maxlength="2000" placeholder="Mis. sudah ditelepon, diberi potongan trip berikutnya"><%= f.admin_note || '' %></textarea></div>
+    <div class="btns">
+      <select name="status" aria-label="Status"><% Object.keys(STATUSES).forEach(function (s) { %><option value="<%= s %>"<%= f.status === s ? ' selected' : '' %>><%= STATUSES[s] %></option><% }) %></select>
+      <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+      <% var digits = String(f.contact || '').replace(/\D/g, ''); if (/^(\+|0|62|8)\d{7,}/.test(String(f.contact || '').replace(/[\s-]/g, ''))) { var wa = digits.indexOf('0') === 0 ? '62' + digits.slice(1) : digits.indexOf('8') === 0 ? '62' + digits : digits; %>
+        <a class="btn btn--cta btn--sm" href="https://wa.me/<%= wa %>?text=<%= encodeURIComponent('Halo ' + (f.name || '') + ', terima kasih atas masukannya untuk Kalma.') %>" target="_blank" rel="noopener">Balas via WhatsApp</a>
+      <% } else if (/@/.test(f.contact || '')) { %>
+        <a class="btn btn--cta btn--sm" href="mailto:<%= f.contact %>?subject=<%= encodeURIComponent('Masukan untuk Kalma Raja Ampat') %>">Balas via email</a>
+      <% } %>
+    </div>
+  </form>
+  <form method="post" action="/admin/feedback/<%= f.id %>/delete" onsubmit="return confirm('Hapus pesan ini?')" style="margin-top:8px"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
+</section>
+<% }) %>
+<%- include('_bottom') %>
