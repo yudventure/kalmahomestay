@@ -22,7 +22,7 @@ const apps = [];
 
 async function start(payments) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-pay-'));
-  const app = createApp({ adminLang: 'id', dataDir, db: null, siteUrl: 'https://kalma.test', contact, payments });
+  const app = createApp({ adminLang: 'id', adminPassword: 'rahasia', dataDir, db: null, siteUrl: 'https://kalma.test', contact, payments });
   await app.locals.repo.init();
   const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
   const base = `http://127.0.0.1:${server.address().port}`;
@@ -87,11 +87,11 @@ test('Midtrans statuses and times are mapped', () => {
 test('payments stay off until both Midtrans keys are set; Instagram accepts a profile URL', () => {
   assert.equal(loadConfig({}).payments.enabled, false);
   assert.equal(loadConfig({ MIDTRANS_SERVER_KEY: 'a' }).payments.enabled, false);
-  const c = loadConfig({ MIDTRANS_SERVER_KEY: 'a', MIDTRANS_CLIENT_KEY: 'b', PAYMENT_DEPOSIT_PERCENT: '30' }).payments;
+  const c = loadConfig({ MIDTRANS_SERVER_KEY: 'SB-Mid-server-a', MIDTRANS_CLIENT_KEY: 'SB-Mid-client-b', PAYMENT_DEPOSIT_PERCENT: '30' }).payments;
   assert.equal(c.enabled, true);
   assert.equal(c.percent, 30);
   assert.match(c.snapUrl, /sandbox/);
-  assert.match(loadConfig({ MIDTRANS_SERVER_KEY: 'a', MIDTRANS_CLIENT_KEY: 'b', MIDTRANS_IS_PRODUCTION: 'true' }).payments.snapUrl, /^https:\/\/app\.midtrans\.com/);
+  assert.match(loadConfig({ MIDTRANS_SERVER_KEY: 'Mid-server-a', MIDTRANS_CLIENT_KEY: 'Mid-client-b' }).payments.snapUrl, /^https:\/\/app\.midtrans\.com/);
   const ig = loadConfig({ INSTAGRAM_HANDLE: 'https://www.instagram.com/kalmahomestay/' }).contact;
   assert.equal(ig.instagram, '@kalmahomestay');
   assert.equal(ig.instagramUrl, 'https://instagram.com/kalmahomestay');
@@ -172,18 +172,40 @@ test('a deposit percentage charges only part of the stay', async () => {
   assert.equal(lastSnap.body.transaction_details.gross_amount, 1530000);
 });
 
-test('if Midtrans is unreachable the booking is kept as a request', async () => {
-  const { post, repo } = await start(payCfg());
+test('if Midtrans refuses, the guest stays on the booking page and the staff see why', async () => {
+  const { base, post, repo } = await start(payCfg());
   snapFails = true;
   try {
-    const body = await (await post('/api/checkout', booking())).json();
-    assert.equal(body.mode, 'request');
-    assert.match(body.doneUrl, /^\/pesan\/selesai\?order=KALMA-/);
+    const r = await post('/en/api/checkout', booking());
+    assert.equal(r.status, 502);
+    const body = await r.json();
+    assert.equal(body.ok, false);
+    assert.equal(body.doneUrl, undefined, 'no jump to a result page');
+    assert.match(body.error, /payment page could not be opened/);
     const saved = (await repo.listInquiries({})).items[0];
-    assert.equal(saved.payment_status, 'failed');
+    assert.equal(saved.payment_status, 'failed', 'kept so the staff can follow up');
+    const admin = await (await fetch(base + '/admin', { headers: { Authorization: 'Basic ' + Buffer.from('admin:rahasia').toString('base64') } })).text();
+    assert.match(admin, /Halaman pembayaran gagal dibuka/);
+    assert.match(admin, /Midtrans menolak Server Key/);
   } finally {
     snapFails = false;
   }
+  // once Midtrans answers again the alert goes away
+  await post('/api/checkout', booking({ checkin: addDays(30), checkout: addDays(31) }));
+  const again = await (await fetch(base + '/admin', { headers: { Authorization: 'Basic ' + Buffer.from('admin:rahasia').toString('base64') } })).text();
+  assert.doesNotMatch(again, /Halaman pembayaran gagal dibuka/);
+});
+
+test('the key decides sandbox or production, and mixed up keys are reported', () => {
+  const prod = loadConfig({ MIDTRANS_SERVER_KEY: 'Mid-server-abc', MIDTRANS_CLIENT_KEY: 'Mid-client-abc' }).payments;
+  assert.equal(prod.production, true, 'a production key goes to the production API even without MIDTRANS_IS_PRODUCTION');
+  assert.equal(prod.snapUrl, 'https://app.midtrans.com/snap/v1/transactions');
+  assert.deepEqual(prod.problems, []);
+  const sb = loadConfig({ MIDTRANS_SERVER_KEY: 'SB-Mid-server-abc', MIDTRANS_CLIENT_KEY: 'SB-Mid-client-abc', MIDTRANS_IS_PRODUCTION: 'true' }).payments;
+  assert.equal(sb.production, false);
+  assert.match(loadConfig({ MIDTRANS_SERVER_KEY: 'Mid-server-abc', MIDTRANS_CLIENT_KEY: 'SB-Mid-client-abc' }).payments.problems.join(), /lingkungan berbeda/);
+  assert.match(loadConfig({ MIDTRANS_SERVER_KEY: 'Mid-client-abc', MIDTRANS_CLIENT_KEY: 'Mid-server-abc' }).payments.problems.join(), /tertukar/);
+  assert.match(loadConfig({ MIDTRANS_SERVER_KEY: 'Mid-server-abc' }).payments.problems.join(), /MIDTRANS_CLIENT_KEY belum diisi/);
 });
 
 test('old /?book=<room> links open the booking page with that room', async () => {

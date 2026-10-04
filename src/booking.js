@@ -24,6 +24,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 function mountBooking(app, ctx) {
   const { repo, config, pay, calendar, media, activities, translator, rupiah, rateLimited, ah, photo, embedJSON } = ctx;
+  const payState = ctx.payState || {};
   const langOf = (req) => (req.path.startsWith('/en') || (req.body && req.body.lang === 'en') ? 'en' : 'id');
   const donePath = (lang, orderId) => `${bookPath(lang)}/${lang === 'en' ? 'done' : 'selesai'}?order=${encodeURIComponent(orderId)}`;
 
@@ -191,12 +192,15 @@ function mountBooking(app, ctx) {
         orderId, amount: order.amount, itemName: order.itemName, name, email: separate ? email : /@/.test(contactText) ? contactText : '',
         phone: separate ? phone : normalizePhone(contactText), finishUrl: config.siteUrl + donePath(lang, orderId),
       });
+      Object.assign(payState, { lastOkAt: new Date(), lastError: '' });
       return { ...result, mode: 'pay', token: snap.token, redirectUrl: snap.redirectUrl };
     } catch (e) {
-      // the order is kept as a request: the staff send payment details instead
-      console.error('Midtrans error, booking kept as a request:', e.message);
+      // Never send the guest on as if the booking were done: they stay on the booking page with a clear message,
+      // the order is kept (marked failed) so the staff can follow up, and the admin shows what Midtrans answered.
+      console.error('Midtrans error, payment page not opened:', e.message);
+      Object.assign(payState, { lastError: String(e.message).slice(0, 300), lastErrorAt: new Date() });
       await repo.setPayment(orderId, { status: 'failed' }).catch(() => {});
-      return result;
+      return { status: 502, error: t('bk').errPayOpen };
     }
   }
 

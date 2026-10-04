@@ -193,8 +193,10 @@ function createApp(options = {}) {
   }
 
   /* ---------- booking page, service pages and online payment (Midtrans Snap) ---------- */
+  const payState = { lastError: '', lastErrorAt: null, lastOkAt: null };
+  app.locals.payState = payState;
   const booking = mountBooking(app, {
-    repo, config, pay, calendar, media, activities, translator, rupiah, rateLimited, ah, embedJSON,
+    payState, repo, config, pay, calendar, media, activities, translator, rupiah, rateLimited, ah, embedJSON,
     photo: () => withUploads(photoFinder(), media),
   });
   // old links like /?book=laguna opened a booking dialog; they now go to the booking page
@@ -272,7 +274,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState, t: translator('id') }));
 
   // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
   app.get('/ical/:file', ah(async (req, res, next) => {
