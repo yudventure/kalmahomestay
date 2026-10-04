@@ -27,6 +27,8 @@ const SLOTS = [
     { id: 'hero-3', label: 'Kotak 3', video: true }, { id: 'hero-4', label: 'Kotak 4', video: true }] },
   { group: 'Layanan Kalma', note: 'Foto latar tiga kartu layanan.', items: [
     { id: 'svc-homestay', label: 'Homestay' }, { id: 'svc-diving', label: 'Diving & snorkeling' }, { id: 'svc-trips', label: 'Trip lainnya' }] },
+  { group: 'Kamar', note: 'Foto tiap kamar di halaman Homestay dan halaman pemesanan.', items: [
+    { id: 'room-laguna', label: 'Bungalow Laguna' }, { id: 'room-pantai', label: 'Rumah Pantai' }, { id: 'room-keluarga', label: 'Rumah Keluarga' }] },
   { group: 'Pengalaman', note: 'Enam lingkaran foto pengalaman.', items: [1, 2, 3, 4, 5, 6].map((i) => ({ id: `exp-${i}`, label: `Pengalaman ${i}`, contentKey: `e${i}.t` })) },
   { group: 'Keunggulan', note: 'Foto besar di samping daftar keunggulan.', items: [{ id: 'feature', label: 'Foto keunggulan' }] },
 ];
@@ -54,7 +56,8 @@ function createMedia({ repo, dir }) {
   const table = repo.table('media');
   let slots = {}; // slot → { image: row, video: row }
   let logos = {}; // partner name (lowercase) → row
-  const PUBLIC = ['website', 'partner'];
+  let activityPhotos = {}; // activity id → row
+  const PUBLIC = ['website', 'partner', 'activity'];
 
   const filePath = (row) => path.join(dir, path.basename(row.file));
   const urlOf = (row) => `/media/${row.file}`;
@@ -63,12 +66,15 @@ function createMedia({ repo, dir }) {
     const rows = await table.list({ where: { owner_type: PUBLIC }, order: [['id', 'asc']] });
     const next = {};
     const nextLogos = {};
+    const nextActivities = {};
     for (const r of rows) {
+      if (r.owner_type === 'activity' && r.owner_id) nextActivities[r.owner_id] = r;
       if (r.owner_type === 'website' && r.slot) (next[r.slot] ||= {})[r.kind] = r;
       if (r.owner_type === 'partner' && r.label) nextLogos[r.label.toLowerCase()] = r;
     }
     slots = next;
     logos = nextLogos;
+    activityPhotos = nextActivities;
     return slots;
   }
 
@@ -112,6 +118,10 @@ function createMedia({ repo, dir }) {
       // one logo per partner name
       for (const old of await table.list({ where: { owner_type: 'partner' } })) if ((old.label || '').toLowerCase() === String(label).toLowerCase()) await remove(old.id);
     }
+    if (ownerType === 'activity') {
+      // one photo per activity
+      for (const old of await table.list({ where: { owner_type: 'activity', owner_id: ownerId } })) await remove(old.id);
+    }
     if (slot) {
       for (const old of await table.list({ where: { owner_type: 'website', slot, kind } })) await remove(old.id);
     }
@@ -141,6 +151,9 @@ function createMedia({ repo, dir }) {
     findPublic: (file) => table.find({ file, public: true }),
     /** Uploaded logo for a partner name, or ''. */
     logoUrl: (name) => (logos[String(name || '').toLowerCase()] ? urlOf(logos[String(name).toLowerCase()]) : ''),
+    /** Uploaded photo of an activity (diving, snorkeling, trip), or ''. */
+    activityUrl: (id) => (activityPhotos[id] ? urlOf(activityPhotos[id]) : ''),
+    activityRow: (id) => activityPhotos[id] || null,
     logoRow: (name) => logos[String(name || '').toLowerCase()] || null,
     photoUrl: (slot) => (slots[slot] && slots[slot].image ? urlOf(slots[slot].image) : ''),
     video: (slot) => {

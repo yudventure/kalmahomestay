@@ -1,0 +1,68 @@
+<%- include('_top') %>
+<p><a href="/admin/website/activities">← Aktivitas & trip</a></p>
+<h1><%= isNew ? 'Tambah aktivitas' : a.title_id %></h1>
+<% if (!isNew && locals.link) { %><p class="muted">Tampil di <a href="<%= link %>" target="_blank" rel="noopener"><%= link %></a></p><% } %>
+<% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+<% var priceKind = a.price === 0 ? 'gratis' : a.price ? 'per_orang' : 'minta'; %>
+<% if (!isNew) { %>
+<section class="panel" id="foto">
+  <div class="panel__head"><div><p class="eyebrow-a">Foto</p><h2>Foto aktivitas</h2></div></div>
+  <div class="act-photo">
+    <div class="thumb"><% if (photo) { %><img src="<%= photo %>" alt="Foto <%= a.title_id %>"><% } else { %><span class="thumb__empty">Belum ada foto. Website memakai warna laut sementara.</span><% } %></div>
+    <div class="stack">
+      <%- include('_upload', { action: '/admin/website/activities/' + a.id + '/photo', accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp', title: photo ? 'Ganti foto' : 'Unggah foto', hint: KINDS.image.label + '. Foto mendatar (landscape) paling bagus.' }) %>
+      <% if (photo) { %><form method="post" action="/admin/website/activities/<%= a.id %>/photo/delete" onsubmit="return confirm('Hapus foto ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus foto</button></form><% } %>
+    </div>
+  </div>
+</section>
+<% } %>
+<form method="post" action="/admin/website/activities<%= isNew ? '' : '/' + a.id %>" class="panel stack admin">
+  <h2>Info utama</h2>
+  <div class="row3">
+    <div class="field"><label for="a-cat">Halaman</label><select id="a-cat" name="category"><% Object.keys(CAT_LABEL).forEach(function (c) { %><option value="<%= c %>"<%= a.category === c ? ' selected' : '' %>><%= CAT_LABEL[c] %></option><% }) %></select></div>
+    <div class="field"><label for="a-level">Tingkat kesulitan</label><select id="a-level" name="level"><option value="">-</option><% Object.keys(LEVEL_LABEL).forEach(function (l) { %><option value="<%= l %>"<%= a.level === l ? ' selected' : '' %>><%= LEVEL_LABEL[l] %></option><% }) %></select></div>
+    <div class="field"><label for="a-sort">Urutan tampil</label><input id="a-sort" name="sort" type="number" min="0" max="999" value="<%= a.sort == null ? '' : a.sort %>"><small class="muted">Angka kecil tampil lebih dulu.</small></div>
+  </div>
+  <div class="row3">
+    <div class="field"><label for="a-pk">Harga</label>
+      <select id="a-pk" name="price_kind">
+        <option value="per_orang"<%= priceKind === 'per_orang' ? ' selected' : '' %>>Per orang (bisa dibayar online)</option>
+        <option value="minta"<%= priceKind === 'minta' ? ' selected' : '' %>>Harga sesuai permintaan</option>
+        <option value="gratis"<%= priceKind === 'gratis' ? ' selected' : '' %>>Gratis untuk tamu</option>
+      </select></div>
+    <div class="field"><label for="a-price">Harga per orang (Rp)</label><input id="a-price" name="price" inputmode="numeric" value="<%= a.price || '' %>" placeholder="mis. 450000"></div>
+    <div class="field"><label for="a-start">Jam mulai</label><input id="a-start" name="start_time" maxlength="20" value="<%= a.start_time || '' %>" placeholder="mis. 07.30"></div>
+  </div>
+  <div class="row3">
+    <div class="field"><label for="a-min">Minimal peserta</label><input id="a-min" name="min_people" type="number" min="1" max="100" value="<%= a.min_people || 1 %>"></div>
+    <div class="field"><label for="a-max">Maksimal peserta</label><input id="a-max" name="max_people" type="number" min="1" max="100" value="<%= a.max_people || '' %>" placeholder="kosongkan jika bebas"></div>
+    <div class="field"><label class="check"><input type="checkbox" name="active" value="1"<%= a.active ? ' checked' : '' %>> Tampilkan di website</label></div>
+  </div>
+
+  <h2>Isi halaman</h2>
+  <p class="muted small" style="margin-top:0">Kolom kiri bahasa Indonesia, kolom kanan bahasa Inggris. Kolom Inggris yang kosong memakai teks Indonesia. Untuk daftar, tulis satu hal per baris.</p>
+  <% var F = [
+       ['title', 'Judul', 'input', 160],
+       ['duration', 'Durasi', 'input', 40],
+       ['summary', 'Ringkasan singkat (1 sampai 2 kalimat)', 'textarea', 600, 2],
+       ['body', 'Cerita lengkap (pisahkan paragraf dengan baris kosong)', 'textarea', 4000, 7],
+       ['includes', 'Sudah termasuk (satu per baris)', 'textarea', 2000, 5],
+       ['bring', 'Yang perlu dibawa (satu per baris)', 'textarea', 2000, 5],
+       ['notes', 'Perlu diketahui', 'textarea', 1000, 3],
+     ]; %>
+  <% F.forEach(function (f) { var idName = f[0] === 'duration' ? 'duration' : f[0] + '_id', enName = f[0] + '_en'; %>
+  <div class="grid2 lang2">
+    <% [[idName, 'ID'], [enName, 'EN']].forEach(function (p) { %>
+    <div class="field"><label for="a-<%= p[0] %>"><%= f[1] %> <span class="chip"><%= p[1] %></span></label>
+      <% if (f[2] === 'input') { %><input id="a-<%= p[0] %>" name="<%= p[0] %>" maxlength="<%= f[3] %>" value="<%= a[p[0]] || '' %>"<%- p[0] === 'title_id' ? ' required' : '' %>>
+      <% } else { %><textarea id="a-<%= p[0] %>" name="<%= p[0] %>" rows="<%= f[4] %>" maxlength="<%= f[3] %>"><%= a[p[0]] || '' %></textarea><% } %>
+    </div>
+    <% }) %>
+  </div>
+  <% }) %>
+  <div class="sticky-save"><button class="btn btn--primary btn--sm" type="submit"><%= isNew ? 'Simpan, lalu unggah foto' : 'Simpan perubahan' %></button></div>
+</form>
+<% if (!isNew) { %>
+<form method="post" action="/admin/website/activities/<%= a.id %>/delete" onsubmit="return confirm('Hapus aktivitas ini beserta fotonya?')" style="margin-top: var(--space-5)"><button class="btn btn--danger btn--sm" type="submit">Hapus aktivitas</button></form>
+<% } %>
+<%- include('_bottom') %>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %></title>
+<meta name="robots" content="noindex, follow">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="/brand/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="preload" href="/fonts/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/home.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/datepicker.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/pages.css?v=<%= v %>">
+</head>
+<body class="home page page--book">
+<a class="skip" href="#main"><%- t('skip') %></a>
+<%- include('partials/site-nav', { alt: { id: '/pesan' + (activity ? '?trip=' + activity.slug : ''), en: '/en/book' + (activity ? '?trip=' + activity.slug : '') } }) %>
+<%
+  const bk = t('bk');
+  const sv = t('sv');
+  const tick = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const lock = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg>';
+  const minus = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12"/></svg>';
+  const plus = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6v12M6 12h12"/></svg>';
+  const online = pay.enabled && (!activity || activity.bookable);
+  const btnLabel = online ? (pay.percent < 100 ? bk.payDeposit.replace('{p}', pay.percent) : bk.payNow) : bk.send;
+%>
+<main id="main" class="bk">
+  <div class="wrap">
+    <div class="bk__head">
+      <a class="bk__back" href="<%= backTo %>"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><%= bk.back %></a>
+      <h1><%= activity ? bk.titleTrip : bk.titleStay %></h1>
+      <ol class="steps" aria-label="<%= bk.title %>">
+        <li class="is-on" data-step="1"><span>1</span><%= bk.step1 %></li>
+        <li data-step="2"><span>2</span><%= bk.step2 %></li>
+        <li data-step="3"><span>3</span><%= bk.step3 %></li>
+      </ol>
+    </div>
+
+    <form class="bk__grid" id="bk-form" method="post" action="<%= bookPath %>" novalidate>
+      <div class="bk__main">
+        <div class="hp" aria-hidden="true"><label for="bk-website">Website</label><input id="bk-website" name="website" tabindex="-1" autocomplete="off"></div>
+        <input type="hidden" name="lang" value="<%= lang %>">
+
+        <!-- 1 · stay or activity -->
+        <section class="bk-card" data-sec="1">
+          <h2><span class="bk-card__n">1</span><%= activity ? bk.secTrip : bk.secRoom %></h2>
+          <% if (activity) { %>
+            <input type="hidden" name="trip" value="<%= activity.slug %>">
+            <div class="bk-trip">
+              <span class="photo bk-trip__img ph-reef" style="<%= activity.photo ? '--img:url(' + activity.photo + ')' : '' %>"></span>
+              <div>
+                <b><%= activity.title %></b>
+                <small><%= [activity.duration, activity.startTime && (sv.start + ' ' + activity.startTime)].filter(Boolean).join(' · ') %></small>
+                <span class="bk-trip__price"><% if (activity.bookable) { %><%= rupiah(activity.price) %> <small><%= bk.perPerson %></small><% } else { %><%= bk.onRequest %><% } %></span>
+              </div>
+            </div>
+            <div class="bk-row">
+              <div class="field">
+                <label for="bk-date"><%= bk.date %></label>
+                <input id="bk-date" type="date" name="date" value="<%= values.date %>" data-dp="single" placeholder="<%= bk.pickDates %>" required>
+              </div>
+              <div class="field">
+                <span class="label" id="bk-people-l"><%= bk.people %></span>
+                <div class="stepper" data-min="<%= activity.minPeople %>" data-max="<%= activity.maxPeople %>">
+                  <button type="button" data-d="-1" aria-label="-"><%- minus %></button>
+                  <input name="people" id="bk-people" inputmode="numeric" value="<%= values.people %>" aria-labelledby="bk-people-l">
+                  <button type="button" data-d="1" aria-label="+"><%- plus %></button>
+                </div>
+              </div>
+            </div>
+            <div class="bk-cal" data-dp-inline data-for="bk-date"></div>
+            <% if (!activity.bookable) { %><p class="bk-note"><%= bk.requestNote %></p><% } %>
+          <% } else { %>
+            <fieldset class="rooms-pick">
+              <legend class="label"><%= bk.room %></legend>
+              <% rooms.forEach(function (r) { %>
+              <label class="rpick" data-room="<%= r.id %>">
+                <input type="radio" name="room" value="<%= r.id %>"<%= r.id === room.id ? ' checked' : '' %>>
+                <span class="photo rpick__img <%= r.ph %>" style="<%= r.style %>"></span>
+                <span class="rpick__body">
+                  <b><%= r.name %></b>
+                  <small><%= r.badge %> · <%= bk.maxGuests.replace('{n}', r.maxGuests) %></small>
+                  <span class="rpick__price"><%= rupiah(r.price) %> <small><%= bk.perNight %></small></span>
+                  <span class="rpick__full" hidden><%= bk.full %></span>
+                </span>
+                <span class="rpick__check" aria-hidden="true"><%- tick %></span>
+              </label>
+              <% }) %>
+            </fieldset>
+            <div class="bk-row">
+              <div class="field">
+                <label for="bk-in"><%= bk.checkin %></label>
+                <input id="bk-in" type="date" name="checkin" value="<%= values.checkin %>" data-dp="range" data-dp-end="bk-out" placeholder="<%= bk.pickDates %>" required>
+              </div>
+              <div class="field">
+                <label for="bk-out"><%= bk.checkout %></label>
+                <input id="bk-out" type="date" name="checkout" value="<%= values.checkout %>" placeholder="<%= bk.pickDates %>" required>
+              </div>
+              <div class="field">
+                <span class="label" id="bk-guests-l"><%= bk.guests %></span>
+                <div class="stepper" data-min="1" data-max="<%= room.maxGuests %>">
+                  <button type="button" data-d="-1" aria-label="-"><%- minus %></button>
+                  <input name="guests" id="bk-guests" inputmode="numeric" value="<%= values.guests %>" aria-labelledby="bk-guests-l">
+                  <button type="button" data-d="1" aria-label="+"><%- plus %></button>
+                </div>
+              </div>
+            </div>
+            <div class="bk-cal" data-dp-inline data-for="bk-in"></div>
+          <% } %>
+        </section>
+
+        <!-- 2 · guest details -->
+        <section class="bk-card" data-sec="2">
+          <h2><span class="bk-card__n">2</span><%= bk.secGuest %></h2>
+          <div class="bk-row bk-row--2">
+            <div class="field"><label for="bk-name"><%= bk.name %></label><input id="bk-name" name="name" autocomplete="name" maxlength="80" required placeholder="<%= bk.namePh %>" value="<%= values.name %>"></div>
+            <div class="field"><label for="bk-country"><%= bk.country %></label><input id="bk-country" name="country" autocomplete="country-name" maxlength="80" value="<%= values.country %>"></div>
+            <div class="field"><label for="bk-email"><%= bk.email %></label><input id="bk-email" name="email" type="email" autocomplete="email" maxlength="120" required value="<%= values.email %>"><small class="hint"><%= bk.emailHint %></small></div>
+            <div class="field"><label for="bk-phone"><%= bk.phone %></label><input id="bk-phone" name="phone" type="tel" autocomplete="tel" maxlength="20" required placeholder="+62 812 3456 7890" value="<%= values.phone %>"><small class="hint"><%= bk.phoneHint %></small></div>
+          </div>
+          <div class="field"><label for="bk-msg"><%= bk.msg %></label><textarea id="bk-msg" name="msg" rows="3" maxlength="1000" placeholder="<%= bk.msgPh %>"><%= values.msg %></textarea></div>
+        </section>
+
+        <!-- 3 · payment -->
+        <section class="bk-card" data-sec="3">
+          <h2><span class="bk-card__n">3</span><%= bk.secPay %></h2>
+          <% if (online) { %>
+            <p class="bk-pay__lead"><%= bk.methodsText %></p>
+            <ul class="paylogos" aria-label="<%= bk.methods %>">
+              <li>QRIS</li><li>Virtual Account</li><li>GoPay</li><li>ShopeePay</li><li>Visa</li><li>Mastercard</li>
+            </ul>
+          <% } else { %>
+            <p class="bk-pay__lead"><%= activity && !activity.bookable ? bk.requestNote : bk.offline %></p>
+          <% } %>
+          <label class="agree"><input type="checkbox" name="agree" value="1" required><span><%= bk.agree %> <a href="<%= anchor('#faq') %>" target="_blank" rel="noopener"><%= bk.agreeLink %></a></span></label>
+          <p class="bk-err" role="alert" aria-live="polite"><%= error %></p>
+          <button class="btn btn--cta btn--block bk-submit" type="submit" id="bk-submit"><%- online ? lock : '' %><span><%= btnLabel %></span><b class="bk-submit__sum"></b></button>
+          <% if (online) { %><p class="bk-secure"><%- lock %><%= bk.secure %></p><% } %>
+          <p class="bform__privacy"><%- t('form.privacy') %></p>
+        </section>
+      </div>
+
+      <!-- summary -->
+      <aside class="bk__side" aria-label="<%= bk.summary %>">
+        <div class="sum">
+          <span class="photo sum__img <%= activity ? 'ph-reef' : room.ph %>" id="sum-img" style="<%= activity ? (activity.photo ? '--img:url(' + activity.photo + ')' : '') : room.style %>"></span>
+          <div class="sum__body">
+            <p class="eyebrow"><%= bk.summary %></p>
+            <h3 id="sum-title"><%= activity ? activity.title : room.name %></h3>
+            <dl class="sum__list">
+              <div><dt><%= activity ? bk.date : bk.dates %></dt><dd id="sum-dates"><%= bk.emptyDates %></dd></div>
+              <div><dt><%= activity ? bk.people : bk.guests %></dt><dd id="sum-guests">-</dd></div>
+            </dl>
+            <div class="sum__calc" id="sum-calc" hidden></div>
+            <div class="sum__total"><span><%= bk.total %></span><b id="sum-total">-</b></div>
+            <p class="sum__dp" id="sum-dp" hidden></p>
+            <p class="sum__incl"><%- activity ? '' : tick + bk.includes %></p>
+          </div>
+        </div>
+      </aside>
+    </form>
+  </div>
+</main>
+<%- include('partials/site-foot') %>
+<script id="kalma-config" type="application/json"><%- clientConfig %></script>
+<script src="/js/site.js?v=<%= v %>" defer></script>
+<script src="/js/datepicker.js?v=<%= v %>" defer></script>
+<script src="/js/book.js?v=<%= v %>" defer></script>
+</body>
+</html>

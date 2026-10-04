@@ -39,3 +39,13 @@ Fraunces untuk judul, Plus Jakarta Sans untuk teks, warna dari `brand/tokens.css
 Banyak laptop Windows dan HP Android menyalakan pengaturan "kurangi animasi" (prefers-reduced-motion: reduce).
 Pemilik ingin semua animasi tetap jalan. Jangan menulis `@media (prefers-reduced-motion: reduce) { ... animation: none }`
 untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 1366×768 dan perangkat Android (Pixel 7).
+
+## Pemesanan dan layanan
+- Tombol Pesan/Book menuju halaman pemesanan `/pesan` (`/en/book`), bukan WhatsApp. Alurnya: pilih kamar dan tanggal,
+  isi data diri, lalu bayar lewat Midtrans Snap (`src/booking.js`, `public/js/book.js`). Tanpa kunci Midtrans pesanan
+  disimpan sebagai permintaan dan tamu diarahkan ke `/pesan/selesai`.
+- Kolom tanggal memakai kalender Kalma (`public/js/datepicker.js`, `data-dp="range"` atau `data-dp="single"`), bukan
+  kalender bawaan browser.
+- Halaman detail layanan ada di `/layanan/<slug>` (`views/service.ejs`). Isi diving, snorkeling, dan trip diatur di admin
+  Website → Aktivitas & trip (tabel `activities`, foto lewat tombol unggah). Harga kosong berarti "sesuai permintaan".
+- Survei tamu sudah tidak ada di website dan tidak ada tombol WhatsApp melayang.

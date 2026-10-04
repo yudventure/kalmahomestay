@@ -3,17 +3,16 @@
 const path = require('path');
 const express = require('express');
 const { loadConfig, ROOMS, GUEST_OPTIONS } = require('./config');
-const { normalize, validate, buildMessage } = require('./inquiry');
 const { createRepo } = require('./db');
 const { createAdminRouter } = require('./admin');
 const { createInstagramSync } = require('./instagram');
 const { createSite } = require('./site');
 const { createCalendar } = require('./calendar');
 const { createMedia } = require('./media');
+const { createActivities, servicePath, bookPath } = require('./activities');
+const { mountBooking } = require('./booking');
 const { recordWebsitePayment } = require('./admin-finance');
-const survey = require('./survey');
 const payments = require('./payments');
-const { parseContact } = require('./db/shared');
 const fs = require('fs');
 const compression = require('compression');
 
@@ -29,8 +28,6 @@ function loadPartners() {
     return Array.isArray(list) ? list.map((p) => String(p).trim()).filter(Boolean).slice(0, 40) : [];
   } catch { return []; }
 }
-
-const EMPTY_VALUES = { name: '', contact: '', country: '', checkin: '', checkout: '', guests: '2', room: '', msg: '' };
 
 function translator(lang) {
   const dict = CONTENT[lang];
@@ -141,6 +138,8 @@ function createApp(options = {}) {
   const media = createMedia({ repo, dir: options.uploadDir || config.uploadDir || path.join(config.dataDir, 'uploads') });
   app.locals.media = media;
   app.locals.builtInMedia = () => ({ photo: photoFinder().url, video: videoFinder() });
+  const activities = createActivities({ repo, media });
+  app.locals.activities = activities;
 
   // Website photos and videos uploaded in the admin (documents are never served here).
   app.get('/media/:file', ah(async (req, res, next) => {
@@ -155,10 +154,8 @@ function createApp(options = {}) {
   function renderHome(res, lang, extra = {}) {
     const t = translator(lang);
     const base = lang === 'en' ? '/en' : '';
-    const values = extra.values || EMPTY_VALUES;
     res.render('index', {
       pay,
-      checkoutOpen: Boolean(extra.formError || extra.bookRoom),
       lang, t, rupiah,
       photo: withUploads(photoFinder(), media),
       video: ((files) => (name) => media.video(name) || files(name))(videoFinder()),
@@ -173,22 +170,14 @@ function createApp(options = {}) {
       home: lang === 'en' ? '/en' : '/',
       base,
       year: new Date().getFullYear(),
-      values: EMPTY_VALUES,
-      formError: '',
-      clientConfig: embedJSON({
-        lang, base, whatsapp: config.contact.whatsapp, email: config.contact.email, ui: t('ui'),
-        rooms: ROOMS.map((r) => ({ id: r.id, name: t(r.nameKey), price: r.price, maxGuests: r.maxGuests })),
-        payments: pay.enabled ? { enabled: true, clientKey: pay.clientKey, snapJs: pay.snapJs, percent: pay.percent } : { enabled: false, percent: 100 },
-      }),
+      servicePath: (id) => servicePath(lang, id),
+      bookPath: bookPath(lang),
+      feedbackPath: lang === 'en' ? '/en/feedback' : '/masukan',
+      anchor: (h) => h,
+      clientConfig: embedJSON({ lang, base, today: new Date().toISOString().slice(0, 10), bookPath: bookPath(lang), ui: t('bk') }),
       ...extra,
-      values: extra.bookRoom ? { ...values, room: extra.bookRoom } : values,
     });
   }
-
-  // ?book=<room> opens the booking dialog for that room (also works without JavaScript)
-  const bookParam = (req) => (ROOMS.some((r) => r.id === req.query.book) ? { bookRoom: req.query.book } : {});
-  app.get('/', (req, res) => renderHome(res, 'id', bookParam(req)));
-  app.get('/en', (req, res) => renderHome(res, 'en', bookParam(req)));
 
   /* ---------- booking inquiries ---------- */
   const hits = new Map(); // simple per-IP rate limit: 10 inquiries / 10 min
@@ -202,104 +191,14 @@ function createApp(options = {}) {
     return list.length > 10;
   }
 
-  async function handleInquiry(lang, req) {
-    const t = translator(lang);
-    const values = normalize(req.body);
-    if (req.body && req.body.website) return { status: 200, values, spam: true }; // honeypot
-    if (rateLimited(req.ip)) return { status: 429, values, error: t('ui').errRate };
-    const errKey = validate(values);
-    if (errKey) return { status: 400, values, error: t('ui')[errKey] };
-    const message = buildMessage(values, lang, t);
-    try {
-      await repo.addInquiry({ lang, ...values });
-    } catch (e) {
-      // Never block a guest because the database is down: they still get the WhatsApp link.
-      console.error('Could not save inquiry:', e.message);
-    }
-    return {
-      status: 201, values, message,
-      whatsappUrl: `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`,
-      mailtoUrl: `mailto:${config.contact.email}?subject=${encodeURIComponent(t('ui').subject + ' · Kalma')}&body=${encodeURIComponent(message)}`,
-    };
-  }
-
-  // JSON endpoint used by the page's JavaScript
-  app.post(['/api/inquiry', '/en/api/inquiry'], ah(async (req, res) => {
-    const lang = req.path.startsWith('/en') || (req.body && req.body.lang === 'en') ? 'en' : 'id';
-    const r = await handleInquiry(lang, req);
-    if (r.spam) return res.status(200).json({ ok: true });
-    if (r.error) return res.status(r.status).json({ ok: false, error: r.error });
-    res.status(201).json({ ok: true, whatsappUrl: r.whatsappUrl, mailtoUrl: r.mailtoUrl });
-  }));
-
-  // Plain form POST (works without JavaScript): redirect straight to WhatsApp
-  app.post(['/inquiry', '/en/inquiry'], ah(async (req, res) => {
-    const lang = req.path.startsWith('/en') ? 'en' : 'id';
-    const r = await handleInquiry(lang, req);
-    if (r.spam) return res.redirect(303, lang === 'en' ? '/en' : '/');
-    if (r.error) {
-      res.status(r.status);
-      return renderHome(res, lang, { values: r.values, formError: r.error });
-    }
-    res.redirect(303, r.whatsappUrl);
-  }));
-
-  /* ---------- online booking & payment (Midtrans Snap) ---------- */
-  function rupiahOrder(n) { return 'Rp ' + Number(n).toLocaleString('id-ID'); }
-
-  app.post(['/api/checkout', '/en/api/checkout'], ah(async (req, res) => {
-    const lang = req.path.startsWith('/en') || (req.body && req.body.lang === 'en') ? 'en' : 'id';
-    const t = translator(lang);
-    const ui = t('ui');
-    if (req.body && req.body.website) return res.status(200).json({ ok: true }); // honeypot
-    if (rateLimited(req.ip, 'checkout')) return res.status(429).json({ ok: false, error: ui.errRate });
-    const values = normalize(req.body);
-    const errKey = validate(values) || (!values.contact ? 'errContact' : '');
-    if (errKey) return res.status(400).json({ ok: false, error: ui[errKey] });
-    const q = payments.quote(values, pay.enabled ? pay.percent : 100);
-    if (q.error) return res.status(400).json({ ok: false, error: String(ui[q.error] || ui.errServer).replace('{n}', q.max) });
-
-    // Nights already sold on the website, an OTA, an agent or blocked in the admin cannot be booked again.
-    try {
-      if (!(await calendar.isAvailable(values.room, values.checkin, values.checkout))) return res.status(409).json({ ok: false, error: ui.errUnavailable });
-    } catch (e) {
-      console.error('Availability check failed, accepting the booking:', e.message);
-    }
-
-    const message = buildMessage(values, lang, t) + `\n${ui.total}: ${rupiahOrder(q.total)} (${q.nights} ${ui.nights})`;
-    const whatsappUrl = `https://wa.me/${config.contact.whatsapp}?text=${encodeURIComponent(message)}`;
-    const viaWhatsapp = async () => {
-      try { await repo.addInquiry({ lang, ...values }); } catch (e) { console.error('Could not save inquiry:', e.message); }
-      return res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
-    };
-    if (!pay.enabled) return viaWhatsapp();
-
-    const orderId = payments.newOrderId();
-    try {
-      await repo.addInquiry({ lang, ...values, orderId, amount: q.amount, total: q.total });
-    } catch (e) {
-      // Without a saved order we could not match the payment, so take the booking over WhatsApp instead.
-      console.error('Could not save order, falling back to WhatsApp:', e.message);
-      return res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
-    }
-    const contact = parseContact(values.contact);
-    try {
-      const snap = await payments.createSnapTransaction(pay, {
-        orderId,
-        amount: q.amount,
-        itemName: `${t(q.room.nameKey)} · ${q.nights} ${ui.nights}`,
-        name: values.name,
-        email: contact.email,
-        phone: contact.phone,
-        finishUrl: `${config.siteUrl}${lang === 'en' ? '/en' : '/'}`,
-      });
-      res.status(201).json({ ok: true, mode: 'pay', token: snap.token, redirectUrl: snap.redirectUrl, orderId, amount: q.amount, total: q.total, nights: q.nights, whatsappUrl });
-    } catch (e) {
-      console.error('Midtrans error, falling back to WhatsApp:', e.message);
-      await repo.setPayment(orderId, { status: 'failed' }).catch(() => {});
-      res.status(201).json({ ok: true, mode: 'whatsapp', whatsappUrl, total: q.total, nights: q.nights });
-    }
-  }));
+  /* ---------- booking page, service pages and online payment (Midtrans Snap) ---------- */
+  const booking = mountBooking(app, {
+    repo, config, pay, calendar, media, activities, translator, rupiah, rateLimited, ah, embedJSON,
+    photo: () => withUploads(photoFinder(), media),
+  });
+  // old links like /?book=laguna opened a booking dialog; they now go to the booking page
+  app.get('/', booking.redirectOldBook, (req, res) => renderHome(res, 'id'));
+  app.get('/en', booking.redirectOldBook, (req, res) => renderHome(res, 'en'));
 
   // Midtrans "Payment Notification URL": https://<domain>/api/payments/midtrans
   app.post('/api/payments/midtrans', ah(async (req, res) => {
@@ -320,44 +219,13 @@ function createApp(options = {}) {
         type: n.payment_type ? String(n.payment_type).slice(0, 40) : null,
         paidAt: status === 'paid' ? payments.midtransTime(n.settlement_time || n.transaction_time) || new Date() : null,
       });
+      app.locals.clearAvailability();
     }
     res.json({ ok: true });
   }));
 
-  /* ---------- traveler survey ---------- */
-  function renderSurvey(res, lang, extra = {}) {
-    const t = translator(lang);
-    res.render('survey', {
-      lang, t, sections: survey.SECTIONS, base: lang === 'en' ? '/en' : '',
-      home: lang === 'en' ? '/en' : '/', siteUrl: config.siteUrl,
-      path: (lang === 'en' ? '/en' : '') + '/survey',
-      answers: {}, contact: '', missing: [], error: '', thanks: false, ...extra,
-    });
-  }
-  app.get(['/survey', '/en/survey'], (req, res) => {
-    const lang = req.path.startsWith('/en') ? 'en' : 'id';
-    renderSurvey(res, lang, { thanks: req.query.thanks === '1' });
-  });
-  app.post(['/survey', '/en/survey'], ah(async (req, res) => {
-    const lang = req.path.startsWith('/en') ? 'en' : 'id';
-    const target = (lang === 'en' ? '/en' : '') + '/survey?thanks=1';
-    if (req.body && req.body.website) return res.redirect(303, target); // honeypot
-    const { answers, contact, missing } = survey.parseSurvey(req.body);
-    if (rateLimited(req.ip, 'survey')) {
-      res.status(429);
-      return renderSurvey(res, lang, { answers, contact, error: translator(lang)('survey.errRate') });
-    }
-    if (missing.length) {
-      res.status(400);
-      return renderSurvey(res, lang, { answers, contact, missing, error: translator(lang)('survey.err') });
-    }
-    try {
-      await repo.addSurveyResponse({ lang, answers, contact });
-    } catch (e) {
-      console.error('Could not save survey response:', e.message);
-    }
-    res.redirect(303, target);
-  }));
+  /* ---------- the traveler survey was taken off the website; old links go home ---------- */
+  app.get(['/survey', '/en/survey'], (req, res) => res.redirect(301, req.path.startsWith('/en') ? '/en' : '/'));
 
   /* ---------- "We hear you": suggestions, complaints, compliments ---------- */
   const FB_KINDS = ['saran', 'keluhan', 'pujian', 'pertanyaan'];
@@ -398,7 +266,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, t: translator('id') }));
 
   // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
   app.get('/ical/:file', ah(async (req, res, next) => {
@@ -422,6 +290,11 @@ function createApp(options = {}) {
       '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n' +
       `  <url><loc>${u}/</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
       `  <url><loc>${u}/en</loc><lastmod>${lastmod}</lastmod>${alt}</url>\n` +
+      ['homestay', 'diving', 'trip'].map((id) => {
+        const pid = u + servicePath('id', id), pen = u + servicePath('en', id);
+        const a = `<xhtml:link rel="alternate" hreflang="id" href="${pid}"/><xhtml:link rel="alternate" hreflang="en" href="${pen}"/>`;
+        return `  <url><loc>${pid}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n  <url><loc>${pen}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n`;
+      }).join('') +
       '</urlset>\n');
   });
   // set by server.js while it prepares the database; error is a plain-language hint, never a secret

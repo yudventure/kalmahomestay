@@ -32,7 +32,7 @@ function quote(v, percent = 100) {
 }
 
 function newOrderId() {
-  return 'KALMA-' + Date.now().toString(36).toUpperCase() + '-' + crypto.randomBytes(3).toString('hex').toUpperCase();
+  return 'KALMA-' + Date.now().toString(36).toUpperCase() + '-' + crypto.randomBytes(5).toString('hex').toUpperCase();
 }
 
 /** Ask Midtrans for a Snap token. Throws on any failure (the caller falls back to WhatsApp). */

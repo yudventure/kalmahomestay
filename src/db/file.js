@@ -7,7 +7,7 @@
 const fs = require('fs');
 const path = require('path');
 const { createFileTable } = require('./tables');
-const { STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError, paging } = require('./shared');
+const { STATUS_IDS, parseContact, contactOf, paymentStatusOf, normalizePhone, normalizeEmail, DuplicateError, paging } = require('./shared');
 
 function createFileRepo(dataDir) {
   const file = path.join(dataDir, 'kalma-db.json');
@@ -52,7 +52,7 @@ function createFileRepo(dataDir) {
     async ping() { return true; },
 
     async addInquiry(v) {
-      const contact = parseContact(v.contact);
+      const contact = contactOf(v);
       const t = iso();
       let c = (contact.phone && db.customers.find((x) => x.phone === contact.phone))
         || (contact.email && db.customers.find((x) => x.email === contact.email));
@@ -64,8 +64,8 @@ function createFileRepo(dataDir) {
         db.customers.push(c);
       }
       const i = { id: ++db.seq.inquiry, customer_id: c.id, checkin: v.checkin, checkout: v.checkout, guests: v.guests,
-        room: v.room || null, message: v.msg || null, lang: v.lang, status: 'new', admin_note: null,
-        order_id: v.orderId || null, amount: v.amount || null, total: v.total || null, payment_status: v.orderId ? 'pending' : null,
+        room: v.room || null, item: v.item || null, message: v.msg || null, lang: v.lang, status: 'new', admin_note: null,
+        order_id: v.orderId || null, amount: v.amount || null, total: v.total || null, payment_status: paymentStatusOf(v),
         payment_type: null, paid_at: null, created_at: t, updated_at: t };
       db.inquiries.push(i);
       save();
@@ -185,7 +185,7 @@ function createFileRepo(dataDir) {
         const c = cust(i.customer_id) || {};
         return { id: i.id, created_at: new Date(i.created_at), status: i.status, name: c.name, phone: c.phone, email: c.email,
           other_contact: c.other_contact, country: c.country, checkin: i.checkin, checkout: i.checkout, guests: i.guests,
-          room: i.room, message: i.message, admin_note: i.admin_note, lang: i.lang, customer_id: i.customer_id,
+          room: i.room, item: i.item || null, message: i.message, admin_note: i.admin_note, lang: i.lang, customer_id: i.customer_id,
           order_id: i.order_id || null, total: i.total || null, amount: i.amount || null, payment_status: i.payment_status || null,
           payment_type: i.payment_type || null, paid_at: i.paid_at ? new Date(i.paid_at) : null };
       });

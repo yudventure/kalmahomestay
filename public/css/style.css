@@ -98,11 +98,6 @@ em { font-style: italic; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .btn[disabled] { opacity: .6; cursor: progress; transform: none; }
 
-/* floating WhatsApp */
-.wa-float { position: fixed; right: 18px; bottom: 18px; z-index: 40; width: 56px; height: 56px; border-radius: 50%; background: var(--kalma-coral); display: grid; place-items: center; box-shadow: var(--shadow-md); transition: transform var(--dur-fast) var(--ease-tide), opacity var(--dur-base); }
-.wa-float:hover { transform: scale(1.06); }
-.wa-float svg { width: 28px; height: 28px; fill: var(--kalma-ink); }
-.wa-float.is-hidden { opacity: 0; pointer-events: none; }
 
 /* reveal on scroll (only when JS is running) */
 .js .reveal { opacity: 0; transform: translateY(18px); transition: opacity var(--dur-slow) var(--ease-tide), transform var(--dur-slow) var(--ease-tide); }

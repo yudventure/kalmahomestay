@@ -43,6 +43,12 @@ const TABLES = {
     columns: { kind: 'str', topic: 'str', rating: 'int', message: 'text', name: 'str', contact: 'str', stay_date: 'date',
       lang: 'str', status: 'str', admin_note: 'text', handled_by: 'str' },
   },
+  activities: {
+    columns: { category: 'str', slug: 'str', sort: 'int', active: 'bool', price: 'money', min_people: 'int', max_people: 'int',
+      level: 'str', duration: 'str', duration_en: 'str', start_time: 'str', title_id: 'str', title_en: 'str',
+      summary_id: 'text', summary_en: 'text', body_id: 'text', body_en: 'text', includes_id: 'text', includes_en: 'text',
+      bring_id: 'text', bring_en: 'text', notes_id: 'text', notes_en: 'text' },
+  },
   transactions: {
     columns: { date: 'date', kind: 'str', category: 'str', amount: 'money', method: 'str', description: 'text',
       ref_type: 'str', ref_id: 'int', created_by: 'str' },

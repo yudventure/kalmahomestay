@@ -97,16 +97,18 @@ test('payments stay off until both Midtrans keys are set; Instagram accepts a pr
   assert.equal(ig.instagramUrl, 'https://instagram.com/kalmahomestay');
 });
 
-test('without payment keys a booking goes to WhatsApp with the price', async () => {
+test('without payment keys a booking is saved as a request with the price', async () => {
   const { post, repo } = await start({ enabled: false, percent: 100 });
   const r = await post('/api/checkout', booking());
   assert.equal(r.status, 201);
   const body = await r.json();
-  assert.equal(body.mode, 'whatsapp');
+  assert.equal(body.mode, 'request');
   assert.equal(body.total, 5100000);
-  assert.match(decodeURIComponent(body.whatsappUrl), /Total: Rp 5\.100\.000 \(3 malam\)/);
+  assert.equal(body.token, undefined);
   const saved = (await repo.listInquiries({})).items[0];
-  assert.equal(saved.order_id, null);
+  assert.match(saved.order_id, /^KALMA-/);
+  assert.equal(saved.payment_status, null, 'nothing to pay online yet');
+  assert.equal(saved.total, 5100000);
   const bad = await post('/api/checkout', booking({ contact: '' }));
   assert.equal(bad.status, 400);
   assert.match((await bad.json()).error, /WhatsApp atau email/);
@@ -131,8 +133,8 @@ test('with Midtrans keys the server prices the stay, saves the order and returns
   assert.equal(saved.payment_status, 'pending');
   assert.equal(saved.status, 'new');
 
-  // the page hands the client key and Snap script to the browser, never the server key
-  const html = await (await fetch(base + '/')).text();
+  // the booking page hands the client key and Snap script to the browser, never the server key
+  const html = await (await fetch(base + '/pesan')).text();
   assert.match(html, /SB-Mid-client-test/);
   assert.doesNotMatch(html, new RegExp(SERVER_KEY));
   assert.match(html, /Bayar sekarang/);
@@ -170,13 +172,13 @@ test('a deposit percentage charges only part of the stay', async () => {
   assert.equal(lastSnap.body.transaction_details.gross_amount, 1530000);
 });
 
-test('if Midtrans is unreachable the guest still gets WhatsApp', async () => {
+test('if Midtrans is unreachable the booking is kept as a request', async () => {
   const { post, repo } = await start(payCfg());
   snapFails = true;
   try {
     const body = await (await post('/api/checkout', booking())).json();
-    assert.equal(body.mode, 'whatsapp');
-    assert.ok(body.whatsappUrl.startsWith('https://wa.me/6281111111111'));
+    assert.equal(body.mode, 'request');
+    assert.match(body.doneUrl, /^\/pesan\/selesai\?order=KALMA-/);
     const saved = (await repo.listInquiries({})).items[0];
     assert.equal(saved.payment_status, 'failed');
   } finally {
@@ -184,14 +186,17 @@ test('if Midtrans is unreachable the guest still gets WhatsApp', async () => {
   }
 });
 
-test('the booking dialog opens from /?book=<room> without JavaScript', async () => {
+test('old /?book=<room> links open the booking page with that room', async () => {
   const { base } = await start({ enabled: false, percent: 100 });
-  const html = await (await fetch(base + '/?book=pantai')).text();
-  assert.match(html, /<dialog class="checkout" id="checkout"[^>]* open>/);
-  assert.match(html, /<option value="pantai" selected>/);
+  const r = await fetch(base + '/?book=pantai', { redirect: 'manual' });
+  assert.equal(r.status, 302);
+  assert.equal(r.headers.get('location'), '/pesan?room=pantai');
+  assert.equal((await fetch(base + '/en?book=x', { redirect: 'manual' })).headers.get('location'), '/en/book');
+  const page = await (await fetch(base + '/pesan?room=pantai')).text();
+  assert.match(page, /<input type="radio" name="room" value="pantai" checked>/);
   const plain = await (await fetch(base + '/')).text();
-  assert.doesNotMatch(plain, /<dialog class="checkout" id="checkout"[^>]* open>/);
-  assert.doesNotMatch(plain, /id="pesan"/, 'the old booking section is gone');
+  assert.doesNotMatch(plain, /<dialog class="checkout"/, 'the booking dialog is gone');
+  assert.doesNotMatch(plain, /class="wa-float"/, 'no floating WhatsApp button');
 });
 
 test('social links only accept http(s) URLs and render as bubbles beside guest stories', async () => {

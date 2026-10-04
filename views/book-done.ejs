@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %></title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="/brand/assets/favicon.ico" sizes="any">
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/home.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/pages.css?v=<%= v %>">
+</head>
+<body class="home page">
+<%- include('partials/site-nav', { alt: { id: '/pesan/selesai?order=' + orderId, en: '/en/book/done?order=' + orderId } }) %>
+<% const bk = t('bk');
+   const fmt = (d) => new Date(d + 'T00:00:00').toLocaleDateString(lang === 'en' ? 'en-GB' : 'id-ID', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
+   const ICONS = {
+     paid: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+     request: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+     pending: '<circle cx="12" cy="12" r="8"/><path d="M12 8v4.5l3 2"/>',
+     failed: '<path d="M12 7.5v6M12 16.5v.5"/>',
+   }; %>
+<main id="main" class="done">
+  <div class="wrap">
+    <section class="done__card done--<%= state %>">
+      <span class="done__icon" aria-hidden="true"><svg viewBox="0 0 24 24"><%- ICONS[state] %></svg></span>
+      <h1><%= bk['doneTitle_' + state] %></h1>
+      <p class="lead"><%= bk['doneText_' + state].replace('{name}', firstName) %></p>
+      <dl class="done__list">
+        <div><dt><%= bk.code %></dt><dd><b class="done__code"><%= orderId %></b></dd></div>
+        <div><dt><%= bk.what %></dt><dd><%= what %></dd></div>
+        <div><dt><%= bk.when %></dt><dd><%= isStay ? fmt(item.checkin) + ' ' + (lang === 'en' ? 'to' : 'sampai') + ' ' + fmt(item.checkout) + ' · ' + nights + ' ' + bk.nights : fmt(item.checkin) %></dd></div>
+        <div><dt><%= bk.who %></dt><dd><%= item.guests %> <%= bk.persons %></dd></div>
+        <% if (item.total) { %><div><dt><%= bk.total %></dt><dd><%= rupiah(Number(item.total)) %></dd></div><% } %>
+        <% if (item.amount && Number(item.amount) !== Number(item.total)) { %><div><dt><%= bk.payToday %></dt><dd><%= rupiah(Number(item.amount)) %></dd></div><% } %>
+        <div><dt><%= bk.status %></dt><dd><span class="pill pill--<%= state %>"><%= bk['st_' + state] %></span></dd></div>
+      </dl>
+      <div class="done__actions">
+        <a class="btn btn--cta" href="<%= home %>"><%= bk.home %></a>
+        <% if (state === 'pending') { %><a class="btn btn--soft" href=""><%= bk.refresh %></a><% } %>
+        <a class="btn btn--soft" href="<%= anchor('#kamar') %>"><%= bk.more %></a>
+      </div>
+      <p class="done__help"><%= bk.help %> <a href="mailto:<%= contact.email %>"><%= contact.email %></a> · <a href="https://wa.me/<%= contact.whatsapp %>" target="_blank" rel="noopener"><%= contact.whatsappDisplay %></a></p>
+    </section>
+  </div>
+</main>
+<%- include('partials/site-foot') %>
+<script src="/js/site.js?v=<%= v %>" defer></script>
+</body>
+</html>

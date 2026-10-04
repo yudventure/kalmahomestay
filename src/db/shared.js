@@ -20,6 +20,20 @@ function parseContact(raw) {
   return { phone: null, email: null, other: c.slice(0, 100) };
 }
 
+/** Booking page sends phone and email separately; the older forms send one "contact" field. */
+function contactOf(v) {
+  const phone = normalizePhone(v.phone);
+  const email = normalizeEmail(v.email);
+  if (phone || email) return { phone: phone || null, email: email || null, other: null };
+  return parseContact(v.contact);
+}
+
+/** An online order waits for payment; a booking request without payment (no Midtrans yet) has no payment state. */
+function paymentStatusOf(v) {
+  if (v.paymentStatus !== undefined) return v.paymentStatus;
+  return v.orderId ? 'pending' : null;
+}
+
 /** "0812-3456 7890" / "+62 812..." / "812..." → "6281234567890". Returns null if it doesn't look like a phone number. */
 function normalizePhone(raw) {
   const s = String(raw || '').trim();
@@ -46,4 +60,4 @@ function paging(page, perPage = PER_PAGE) {
   return { page: p, perPage, offset: (p - 1) * perPage };
 }
 
-module.exports = { STATUSES, STATUS_IDS, parseContact, normalizePhone, normalizeEmail, DuplicateError, paging, PER_PAGE };
+module.exports = { STATUSES, STATUS_IDS, parseContact, contactOf, paymentStatusOf, normalizePhone, normalizeEmail, DuplicateError, paging, PER_PAGE };

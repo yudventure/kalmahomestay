@@ -139,72 +139,56 @@ test('static assets and brand files are served, guideline sources are not', asyn
   assert.equal((await fetch(base + '/.env')).status, 404);
 });
 
-test('inquiry API validates input', async () => {
-  let r = await post('/api/inquiry', { ...valid(), name: '' });
+const book = (o = {}) => ({ name: 'Rina', email: 'rina@mail.com', phone: '0812 3456 7890', agree: '1', checkin: addDays(10), checkout: addDays(13), guests: '2', room: 'pantai', msg: 'Vegetarian', ...o });
+
+test('booking API validates input in the guest language', async () => {
+  let r = await post('/api/checkout', book({ name: '' }));
   assert.equal(r.status, 400);
   assert.equal((await r.json()).error, 'Boleh tahu namamu?');
-
-  r = await post('/en/api/inquiry', { ...valid(), checkout: valid().checkin });
-  assert.equal(r.status, 400);
+  r = await post('/en/api/checkout', book({ checkout: book().checkin }));
   assert.equal((await r.json()).error, 'Check-out must be after check-in.');
-
-  r = await post('/api/inquiry', { ...valid(), checkin: addDays(-3) });
-  assert.equal(r.status, 400);
-
-  r = await post('/api/inquiry', { ...valid(), checkin: 'besok' });
-  assert.equal(r.status, 400);
+  assert.equal((await post('/api/checkout', book({ checkin: addDays(-3) }))).status, 400);
+  assert.equal((await post('/api/checkout', book({ checkin: 'besok' }))).status, 400);
+  assert.match((await (await post('/api/checkout', book({ email: 'bukan-email' }))).json()).error, /email/);
+  assert.match((await (await post('/api/checkout', book({ phone: '12' }))).json()).error, /WhatsApp/);
+  assert.match((await (await post('/api/checkout', book({ agree: '' }))).json()).error, /persetujuan/);
 });
 
-test('valid inquiry is saved and returns a prefilled WhatsApp link', async () => {
-  const r = await post('/api/inquiry', valid());
+test('a booking without online payment is saved as a request and shows a confirmation page', async () => {
+  const r = await post('/api/checkout', book());
   assert.equal(r.status, 201);
   const body = await r.json();
-  assert.ok(body.whatsappUrl.startsWith('https://wa.me/6281111111111?text='));
-  const text = decodeURIComponent(body.whatsappUrl.split('text=')[1]);
-  assert.match(text, /Nama: Rina/);
-  assert.match(text, /Kamar: Rumah Pantai/);
-  assert.match(text, /Catatan: Vegetarian/);
-  assert.ok(body.mailtoUrl.startsWith('mailto:host@kalma.test?subject='));
-
+  assert.equal(body.mode, 'request');
+  assert.equal(body.total, 750000 * 2 * 3);
+  assert.match(body.doneUrl, /^\/pesan\/selesai\?order=KALMA-/);
+  assert.equal(body.whatsappUrl, undefined, 'no WhatsApp detour any more');
   const saved = (await repo.listInquiries({})).items[0];
-  assert.equal(saved.name, 'Rina');
-  assert.equal(saved.room, 'pantai');
-  assert.equal(saved.phone, '6281234567890');
-  assert.equal(saved.message, 'Vegetarian');
+  assert.deepEqual([saved.name, saved.room, saved.phone, saved.email, saved.message, saved.payment_status], ['Rina', 'pantai', '6281234567890', 'rina@mail.com', 'Vegetarian', null]);
+  const page = await (await fetch(base + body.doneUrl)).text();
+  assert.match(page, /Pesanan diterima/);
+  assert.match(page, /Rumah Pantai/);
+  assert.match(page, /Rp 4\.500\.000/);
+  assert.doesNotMatch(page, /rina@mail\.com|6281234567890/, 'the result page never shows contact details');
+  assert.equal((await fetch(base + '/pesan/selesai?order=KALMA-NOPE')).status, 404);
 });
 
-test('unknown room and guest values are normalized', async () => {
-  const r = await post('/api/inquiry', { ...valid(), room: 'presidential', guests: '99' });
-  assert.equal(r.status, 201);
-  const text = decodeURIComponent((await r.json()).whatsappUrl.split('text=')[1]);
-  assert.match(text, /Tamu: 2/);
-  assert.match(text, /Kamar: bebas/);
-});
-
-test('honeypot submissions are accepted silently but not stored', async () => {
+test('honeypot bookings are accepted silently but not stored', async () => {
   const before = (await repo.listInquiries({})).total;
-  const r = await post('/api/inquiry', { ...valid(), website: 'http://spam' });
+  const r = await post('/api/checkout', { ...book(), website: 'http://spam' });
   assert.equal(r.status, 200);
   assert.equal((await repo.listInquiries({})).total, before);
 });
 
-test('form POST without JavaScript redirects to WhatsApp, or re-renders with the error', async () => {
-  const form = (o) => fetch(base + '/inquiry', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(o) });
-  let r = await form(valid());
+test('the booking page works without JavaScript and keeps what the guest typed', async () => {
+  const form = (o) => fetch(base + '/pesan', { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(o) });
+  let r = await form(book({ checkin: addDays(20), checkout: addDays(22) }));
   assert.equal(r.status, 303);
-  assert.match(r.headers.get('location'), /^https:\/\/wa\.me\/6281111111111\?text=/);
-
-  r = await form({ ...valid(), name: '' });
+  assert.match(r.headers.get('location'), /^\/pesan\/selesai\?order=KALMA-/);
+  r = await form(book({ name: '', country: '"><script>alert(1)</script>' }));
   assert.equal(r.status, 400);
   const html = await r.text();
   assert.match(html, /Boleh tahu namamu\?/);
-  assert.match(html, /value="0812 3456 7890"/, 'keeps what the guest typed');
-});
-
-test('user input is escaped in the re-rendered form', async () => {
-  const r = await fetch(base + '/inquiry', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ name: '', country: '"><script>alert(1)</script>' }) });
-  const html = await r.text();
+  assert.match(html, /value="0812 3456 7890"/);
   assert.doesNotMatch(html, /<script>alert\(1\)<\/script>/);
 });
 
@@ -272,7 +256,7 @@ test('admin edits a customer and shows validation errors', async () => {
 });
 
 test('admin CSV exports are escaped against formula injection', async () => {
-  await post('/api/inquiry', { ...valid(), name: '=HYPERLINK("x")', contact: 'evil@example.com' });
+  await repo.addInquiry({ ...valid(), lang: 'id', name: '=HYPERLINK("x")', contact: 'evil@example.com' });
   const r = await adminGet('/admin/export/customers.csv');
   assert.equal(r.status, 200);
   assert.match(r.headers.get('content-type'), /text\/csv/);
@@ -301,16 +285,16 @@ test('admin is disabled when no password is configured', async () => {
   assert.equal(res.status, 404);
 });
 
-test('inquiry still works when saving fails', async () => {
+test('a booking reports a clear error when saving fails', async () => {
   const blocker = path.join(dataDir, 'not-a-dir');
   fs.writeFileSync(blocker, 'x'); // a file where a directory is expected → mkdir/append fails
   const app = createApp({ dataDir: path.join(blocker, 'sub'), db: null });
   const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });
   const origError = console.error; console.error = () => {};
-  const res = await fetch(`http://127.0.0.1:${s.address().port}/api/inquiry`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid()) });
+  const res = await fetch(`http://127.0.0.1:${s.address().port}/api/checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid()) });
   console.error = origError; s.close();
-  assert.equal(res.status, 201);
-  assert.ok((await res.json()).whatsappUrl);
+  assert.equal(res.status, 500);
+  assert.equal((await res.json()).ok, false);
 });
 
 test('replyLink handles phones and emails', () => {
@@ -319,53 +303,16 @@ test('replyLink handles phones and emails', () => {
   assert.equal(replyLink('besok', 'A'), '');
 });
 
-const surveyPost = (p, body) => fetch(base + p, { method: 'POST', redirect: 'manual', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
-
-test('survey pages render in both languages, noindex', async () => {
-  const en = await (await fetch(base + '/en/survey')).text();
-  assert.match(en, /Help us make Raja Ampat easier to visit/);
-  assert.match(en, /most frustrating part of a trip to Raja Ampat/);
-  assert.match(en, /<meta name="robots" content="noindex, follow">/);
-  const id = await (await fetch(base + '/survey')).text();
-  assert.match(id, /paling bikin repot/);
-  assert.match(await (await fetch(base + '/')).text(), /href="\/survey"/, 'homepage footer links to the survey');
+test('the survey is gone from the website; old links go home', async () => {
+  const r = await fetch(base + '/en/survey', { redirect: 'manual' });
+  assert.equal(r.status, 301);
+  assert.equal(r.headers.get('location'), '/en');
+  assert.equal((await fetch(base + '/survey', { redirect: 'manual' })).headers.get('location'), '/');
+  assert.doesNotMatch(await (await fetch(base + '/')).text(), /\/survey/);
 });
 
-test('survey requires q1 and q8, keeps answers on error', async () => {
-  const r = await surveyPost('/en/survey', 'q1=planning&q4=diving&q8=');
-  assert.equal(r.status, 400);
-  const html = await r.text();
-  assert.match(html, /Please answer the questions marked \*/);
-  assert.match(html, /value="planning" checked/);
-  assert.match(html, /value="diving" checked/);
-});
-
-test('survey saves valid answers, caps multi choices, ignores unknown values', async () => {
-  const body = new URLSearchParams();
-  body.append('q1', 'yes_once'); body.append('q2', 'Australia');
-  ['diving', 'snorkeling', 'views', 'hacked'].forEach((v) => body.append('q4', v)); // max 2
-  ['cash', 'signal', 'nope'].forEach((v) => body.append('q9', v));
-  body.append('q8', 'The ferry schedule was confusing');
-  body.append('q15', 'bogus');
-  body.append('q23', 'tom@mail.com');
-  const r = await surveyPost('/en/survey', body);
-  assert.equal(r.status, 303);
-  assert.equal(r.headers.get('location'), '/en/survey?thanks=1');
-  assert.match(await (await fetch(base + '/en/survey?thanks=1')).text(), /Thank you so much!/);
-  const [saved] = await repo.allSurveyResponses();
-  assert.deepEqual(saved.answers, { q1: 'yes_once', q2: 'Australia', q4: ['diving', 'snorkeling'], q8: 'The ferry schedule was confusing', q9: ['cash', 'signal'] });
-  assert.equal(saved.contact, 'tom@mail.com');
-  assert.equal(saved.lang, 'en');
-});
-
-test('survey honeypot is not stored', async () => {
-  const before = (await repo.allSurveyResponses()).length;
-  const r = await surveyPost('/survey', 'q1=curious&q8=spam&website=x');
-  assert.equal(r.status, 303);
-  assert.equal((await repo.allSurveyResponses()).length, before);
-});
-
-test('admin survey summary, single response, CSV and delete', async () => {
+test('admin still shows earlier survey answers, CSV and delete', async () => {
+  await repo.addSurveyResponse({ lang: 'en', contact: 'tom@mail.com', answers: { q1: 'yes_once', q4: ['diving', 'snorkeling'], q8: 'The ferry schedule was confusing', q9: ['cash', 'signal'] } });
   let html = await (await adminGet('/admin/survey')).text();
   assert.match(html, /Survei tamu/);
   assert.match(html, /The ferry schedule was confusing/);
@@ -384,7 +331,8 @@ test('admin survey summary, single response, CSV and delete', async () => {
 test('sitemap has hreflang alternates and lastmod; verification meta is rendered', async () => {
   const xml = await (await fetch(base + '/sitemap.xml')).text();
   assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
-  assert.equal((xml.match(/<url>/g) || []).length, 2);
+  assert.equal((xml.match(/<url>/g) || []).length, 8, 'home and the three service pages, in both languages');
+  assert.match(xml, /<loc>https:\/\/kalma\.test\/en\/services\/diving-snorkeling<\/loc>/);
   assert.match(xml, /<loc>https:\/\/kalma\.test\/en<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
   assert.match(xml, /hreflang="x-default" href="https:\/\/kalma\.test\/"/);
   assert.doesNotMatch(xml, /survey|admin/);
