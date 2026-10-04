@@ -13,10 +13,10 @@
   <input type="hidden" name="date" value="<%= date %>">
   <div class="table">
   <table>
-    <thead><tr><th>Karyawan</th><th>Status</th><th>Masuk</th><th>Pulang</th><th>Catatan</th></tr></thead>
+    <thead><tr><th>Karyawan</th><th>Status</th><th>Jam masuk</th><th>Jam pulang</th><th>Catatan</th></tr></thead>
     <tbody>
     <% sheet.forEach(function (row) { var e = row.e; %>
-      <tr><td><b><%= e.name %></b><br><small class="muted"><%= e.position || e.department || '' %></small><% if (row.leave) { %><br><span class="chip chip--warn"><%= row.leave.kind %> disetujui</span><% } %><% if (!row.r) { %><br><small class="muted">belum diisi</small><% } %></td>
+      <tr><td><b><%= e.name %></b><br><small class="muted"><%= e.position || (e.department ? L(e.department) : '') %></small><% if (row.leave) { %><br><span class="chip chip--warn"><%= row.leave.kind %> disetujui</span><% } %><% if (!row.r) { %><br><small class="muted">belum diisi</small><% } %></td>
         <td><select name="status_<%= e.id %>" aria-label="Status <%= e.name %>"><% ATTENDANCE.forEach(function (a) { %><option value="<%= a.id %>"<%= row.suggested === a.id ? ' selected' : '' %>><%= a.label %></option><% }) %></select></td>
         <td><input type="time" name="in_<%= e.id %>" value="<%= row.r && row.r.check_in || '' %>" aria-label="Jam masuk"></td>
         <td><input type="time" name="out_<%= e.id %>" value="<%= row.r && row.r.check_out || '' %>" aria-label="Jam pulang"></td>

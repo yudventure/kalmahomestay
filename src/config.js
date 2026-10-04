@@ -17,6 +17,7 @@ function loadConfig(env = process.env) {
     // Uploaded photos, videos and documents. In production they live outside the app folder so a redeploy keeps them.
     uploadDir: env.UPLOAD_DIR || (env.NODE_ENV === 'production' ? require('path').join(require('os').homedir(), 'kalma-uploads') : ''),
     adminPassword: env.ADMIN_PASSWORD || '',
+    adminLang: env.ADMIN_LANG === 'id' ? 'id' : 'en', // admin language for staff who have not chosen one
     googleVerification: env.GOOGLE_SITE_VERIFICATION || '',
     sessionSecret: env.SESSION_SECRET || '', // optional; admin sessions are otherwise signed with ADMIN_PASSWORD
     db: loadDb(env),

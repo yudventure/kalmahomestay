@@ -1,17 +1,17 @@
 <%- include('_top') %>
+<% var sl = locals.adminLang === 'en' ? 'en' : 'id'; %>
 <h1>Survei tamu <small class="muted">(<%= total %> jawaban)</small></h1>
-<p class="muted">Link survei untuk dibagikan: <a href="/en/survey" target="_blank" rel="noopener">/en/survey</a> (English) · <a href="/survey" target="_blank" rel="noopener">/survey</a> (Indonesia)</p>
 <div class="btns" style="margin-bottom: var(--space-5)"><a class="btn btn--ghost btn--sm" href="/admin/export/survey.csv">Unduh semua jawaban (.csv)</a></div>
 
 <% if (!total) { %>
   <section class="panel"><p class="muted">Belum ada jawaban. Bagikan link survei ke tamu, grup Facebook, atau Instagram.</p></section>
 <% } else { var n = 0; sections.forEach(function (sec) { %>
-  <h2 class="sv-sec"><span><%= sec.id %></span> <%= sec.title.id %></h2>
+  <h2 class="sv-sec"><span><%= sec.id %></span> <%= sec.title[sl] %></h2>
   <% sec.questions.forEach(function (q) { n += 1; if (q.contact) return; var s = summary[q.id]; %>
   <section class="panel">
-    <div class="panel__head"><h3 class="sv-q"><%= n %>. <%= q.text.id %></h3><small class="muted"><%= s.answered %> / <%= total %> menjawab</small></div>
+    <div class="panel__head"><h3 class="sv-q"><%= n %>. <%= q.text[sl] %></h3><small class="muted"><%= s.answered %> / <%= total %> menjawab</small></div>
     <% if (q.options) {
-         var rows = q.options.map(function (op) { return { label: op.label.id, c: s.counts[op.id] }; }).sort(function (a, b) { return b.c - a.c; }); %>
+         var rows = q.options.map(function (op) { return { label: op.label[sl], c: s.counts[op.id] }; }).sort(function (a, b) { return b.c - a.c; }); %>
       <ul class="bars">
       <% rows.forEach(function (row) { var pct = s.answered ? Math.round(row.c / s.answered * 100) : 0; %>
         <li><span class="bars__label"><%= row.label %></span><span class="bars__track"><span class="bars__fill" style="width: <%= pct %>%"></span></span><span class="bars__val"><%= row.c %> · <%= pct %>%</span></li>
@@ -42,7 +42,7 @@
         <td><a href="/admin/survey/<%= r.id %>">#<%= r.id %></a></td>
         <td><%= fmtDateTime(r.created_at) %></td>
         <td><%= r.lang.toUpperCase() %></td>
-        <td><%= q1 ? q1.label.id : '-' %></td>
+        <td><%= q1 ? q1.label[sl] : '-' %></td>
         <td class="admin__msg"><%= (r.answers.q8 || '').slice(0, 140) %><%= (r.answers.q8 || '').length > 140 ? '…' : '' %></td>
         <td><%= r.contact || '-' %></td>
       </tr>

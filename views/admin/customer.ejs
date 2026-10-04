@@ -29,7 +29,7 @@
       <% customer.inquiries.forEach(function (it) { %>
       <li><a href="/admin/inquiries/<%= it.id %>"><b><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %></b>
         <span><%= it.guests %> tamu · <%= roomName(it.room) %> · <%- include('_status', { s: it.status }) %></span>
-        <small>Masuk <%= fmtDateTime(it.created_at) %></small></a></li>
+        <small>Diterima <%= fmtDateTime(it.created_at) %></small></a></li>
       <% }) %>
     </ul><% } %>
   </section>

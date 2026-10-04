@@ -86,10 +86,11 @@ function mountContent(router, { repo, media, ah, idParam }) {
     };
     return { v, error: v.title ? '' : 'Judul konten wajib diisi.' };
   }
-  const blank = (q) => ({ status: 'ide', publish_date: isDate(q.date) ? q.date : null, platforms: 'instagram', format: 'reels', script: SCRIPT_TEMPLATE });
+  const SCRIPT_TEMPLATE_EN = 'Hook (0 to 3 seconds):\n\nScene 1:\n\nScene 2:\n\nScene 3:\n\nClosing and call to action:\n';
+  const blank = (q, lang) => ({ status: 'ide', publish_date: isDate(q.date) ? q.date : null, platforms: 'instagram', format: 'reels', script: lang === 'en' ? SCRIPT_TEMPLATE_EN : SCRIPT_TEMPLATE });
 
   router.get('/content/new', ah(async (req, res) => {
-    res.render('admin/content-post', { title: 'Konten baru', ...(await common()), p: blank(req.query), isNew: true, error: '', files: [], KINDS: media.KINDS });
+    res.render('admin/content-post', { title: 'Konten baru', ...(await common()), p: blank(req.query, req.adminLang), isNew: true, error: '', files: [], KINDS: media.KINDS });
   }));
   router.post('/content', ah(async (req, res) => {
     const { v, error } = read(req.body);

@@ -29,10 +29,10 @@
 </div>
 <div class="grid2">
   <section class="panel"><h2>Pemasukan per kategori</h2>
-    <% if (!incomeCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% incomeCats.forEach(function (c) { %><li><span class="bars__label"><%= c.c %></span><span class="bars__track"><span class="bars__fill" style="width: <%= Math.round(c.total / totals.income * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
+    <% if (!incomeCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% incomeCats.forEach(function (c) { %><li><span class="bars__label"><%= L(c.c) %></span><span class="bars__track"><span class="bars__fill" style="width: <%= Math.round(c.total / totals.income * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
   </section>
   <section class="panel"><h2>Pengeluaran per kategori</h2>
-    <% if (!expenseCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% expenseCats.forEach(function (c) { %><li><span class="bars__label"><%= c.c %></span><span class="bars__track"><span class="bars__fill bars__fill--exp" style="width: <%= Math.round(c.total / totals.expense * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
+    <% if (!expenseCats.length) { %><p class="muted">Belum ada.</p><% } else { %><ul class="bars"><% expenseCats.forEach(function (c) { %><li><span class="bars__label"><%= L(c.c) %></span><span class="bars__track"><span class="bars__fill bars__fill--exp" style="width: <%= Math.round(c.total / totals.expense * 100) %>%"></span></span><span class="bars__val"><%= rupiah(c.total) %></span></li><% }) %></ul><% } %>
   </section>
 </div>
 <p class="muted small">Okupansi = malam terjual ÷ (<%= units %> unit × hari dalam bulan), dari kalender (booking website terkonfirmasi/lunas, OTA, agen, walk-in). Rata-rata / malam = pemasukan booking ÷ malam terjual.</p>

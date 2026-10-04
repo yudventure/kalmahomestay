@@ -16,7 +16,7 @@ function addDays(n) {
 
 before(async () => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-test-'));
-  const app = createApp({
+  const app = createApp({ adminLang: 'id',
     dataDir, db: null, adminPassword: 'rahasia', googleVerification: 'abc123verify',
     siteUrl: 'https://kalma.test',
     contact: { whatsapp: '6281111111111', whatsappDisplay: '+62 811', email: 'host@kalma.test', instagram: '@kalma', instagramUrl: 'https://instagram.com/kalma' },
@@ -283,7 +283,7 @@ test('admin deletes a customer with all their inquiries', async () => {
 });
 
 test('admin is disabled when no password is configured', async () => {
-  const app = createApp({ dataDir, db: null, adminPassword: '' });
+  const app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: '' });
   const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });
   const res = await fetch(`http://127.0.0.1:${s.address().port}/admin`);
   s.close();
@@ -293,7 +293,7 @@ test('admin is disabled when no password is configured', async () => {
 test('a booking reports a clear error when saving fails', async () => {
   const blocker = path.join(dataDir, 'not-a-dir');
   fs.writeFileSync(blocker, 'x'); // a file where a directory is expected → mkdir/append fails
-  const app = createApp({ dataDir: path.join(blocker, 'sub'), db: null });
+  const app = createApp({ adminLang: 'id', dataDir: path.join(blocker, 'sub'), db: null });
   const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });
   const origError = console.error; console.error = () => {};
   const res = await fetch(`http://127.0.0.1:${s.address().port}/api/checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(valid()) });
@@ -351,7 +351,7 @@ test('health check reports storage', async () => {
 });
 
 test('health check reports a database problem without taking the site down', async () => {
-  const app = createApp({ dataDir, db: null });
+  const app = createApp({ adminLang: 'id', dataDir, db: null });
   app.locals.dbStatus.ready = false;
   app.locals.dbStatus.error = 'DB_USER atau DB_PASSWORD salah';
   const s = await new Promise((r) => { const x = app.listen(0, () => r(x)); });

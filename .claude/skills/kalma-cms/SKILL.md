@@ -60,3 +60,13 @@ untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 
   Papan konten (ide, naskah, produksi, siap tayang, sudah tayang), dan Komentar Instagram (`src/admin-content.js`).
   Materi konten diunggah lewat tombol (dokumen/foto dan video), bersifat pribadi.
 - Kalender tanggal di bar pemesanan selalu terbuka di bawah bar. Jika layar pendek, halaman digulir dulu.
+
+## Admin dua bahasa
+- Admin tampil dalam bahasa Inggris (bawaan, `ADMIN_LANG=id` untuk mengganti bawaan) atau Indonesia (pilihan staf di menu
+  akun dan halaman login, cookie `kalma_admin_lang`).
+- Tulis teks admin di template dalam bahasa Indonesia seperti biasa, lalu tambahkan terjemahannya di `src/admin-i18n-en.js`.
+  `src/admin-i18n.js` menerjemahkan template sekali saat start (teks, placeholder, label di kode template) dan label yang
+  dikirim dari server (judul, status, pesan error). Data dari tamu dan staf tidak pernah diterjemahkan.
+- Nilai yang disimpan dalam bahasa Indonesia (kategori keuangan, bagian karyawan) tampil lewat `L(nilai)` dengan
+  `value` asli di `<option>`, supaya data tetap konsisten.
+- Cek halaman admin berbahasa Inggris setelah menambah fitur: tidak boleh ada teks Indonesia tersisa.

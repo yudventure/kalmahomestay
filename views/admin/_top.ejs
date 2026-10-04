@@ -50,7 +50,7 @@ NAV.forEach(function (n) {
 var initials = String(me.name || 'K').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
 var svg = function (name, cls) { return '<svg viewBox="0 0 24 24" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') + '>' + I[name] + '</svg>'; };
 %><!doctype html>
-<html lang="id">
+<html lang="<%= locals.adminLang || 'id' %>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -79,6 +79,8 @@ var svg = function (name, cls) { return '<svg viewBox="0 0 24 24" aria-hidden="t
       <div class="menu-pop__box">
         <div class="menu-pop__head"><b><%= me.name %></b><span class="muted"><%= roleLabel(me.role) %> · <%= me.username %></span></div>
         <a href="/admin/account">Akun saya</a>
+        <form method="post" action="/admin/lang" class="menu-pop__lang"><input type="hidden" name="next" value="<%= '/admin' + (current === '/' ? '' : current) %>"><span>Bahasa admin</span>
+          <button type="submit" name="lang" value="en"<%- locals.adminLang === 'en' ? ' aria-pressed="true"' : '' %>>English</button><button type="submit" name="lang" value="id"<%- locals.adminLang !== 'en' ? ' aria-pressed="true"' : '' %>>Indonesia</button></form>
         <a href="/" target="_blank" rel="noopener">Lihat website</a>
         <form method="post" action="/admin/logout"><button type="submit">Keluar</button></form>
       </div>

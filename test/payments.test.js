@@ -22,7 +22,7 @@ const apps = [];
 
 async function start(payments) {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-pay-'));
-  const app = createApp({ dataDir, db: null, siteUrl: 'https://kalma.test', contact, payments });
+  const app = createApp({ adminLang: 'id', dataDir, db: null, siteUrl: 'https://kalma.test', contact, payments });
   await app.locals.repo.init();
   const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
   const base = `http://127.0.0.1:${server.address().port}`;
