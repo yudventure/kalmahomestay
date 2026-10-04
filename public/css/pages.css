@@ -190,19 +190,21 @@
 .bk .bform__privacy { margin: var(--space-3) 0 0; font-size: var(--text-xs); color: var(--muted); text-align: center; }
 
 /* Kalma payment panel: Midtrans Snap is embedded here instead of a bare popup */
+.page--book .bk { background: #F4F9FB url("/img/beach-pattern.svg") 0 0 / 260px 260px; }
 .bk-card[hidden], .paybox[hidden] { display: none; }
-.bk-card.paybox { padding: 0; overflow: hidden; border-color: var(--kalma-deep-sea); }
-.paybox__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; background: linear-gradient(120deg, var(--kalma-deep-sea), var(--kalma-lagoon)); color: #fff; }
+.bk-card.paybox { padding: 0; overflow: hidden; border-color: var(--line); background: #fff; box-shadow: 0 18px 50px -30px rgba(34, 72, 102, .45); }
+.paybox__head { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 22px; background: linear-gradient(120deg, var(--kalma-deep-sea), var(--kalma-lagoon)); color: #fff; }
+.paybox__head::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 12px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 12' preserveAspectRatio='none'%3E%3Cpath d='M0 12V6c10 0 10-5 20-5s10 5 20 5 10-5 20-5 10 5 20 5v6z' fill='%23fff'/%3E%3C/svg%3E") repeat-x 0 0 / 80px 12px; }
 .paybox__head img { height: 34px; width: auto; display: block; }
 .paybox__secure { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: var(--text-sm); padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.16); }
 .paybox__secure svg, .paybox__foot svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.paybox__meta { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding: 18px 22px; background: var(--kalma-sand, #EDE0B5); background: color-mix(in srgb, var(--kalma-sand, #EDE0B5) 45%, #fff); }
+.paybox__meta { display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 12px; margin: 18px 22px 0; padding: 0 0 16px; border-bottom: 1px dashed var(--line); }
 .paybox__meta span { display: block; font-size: var(--text-xs); color: var(--muted); letter-spacing: .04em; text-transform: uppercase; font-weight: 700; }
 .paybox__meta b { color: var(--heading); font-size: var(--text-sm); word-break: break-all; }
 .paybox__due { text-align: right; }
 .paybox__due b { font-family: var(--font-display, "Fraunces", serif); font-size: var(--text-2xl); word-break: normal; white-space: nowrap; }
 .paybox__lead { margin: 18px 22px 8px; color: var(--muted); font-size: var(--text-sm); }
-.paybox__snap { margin: 0 12px; min-height: 560px; border-radius: 16px; overflow: hidden; background: #fff; }
+.paybox__snap { margin: 0 12px; border: 1px solid var(--line); min-height: 560px; border-radius: 16px; overflow: hidden; background: #fff; }
 .paybox__snap iframe { width: 100% !important; min-height: 560px; border: 0; }
 .paybox__loading { display: grid; place-items: center; min-height: 200px; margin: 0; color: var(--muted); font-size: var(--text-sm); }
 .paybox__err { margin: 10px 22px 0; }
