@@ -35,6 +35,10 @@ const TABLES = {
     columns: { period: 'str', employee_id: 'int', base: 'money', allowance: 'money', bonus: 'money', deduction: 'money',
       net: 'money', status: 'str', paid_at: 'datetime', transaction_id: 'int', note: 'str' },
   },
+  media: {
+    columns: { kind: 'str', file: 'str', original_name: 'str', mime: 'str', size: 'int', slot: 'str', owner_type: 'str', owner_id: 'int',
+      label: 'str', public: 'bool', uploaded_by: 'str' },
+  },
   transactions: {
     columns: { date: 'date', kind: 'str', category: 'str', amount: 'money', method: 'str', description: 'text',
       ref_type: 'str', ref_id: 'int', created_by: 'str' },

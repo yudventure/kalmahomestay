@@ -16,8 +16,8 @@
   <% list.forEach(function (l) { var days = nights(l.start_date, l.end_date) + 1; %>
     <tr><td><b><%= nameOf(l.employee_id) %></b></td>
       <td><%= (LEAVE_KINDS.find(function (k) { return k.id === l.kind; }) || {}).label %></td>
-      <td><%= fmtDate(l.start_date) %> – <%= fmtDate(l.end_date) %><br><small class="muted"><%= days %> hari</small></td>
-      <td class="admin__msg"><%= l.reason || '—' %></td>
+      <td><%= fmtDate(l.start_date) %> sampai <%= fmtDate(l.end_date) %><br><small class="muted"><%= days %> hari</small></td>
+      <td class="admin__msg"><%= l.reason || '-' %></td>
       <td><span class="chip <%= l.status === 'approved' ? 'chip--ok' : l.status === 'rejected' ? 'chip--err' : 'chip--warn' %>"><%= { pending: 'Menunggu', approved: 'Disetujui', rejected: 'Ditolak' }[l.status] %></span><% if (l.decided_by) { %><br><small class="muted">oleh <%= l.decided_by %></small><% } %></td>
       <td class="inline">
         <% if (l.status !== 'approved') { %><form method="post" action="/admin/hr/leave/<%= l.id %>"><input type="hidden" name="status" value="approved"><button class="btn btn--primary btn--sm" type="submit">Setujui</button></form><% } %>
@@ -32,7 +32,7 @@
   <h2>Ajukan cuti / izin</h2>
   <form method="post" action="/admin/hr/leave" class="stack admin">
     <div class="row3">
-      <div class="field"><label for="l-emp">Karyawan</label><select id="l-emp" name="employee_id" required><option value="">—</option><% staff.forEach(function (e) { %><option value="<%= e.id %>"><%= e.name %></option><% }) %></select></div>
+      <div class="field"><label for="l-emp">Karyawan</label><select id="l-emp" name="employee_id" required><option value="">-</option><% staff.forEach(function (e) { %><option value="<%= e.id %>"><%= e.name %></option><% }) %></select></div>
       <div class="field"><label for="l-kind">Jenis</label><select id="l-kind" name="kind"><% LEAVE_KINDS.forEach(function (k) { %><option value="<%= k.id %>"><%= k.label %></option><% }) %></select></div>
       <div class="field"><label for="l-reason">Alasan</label><input id="l-reason" name="reason" maxlength="2000"></div>
     </div>

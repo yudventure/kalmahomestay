@@ -48,10 +48,18 @@
   <% list.forEach(function (t) { %>
     <tr><td><%= fmtDate(t.date) %></td>
       <td><span class="chip <%= t.kind === 'income' ? 'chip--ok' : 'chip--err' %>"><%= t.kind === 'income' ? '+' : '−' %></span> <%= t.category %></td>
-      <td class="admin__msg"><% if (t.ref_type === 'inquiry') { %><a href="/admin/inquiries/<%= t.ref_id %>"><%= t.description %></a><% } else { %><%= t.description || '—' %><% } %><br><small class="muted"><%= t.created_by || '' %></small></td>
-      <td><%= t.method || '—' %></td>
+      <td class="admin__msg"><% if (t.ref_type === 'inquiry') { %><a href="/admin/inquiries/<%= t.ref_id %>"><%= t.description %></a><% } else { %><%= t.description || '-' %><% } %><br><small class="muted"><%= t.created_by || '' %></small></td>
+      <td><%= t.method || '-' %></td>
       <td class="num"><b><%= t.kind === 'income' ? '' : '−' %><%= rupiah(t.amount) %></b></td>
-      <td><form method="post" action="/admin/finance/<%= t.id %>/delete" onsubmit="return confirm('Hapus transaksi ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form></td></tr>
+      <td><div class="actions">
+        <% receipts(t.id).forEach(function (d) { %><a class="chip chip--ok" href="/admin/files/<%= d.id %>" target="_blank" rel="noopener">Bukti</a><% }) %>
+        <form method="post" action="/admin/finance/<%= t.id %>/receipt" enctype="multipart/form-data" data-upload class="upload">
+          <label class="upload__drop upload__drop--sm" title="Unggah bukti (foto atau PDF)"><input type="file" name="file" accept=".pdf,.jpg,.jpeg,.png,.webp" required><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg><span><b>Bukti</b><span class="upload__name"></span></span></label>
+          <progress max="100" value="0" hidden></progress>
+          <noscript><button class="btn btn--ghost btn--sm" type="submit">Unggah</button></noscript>
+        </form>
+        <form method="post" action="/admin/finance/<%= t.id %>/delete" onsubmit="return confirm('Hapus transaksi ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus</button></form>
+      </div></td></tr>
   <% }) %>
   </tbody>
 </table>

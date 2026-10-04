@@ -33,8 +33,8 @@ const SECTIONS = [
         o('facebook', 'Facebook groups', 'Grup Facebook'), o('reddit', 'Reddit', 'Reddit'), o('blogs', 'Blogs', 'Blog'), o('friends', 'Friends', 'Teman / keluarga')] },
       { id: 'q6', type: 'text', text: { en: 'What information was the hardest to find?', id: 'Informasi apa yang paling sulit ditemukan?' } },
       { id: 'q7', type: 'single', text: { en: 'How far in advance did you book your accommodation?', id: 'Berapa lama sebelumnya kamu memesan penginapan?' }, options: [
-        o('lt2w', 'Less than 2 weeks', 'Kurang dari 2 minggu'), o('2to4w', '2–4 weeks', '2–4 minggu'),
-        o('1to3m', '1–3 months', '1–3 bulan'), o('gt3m', 'More than 3 months', 'Lebih dari 3 bulan')] },
+        o('lt2w', 'Less than 2 weeks', 'Kurang dari 2 minggu'), o('2to4w', '2 to 4 weeks', '2 sampai 4 minggu'),
+        o('1to3m', '1 to 3 months', '1 sampai 3 bulan'), o('gt3m', 'More than 3 months', 'Lebih dari 3 bulan')] },
     ],
   },
   {
@@ -70,8 +70,8 @@ const SECTIONS = [
       { id: 'q13', type: 'text', text: { en: 'What makes you trust a homestay enough to pay a deposit?', id: 'Apa yang membuatmu cukup percaya untuk membayar DP ke sebuah homestay?' } },
       { id: 'q14', type: 'text', text: { en: 'What would make you NOT book a homestay, even if it looked nice?', id: 'Apa yang membuatmu TIDAK jadi memesan, walau homestay-nya terlihat bagus?' } },
       { id: 'q15', type: 'single', text: { en: 'How much did you expect to pay per person per night (including meals)?', id: 'Berapa harga yang kamu harapkan per orang per malam (termasuk makan)?' }, options: [
-        o('lt500', 'Under Rp 500,000', 'Di bawah Rp 500.000'), o('500_800', 'Rp 500,000–800,000', 'Rp 500.000–800.000'),
-        o('800_1200', 'Rp 800,000–1,200,000', 'Rp 800.000–1.200.000'), o('gt1200', 'Over Rp 1,200,000', 'Di atas Rp 1.200.000')] },
+        o('lt500', 'Under Rp 500,000', 'Di bawah Rp 500.000'), o('500_800', 'Rp 500,000 to 800,000', 'Rp 500.000 sampai 800.000'),
+        o('800_1200', 'Rp 800,000 to 1,200,000', 'Rp 800.000 sampai 1.200.000'), o('gt1200', 'Over Rp 1,200,000', 'Di atas Rp 1.200.000')] },
     ],
   },
   {

@@ -6,7 +6,7 @@
   <dl class="dl dl--wide">
   <% var n = 0; sections.forEach(function (sec) { sec.questions.forEach(function (q) { n += 1; if (q.contact) return;
        var v = r.answers[q.id]; var shown;
-       if (v == null) shown = '—';
+       if (v == null) shown = '-';
        else if (q.options) shown = (Array.isArray(v) ? v : [v]).map(function (id) { var o = q.options.find(function (x) { return x.id === id; }); return o ? o.label.id : id; }).join(', ');
        else shown = v; %>
     <dt><%= n %>. <%= q.text.id %></dt><dd class="pre"><%= shown %></dd>

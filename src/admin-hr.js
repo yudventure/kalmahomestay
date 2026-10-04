@@ -54,13 +54,14 @@ function mountHr(router, { repo, ah, idParam }) {
     const id = idParam(req); if (!id) return next();
     const e = await employees.get(id); if (!e) return next();
     const m = todayISO().slice(0, 7);
-    const [att, leaves, slips] = await Promise.all([
+    const [att, leaves, slips, docs] = await Promise.all([
       attendance.list({ where: { employee_id: id }, range: { col: 'date', from: `${m}-01`, to: monthEnd(m) } }),
       leave.list({ where: { employee_id: id }, order: [['start_date', 'desc']], limit: 20 }),
       payroll.list({ where: { employee_id: id }, order: [['period', 'desc']], limit: 12 }),
+      repo.table('media').list({ where: { owner_type: 'employee', owner_id: id }, order: [['id', 'desc']] }),
     ]);
     const recap = Object.fromEntries(ATTENDANCE.map((a) => [a.id, att.filter((x) => x.status === a.id).length]));
-    res.render('admin/hr-employee', { title: e.name, e, DEPARTMENTS, ATTENDANCE, recap, leaves, slips, month: m, LEAVE_KINDS });
+    res.render('admin/hr-employee', { title: e.name, e, DEPARTMENTS, ATTENDANCE, recap, leaves, slips, docs, month: m, LEAVE_KINDS });
   }));
 
   router.post('/hr/employees/:id', ah(async (req, res, next) => {
@@ -75,6 +76,7 @@ function mountHr(router, { repo, ah, idParam }) {
     const id = idParam(req); if (!id) return next();
     if (await payroll.count({ where: { employee_id: id, status: 'paid' } })) return res.redirect(303, `/admin/hr/employees/${id}?err=has-payroll`);
     for (const t of [attendance, leave, payroll]) for (const r of await t.list({ where: { employee_id: id } })) await t.remove(r.id);
+    if (req.app.locals.media) for (const d of await repo.table('media').list({ where: { owner_type: 'employee', owner_id: id } })) await req.app.locals.media.remove(d.id);
     if (!(await employees.remove(id))) return next();
     res.redirect(303, '/admin/hr/employees?ok=deleted');
   }));
@@ -126,7 +128,7 @@ function mountHr(router, { repo, ah, idParam }) {
       leave.list({ where: status ? { status } : {}, order: [['start_date', 'desc']], limit: 200 }),
       employees.list({ order: [['name', 'asc']] }),
     ]);
-    const nameOf = (id) => (staff.find((e) => e.id === id) || {}).name || '—';
+    const nameOf = (id) => (staff.find((e) => e.id === id) || {}).name || '-';
     res.render('admin/hr-leave', { title: 'Cuti & izin', list, staff: staff.filter((e) => e.status === 'active'), nameOf, status, LEAVE_KINDS });
   }));
 
@@ -157,7 +159,7 @@ function mountHr(router, { repo, ah, idParam }) {
   router.get('/payroll', ah(async (req, res) => {
     const period = isMonth(req.query.period) ? req.query.period : todayISO().slice(0, 7);
     const [rows, staff] = await Promise.all([payroll.list({ where: { period }, order: [['id', 'asc']] }), employees.list({ order: [['name', 'asc']] })]);
-    const nameOf = (id) => staff.find((e) => e.id === id) || { name: '—' };
+    const nameOf = (id) => staff.find((e) => e.id === id) || { name: '-' };
     const total = rows.reduce((s, r) => s + r.net, 0);
     const missing = staff.filter((e) => e.status === 'active' && !rows.some((r) => r.employee_id === e.id)).length;
     res.render('admin/payroll', { title: 'Penggajian', period, rows, nameOf, total, missing,
@@ -227,7 +229,7 @@ function mountHr(router, { repo, ah, idParam }) {
   router.get('/payroll/:id/slip', ah(async (req, res, next) => {
     const id = idParam(req); if (!id) return next();
     const r = await payroll.get(id); if (!r) return next();
-    res.render('admin/payslip', { title: `Slip gaji ${r.period}`, r, e: (await employees.get(r.employee_id)) || { name: '—' } });
+    res.render('admin/payslip', { title: `Slip gaji ${r.period}`, r, e: (await employees.get(r.employee_id)) || { name: '-' } });
   }));
 }
 

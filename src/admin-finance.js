@@ -54,8 +54,10 @@ function mountFinance(router, { repo, calendar, ah, idParam, toCSV }) {
     const list = await tx.list({ where, range: { col: 'date', from: `${m}-01`, to: monthEnd(m) }, order: [['date', 'desc'], ['id', 'desc']] });
     const all = await tx.list({ range: { col: 'date', from: `${m}-01`, to: monthEnd(m) } });
     const sum = (k) => all.filter((t) => t.kind === k).reduce((s, t) => s + t.amount, 0);
+    const docs = list.length ? await repo.table('media').list({ where: { owner_type: 'transaction', owner_id: list.map((t) => t.id) } }) : [];
+    const receipts = (id) => docs.filter((d) => d.owner_id === id);
     res.render('admin/finance', {
-      title: 'Keuangan', m, list, kind, category, CATEGORIES, METHODS, income: sum('income'), expense: sum('expense'), today: todayISO(),
+      title: 'Keuangan', m, list, receipts, kind, category, CATEGORIES, METHODS, income: sum('income'), expense: sum('expense'), today: todayISO(),
       prev: addDays(`${m}-01`, -1).slice(0, 7), next: addDays(`${m}-01`, 32).slice(0, 7),
     });
   }));
@@ -77,6 +79,7 @@ function mountFinance(router, { repo, calendar, ah, idParam, toCSV }) {
     const t = await tx.get(id); if (!t) return next();
     // a salary payment removed here puts the slip back to draft
     if (t.ref_type === 'payroll' && t.ref_id) await payroll.update(t.ref_id, { status: 'draft', paid_at: null, transaction_id: null });
+    if (req.app.locals.media) for (const d of await repo.table('media').list({ where: { owner_type: 'transaction', owner_id: id } })) await req.app.locals.media.remove(d.id);
     await tx.remove(id);
     res.redirect(303, `/admin/finance?m=${t.date.slice(0, 7)}&ok=deleted`);
   }));

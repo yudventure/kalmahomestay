@@ -54,7 +54,7 @@
       <div class="field"><label for="b-out">Tanggal keluar (check-out)</label><input id="b-out" name="end_date" type="date" required value="<%= form.end_date || '' %>"></div>
     </div>
     <div class="row2">
-      <div class="field"><label for="b-ch">Channel / agen (untuk booking OTA/agen)</label><select id="b-ch" name="channel_id"><option value="">—</option><% chans.forEach(function (c) { %><option value="<%= c.id %>"<%= String(form.channel_id) === String(c.id) ? ' selected' : '' %>><%= c.name %> · <%= roomLabel(c.room) %></option><% }) %></select></div>
+      <div class="field"><label for="b-ch">Channel / agen (untuk booking OTA/agen)</label><select id="b-ch" name="channel_id"><option value="">-</option><% chans.forEach(function (c) { %><option value="<%= c.id %>"<%= String(form.channel_id) === String(c.id) ? ' selected' : '' %>><%= c.name %> · <%= roomLabel(c.room) %></option><% }) %></select></div>
       <div class="field"><label for="b-name">Nama tamu</label><input id="b-name" name="guest_name" maxlength="120" value="<%= form.guest_name || '' %>"></div>
     </div>
     <div class="row2">

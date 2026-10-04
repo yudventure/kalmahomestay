@@ -1,4 +1,50 @@
-<!doctype html>
+<%
+// Admin menu. Groups and items show only for roles that may open them (src/staff.js).
+var I = {
+  home: '<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/>',
+  book: '<path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/>',
+  web: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.5 3.6 8.5s-1.1 5.9-3.6 8.5c-2.5-2.6-3.6-5.5-3.6-8.5S9.5 6.1 12 3.5z"/>',
+  team: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.5 3.3-5.5 6.5-5.5s5.9 2 6.5 5.5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.8c1.6.8 2.7 2.6 3 5.2"/>',
+  money: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 20c.8-4 3.8-6 7.5-6s6.7 2 7.5 6"/>',
+  chev: '<path d="M6 9l6 6 6-6"/>',
+};
+var NAV = [
+  { href: '/admin', label: 'Ringkasan', icon: 'home', match: function (p) { return p === '/'; } },
+  { href: '/admin/calendar', label: 'Kalender', icon: 'cal', area: 'reservations' },
+  { title: 'Reservasi', icon: 'book', area: 'reservations', items: [
+    { href: '/admin/inquiries', label: 'Permintaan & booking' },
+    { href: '/admin/channels', label: 'Channel OTA & agen' },
+    { href: '/admin/customers', label: 'Customer' } ] },
+  { title: 'Website', icon: 'web', area: 'website', items: [
+    { href: '/admin/website/media', label: 'Foto & video' },
+    { href: '/admin/website/content', label: 'Teks website' },
+    { href: '/admin/website/rooms', label: 'Kamar & harga' },
+    { href: '/admin/website/contact', label: 'Kontak & sosial media' },
+    { href: '/admin/website/partners', label: 'Partner' },
+    { href: '/admin/instagram', label: 'Komentar Instagram' },
+    { href: '/admin/survey', label: 'Survei tamu' } ] },
+  { title: 'SDM', icon: 'team', items: [
+    { href: '/admin/hr/employees', label: 'Karyawan', area: 'hr' },
+    { href: '/admin/hr/attendance', label: 'Absensi', area: 'hr' },
+    { href: '/admin/hr/leave', label: 'Cuti & izin', area: 'hr' },
+    { href: '/admin/payroll', label: 'Penggajian', area: 'payroll' } ] },
+  { title: 'Keuangan', icon: 'money', area: 'finance', items: [
+    { href: '/admin/finance', label: 'Transaksi', exact: true },
+    { href: '/admin/finance/report', label: 'Laporan laba rugi' } ] },
+  { href: '/admin/users', label: 'Pengguna & peran', icon: 'user', area: 'users' },
+];
+var here = '/admin' + (current === '/' ? '' : current);
+var isOn = function (i) { return i.match ? i.match(current) : i.exact ? here === i.href : here === i.href || here.indexOf(i.href + '/') === 0; };
+var crumb = '';
+NAV.forEach(function (n) {
+  if (n.items) n.items.forEach(function (i) { if (isOn(i)) crumb = n.title + ' · ' + i.label; });
+  else if (isOn(n)) crumb = n.label;
+});
+var initials = String(me.name || 'K').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+var svg = function (name, cls) { return '<svg viewBox="0 0 24 24" aria-hidden="true"' + (cls ? ' class="' + cls + '"' : '') + '>' + I[name] + '</svg>'; };
+%><!doctype html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
@@ -11,22 +57,54 @@
 <link rel="stylesheet" href="/css/admin.css?v=<%= v %>">
 </head>
 <body class="admin">
-<div class="shell">
-<aside class="side" id="side">
-  <div class="side__top">
-    <a href="/admin" class="admin__logo"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="96" height="46"><span>Admin</span></a>
-    <button type="button" class="side__toggle" aria-controls="side-body" aria-expanded="false" onclick="var b=document.getElementById('side-body');var o=b.classList.toggle('is-open');this.setAttribute('aria-expanded',o)">Menu</button>
+<header class="topbar">
+  <div class="topbar__in">
+    <a href="/admin" class="topbar__logo"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="96" height="46"><span>Admin</span></a>
+    <a class="pill-btn hide-sm" href="/" target="_blank" rel="noopener">Kembali ke situs <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 16L16 8M9 8h7v7"/></svg></a>
+    <details class="menu-pop">
+      <summary class="pill-btn icon-btn" aria-label="Pemberitahuan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><% if (alerts.length) { %><span class="badge"><%= alerts.length %></span><% } %></summary>
+      <div class="menu-pop__box">
+        <div class="menu-pop__head"><b>Pemberitahuan</b></div>
+        <% if (!alerts.length) { %><p class="menu-pop__empty">Semua beres. Tidak ada yang perlu ditindaklanjuti.</p><% } %>
+        <% alerts.forEach(function (a) { %><a href="<%= a.href %>"><%= a.label %><small><%= a.sub %></small></a><% }) %>
+      </div>
+    </details>
+    <details class="menu-pop">
+      <summary class="pill-btn user-chip"><span class="avatar"><%= initials %></span><span class="hide-sm"><%= me.name %></span><%- svg('chev', 'chev') %></summary>
+      <div class="menu-pop__box">
+        <div class="menu-pop__head"><b><%= me.name %></b><span class="muted"><%= roleLabel(me.role) %> · <%= me.username %></span></div>
+        <a href="/admin/account">Akun saya</a>
+        <a href="/" target="_blank" rel="noopener">Lihat website</a>
+        <form method="post" action="/admin/logout"><button type="submit">Keluar</button></form>
+      </div>
+    </details>
   </div>
+</header>
+<div class="shell">
+<aside class="side" aria-label="Menu admin">
+  <button type="button" class="pill-btn side__toggle" aria-controls="side-body" aria-expanded="false" onclick="var b=document.getElementById('side-body');this.setAttribute('aria-expanded',b.classList.toggle('is-open'))">Menu <%- svg('chev', 'chev') %></button>
   <div class="side__body" id="side-body">
-    <%- include('_nav') %>
-    <div class="side__me">
-      <b><%= me.name %></b><span><%= roleLabel(me.role) %></span>
-      <div class="side__links"><a href="/admin/account">Akun saya</a> · <a href="/" target="_blank" rel="noopener">Lihat website ↗</a></div>
-      <form method="post" action="/admin/logout"><button class="btn btn--ghost btn--sm" type="submit">Keluar</button></form>
-    </div>
+    <p class="side__label">Menu</p>
+    <nav class="side__nav">
+    <% NAV.forEach(function (n) {
+         if (n.items) {
+           var items = n.items.filter(function (i) { return !i.hidden && (!i.area || can(i.area)); });
+           if ((n.area && !can(n.area)) || !items.length) return;
+           var open = items.some(isOn); %>
+      <details class="nav-group<%= open ? ' is-current' : '' %>"<%= open ? ' open' : '' %>>
+        <summary><%- svg(n.icon) %><span><%= n.title %></span><%- svg('chev', 'chev') %></summary>
+        <div class="nav-sub"><% items.forEach(function (i) { %><a href="<%= i.href %>"<%- isOn(i) ? ' aria-current="page"' : '' %>><%= i.label %></a><% }) %></div>
+      </details>
+    <%   } else { if (n.area && !can(n.area)) return; %>
+      <a class="nav-item" href="<%= n.href %>"<%- isOn(n) ? ' aria-current="page"' : '' %>><%- svg(n.icon) %><span><%= n.label %></span></a>
+    <%   } }) %>
+    </nav>
+    <div class="side__status"><p class="eyebrow-a">Status hari ini</p><p><%= todayStatus %></p></div>
   </div>
 </aside>
 <main class="admin__main">
-<% if (storage === 'file') { %><p class="alert alert--warn">Mode pengembangan: data disimpan di file JSON lokal. Di server produksi isi pengaturan database MySQL (lihat DEPLOY.md).</p><% } %>
-<% var flashText = { 'saved': 'Perubahan tersimpan.', 'deleted': 'Data sudah dihapus.', 'customer-deleted': 'Data customer dan semua permintaannya sudah dihapus.', 'inquiry-deleted': 'Permintaan sudah dihapus.', 'survey-deleted': 'Jawaban survei sudah dihapus.', 'ig-synced': 'Komentar Instagram sudah diperbarui.', 'ig-added': 'Komentar ditambahkan dan langsung tampil di website.', 'ig-deleted': 'Komentar dihapus.', 'synced': 'Kalender sudah disinkronkan.' }[flash]; %>
+<% if (crumb) { %><p class="eyebrow-a"><%= crumb %></p><% } %>
+<% if (storage === 'file') { %><p class="alert alert--warn">Mode pengembangan. Data disimpan di file JSON lokal. Di server produksi isi pengaturan database MySQL (lihat DEPLOY.md).</p><% } %>
+<% var flashText = { 'saved': 'Perubahan tersimpan.', 'deleted': 'Data sudah dihapus.', 'customer-deleted': 'Data customer dan semua permintaannya sudah dihapus.', 'inquiry-deleted': 'Permintaan sudah dihapus.', 'survey-deleted': 'Jawaban survei sudah dihapus.', 'ig-synced': 'Komentar Instagram sudah diperbarui.', 'ig-added': 'Komentar ditambahkan dan langsung tampil di website.', 'ig-deleted': 'Komentar dihapus.', 'synced': 'Kalender sudah disinkronkan.', 'uploaded': 'File berhasil diunggah.' }[flash]; %>
 <% if (flashText) { %><p class="alert alert--ok" role="status"><%= flashText %></p><% } %>
+<% if (/^upload-/.test(flashErr)) { %><p class="alert alert--err" role="alert"><%= UPLOAD_ERRORS[flashErr.slice(7)] || UPLOAD_ERRORS.failed %></p><% } %>

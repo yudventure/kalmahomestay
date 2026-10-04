@@ -20,7 +20,7 @@ function mountUsers(router, { repo, ah, idParam }) {
     const f = { name: str(req.body.name, 120), username: str(req.body.username, 30).toLowerCase(), role: req.body.role, password: String(req.body.password || '') };
     let error = '';
     if (!f.name) error = 'Nama wajib diisi.';
-    else if (!USERNAME.test(f.username) || f.username === 'admin') error = 'Username 3–30 huruf kecil/angka (boleh . _ -), selain "admin".';
+    else if (!USERNAME.test(f.username) || f.username === 'admin') error = 'Username 3 sampai 30 huruf kecil atau angka (boleh . _ -), selain "admin".';
     else if (!ROLE_IDS.includes(f.role)) error = 'Pilih peran.';
     else if (f.password.length < 8) error = 'Password minimal 8 karakter.';
     else if (await users.find({ username: f.username })) error = 'Username sudah dipakai.';

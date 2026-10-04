@@ -1,0 +1,11 @@
+<%# Upload button. Params: action, accept, title, hint, (optional) fields = extra form HTML, compact %>
+<form class="upload" method="post" action="<%= action %>" enctype="multipart/form-data" data-upload>
+  <% if (locals.fields) { %><%- fields %><% } %>
+  <label class="upload__drop">
+    <input type="file" name="file" accept="<%= accept %>" required>
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M4 16v2.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V16"/></svg>
+    <span><b><%= title %></b><small><%= hint %></small><span class="upload__name" aria-live="polite"></span></span>
+  </label>
+  <progress max="100" value="0" hidden></progress>
+  <noscript><button class="btn btn--primary btn--sm" type="submit">Unggah</button></noscript>
+</form>

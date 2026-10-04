@@ -1,4 +1,4 @@
-# Kalma Raja Ampat — Website
+# Kalma Raja Ampat, Website
 
 Website Kalma Homestay dengan **Node.js + Express**, dibangun dari brand identity di folder [`brand/`](brand/README.md).
 
@@ -66,34 +66,13 @@ data/                  File JSON saat tanpa MySQL (tidak masuk git)
 
 Semua data homestay (harga, kapasitas, jam listrik, sinyal, pembayaran, pembatalan) saat ini **placeholder**. Ganti dengan data asli sebelum online.
 
-## Mengganti foto
+## Mengganti foto dan video
 
-Kotak foto masih berupa gradasi warna. Cukup simpan foto di `public/img/` dengan nama berikut (JPG, PNG, WebP, atau AVIF); halaman langsung memakainya tanpa mengubah kode:
+Masuk ke admin lalu buka **Website → Foto & video**. Setiap tempat foto punya tombol **Unggah foto** (dan **Unggah video** untuk empat kotak hero). Pilih file atau tarik ke kotaknya, foto langsung tampil di website. Tidak perlu File Manager atau Git.
 
-| Nama file | Tempat |
-|---|---|
-| `hero-1` … `hero-4` | Mozaik foto di bagian atas |
-| `exp-1` … `exp-6` | Lingkaran pengalaman (snorkeling, island hopping, selam, cendrawasih, kampung, kayak) |
-| `room-laguna`, `room-pantai`, `room-keluarga` | Kartu kamar |
-| `feature` | Foto besar di samping daftar keunggulan |
+Tempat yang tersedia: empat kotak hero (foto dan video), tiga kartu layanan, enam foto pengalaman, dan foto keunggulan. Foto bawaan di `public/img/` tetap dipakai selama belum ada unggahan.
 
-Contoh: `public/img/room-laguna.jpg`.
-
-## Video di hero
-
-Empat kotak di bagian atas bisa memutar video pendek (otomatis, tanpa suara, berulang). Simpan di `public/video/` dengan nama `hero-1` … `hero-4`:
-
-- `hero-1.mp4` (wajib, diputar di semua browser) dan opsional `hero-1.webm` (lebih kecil, dipakai Chrome/Firefox)
-- Foto `public/img/hero-1.jpg` (jika ada) tampil sebagai gambar awal sebelum video siap
-
-Agar ringan: 5–10 detik, potret ±720 px, tanpa audio, di bawah ±1,5 MB per video. Contoh konversi dengan ffmpeg:
-
-```bash
-ffmpeg -i asli.mov -t 8 -vf "scale=-2:640,fps=24" -an -c:v libx264 -profile:v main -crf 30 -preset veryslow -g 48 -movflags +faststart public/video/hero-1.mp4
-ffmpeg -i asli.mov -t 8 -vf "scale=-2:720,fps=24" -an -c:v libvpx-vp9 -crf 38 -b:v 0 public/video/hero-1.webm
-```
-
-Video diputar otomatis oleh browser (tanpa menunggu JavaScript), dijeda saat tidak terlihat di layar atau tab tidak aktif. Untuk pengunjung yang mengaktifkan "kurangi animasi" atau mode hemat data, video tidak diputar dan foto/gradasi tetap tampil.
+Video hero sebaiknya 5 sampai 10 detik, tanpa suara, dan sekecil mungkin agar website tetap cepat.
 
 ## Cerita tamu
 

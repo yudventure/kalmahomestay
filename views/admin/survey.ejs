@@ -17,7 +17,7 @@
         <li><span class="bars__label"><%= row.label %></span><span class="bars__track"><span class="bars__fill" style="width: <%= pct %>%"></span></span><span class="bars__val"><%= row.c %> · <%= pct %>%</span></li>
       <% }) %>
       </ul>
-      <% if (q.type === 'multi') { %><p class="muted small">Persentase dari yang menjawab; satu orang bisa memilih lebih dari satu.</p><% } %>
+      <% if (q.type === 'multi') { %><p class="muted small">Persentase dari yang menjawab. Satu orang bisa memilih lebih dari satu.</p><% } %>
     <% } else if (!s.texts.length) { %>
       <p class="muted">Belum ada jawaban.</p>
     <% } else { %>
@@ -42,9 +42,9 @@
         <td><a href="/admin/survey/<%= r.id %>">#<%= r.id %></a></td>
         <td><%= fmtDateTime(r.created_at) %></td>
         <td><%= r.lang.toUpperCase() %></td>
-        <td><%= q1 ? q1.label.id : '—' %></td>
+        <td><%= q1 ? q1.label.id : '-' %></td>
         <td class="admin__msg"><%= (r.answers.q8 || '').slice(0, 140) %><%= (r.answers.q8 || '').length > 140 ? '…' : '' %></td>
-        <td><%= r.contact || '—' %></td>
+        <td><%= r.contact || '-' %></td>
       </tr>
     <% }) %>
     </tbody>

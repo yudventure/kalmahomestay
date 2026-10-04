@@ -10,6 +10,8 @@ const { mountUsers, mountWebsite } = require('./admin-cms');
 const { mountCalendar } = require('./admin-calendar');
 const { mountHr } = require('./admin-hr');
 const { mountFinance, soldNights } = require('./admin-finance');
+const { mountMedia } = require('./admin-media');
+const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
 
@@ -18,11 +20,11 @@ const TZ = 'Asia/Jayapura'; // WIT, Raja Ampat local time
 
 /* ---------- formatting helpers for the views ---------- */
 function fmtDateTime(d) {
-  if (!d) return '—';
+  if (!d) return '-';
   return new Date(d).toLocaleString('id-ID', { timeZone: TZ, day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIT';
 }
 function fmtDate(iso) {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(String(iso).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('id-ID', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });
 }
 function nights(a, b) {
@@ -49,11 +51,11 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, media, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
-  const roomName = (id) => { const r = ROOMS.find((x) => x.id === id); return r ? t(r.nameKey) : '—'; };
+  const roomName = (id) => { const r = ROOMS.find((x) => x.id === id); return r ? t(r.nameKey) : '-'; };
 
   const idParam = (req) => {
     const id = Number(req.params.id);
@@ -153,10 +155,52 @@ function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
       statusLabel: (id) => (STATUSES.find((s) => s.id === id) || {}).label || id,
       storage: repo.kind, flash: req.query.ok || '', flashErr: req.query.err || '',
       current: req.path, qs: (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v)).toString(),
-      me: req.staff, can: (area) => can(req.staff.role, area), roleLabel: (id) => (ROLES.find((r) => r.id === id) || {}).label || id,
+      UPLOAD_ERRORS, me: req.staff, can: (area) => can(req.staff.role, area), roleLabel: (id) => (ROLES.find((r) => r.id === id) || {}).label || id,
     });
     next();
   });
+
+  /* ---------- bell notifications and "Status hari ini" in the sidebar ---------- */
+  router.use(ah(async (req, res, next) => {
+    res.locals.alerts = [];
+    res.locals.todayStatus = 'Tidak ada yang perlu ditindaklanjuti hari ini.';
+    if (req.method !== 'GET') return next();
+    const role = req.staff.role;
+    const today = todayISO();
+    const alerts = [];
+    const status = [];
+    try {
+      if (can(role, 'reservations')) {
+        const [fresh, items, chans] = await Promise.all([
+          repo.listInquiries({ status: 'new' }), calendar.items(addDays(today, -1), addDays(today, 1)), repo.table('channels').list({ where: { active: true } }),
+        ]);
+        if (fresh.total) alerts.push({ label: `${fresh.total} permintaan baru`, sub: 'Tamu menunggu balasan', href: '/admin/inquiries?status=new' });
+        const held = items.filter((it) => it.counts && it.type !== 'block');
+        const arr = held.filter((it) => it.start === today).length;
+        const dep = held.filter((it) => it.end === today).length;
+        if (arr || dep) alerts.push({ label: `${arr} check-in, ${dep} check-out hari ini`, sub: 'Lihat di kalender', href: '/admin/calendar' });
+        status.push(arr || dep ? `${arr} check-in dan ${dep} check-out hari ini.` : 'Tidak ada check-in atau check-out hari ini.');
+        for (const c of chans.filter((x) => /^Gagal/.test(x.last_sync_status || ''))) alerts.push({ label: `Sinkron ${c.name} gagal`, sub: c.last_sync_status, href: '/admin/channels' });
+      }
+      if (can(role, 'hr')) {
+        const [pending, staffCount, att] = await Promise.all([
+          repo.table('leave_requests').count({ where: { status: 'pending' } }),
+          repo.table('employees').count({ where: { status: 'active' } }),
+          repo.table('attendance').count({ where: { date: today } }),
+        ]);
+        if (pending) alerts.push({ label: `${pending} pengajuan cuti`, sub: 'Menunggu persetujuan', href: '/admin/hr/leave?status=pending' });
+        if (staffCount && !att) {
+          alerts.push({ label: 'Absensi hari ini belum diisi', sub: `${staffCount} karyawan aktif`, href: '/admin/hr/attendance' });
+          status.push('Absensi hari ini belum diisi.');
+        }
+      }
+    } catch (e) {
+      console.error('Admin notifications failed:', e.message);
+    }
+    res.locals.alerts = alerts;
+    if (status.length) res.locals.todayStatus = status.join(' ');
+    next();
+  }));
 
   /* ---------- who may open what ---------- */
   const need = (area) => (req, res, next) => (can(req.staff.role, area) ? next()
@@ -173,6 +217,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
   mountCalendar(router, { repo, calendar, config, ah, idParam, t });
   mountHr(router, { repo, ah, idParam });
   mountFinance(router, { repo, calendar, ah, idParam, toCSV });
+  mountMedia(router, { repo, media, ah, idParam, t });
 
   const stamp = () => todayISO();
 
@@ -183,7 +228,9 @@ function createAdminRouter({ repo, config, instagram, site, calendar, t }) {
     const month = today.slice(0, 7);
     const monthStart = `${month}-01`;
     const nextMonth = addDays(monthStart, 32).slice(0, 7) + '-01';
-    const view = { title: 'Ringkasan', today };
+    const hour = Number(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Jayapura', hour: '2-digit', hour12: false }));
+    const greeting = hour < 11 ? 'Selamat pagi' : hour < 15 ? 'Selamat siang' : hour < 18 ? 'Selamat sore' : 'Selamat malam';
+    const view = { title: 'Ringkasan', today, greeting, firstName: String(req.staff.name || '').split(/\s+/)[0] };
     if (can(role, 'reservations')) {
       const [stats, recent, items] = await Promise.all([repo.stats(today), repo.listInquiries({ status: 'new' }), calendar.items(monthStart < today ? monthStart : today, nextMonth)]);
       const held = items.filter((it) => it.counts && it.type !== 'block');

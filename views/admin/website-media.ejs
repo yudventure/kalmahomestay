@@ -1,0 +1,27 @@
+<%- include('_top') %>
+<h1>Foto & video website</h1>
+<p class="muted">Klik tombol unggah atau tarik file ke kotaknya. Foto dan video langsung tampil di website. Tanpa unggahan, website memakai foto bawaan atau gradasi warna.</p>
+<% groups.forEach(function (g) { %>
+<section class="panel">
+  <div class="panel__head"><div><p class="eyebrow-a"><%= g.items.length %> tempat</p><h2><%= g.group %></h2></div></div>
+  <p class="muted small" style="margin-top:0"><%= g.note %></p>
+  <div class="media-grid">
+  <% g.items.forEach(function (s) { var img = s.image || s.imageBuiltIn; %>
+    <article class="media-card" id="<%= s.id %>">
+      <h3><%= s.label %></h3>
+      <div class="thumb"><% if (s.video || s.videoBuiltIn) { %><video src="<%= s.video || s.videoBuiltIn %>" muted loop playsinline autoplay<% if (img) { %> poster="<%= img %>"<% } %>></video><% } else if (img) { %><img src="<%= img %>" alt="" loading="lazy"><% } else { %><span class="thumb__empty">Belum ada foto</span><% } %></div>
+      <p><%= s.image ? 'Foto unggahan' : s.imageBuiltIn ? 'Foto bawaan' : 'Gradasi warna' %><%= s.video ? ' · video unggahan' : s.videoBuiltIn ? ' · video bawaan' : '' %></p>
+      <%- include('_upload', { action: '/admin/website/media/' + s.id + '/image', accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp', title: s.image ? 'Ganti foto' : 'Unggah foto', hint: KINDS.image.label }) %>
+      <% if (s.hasVideo) { %>
+      <%- include('_upload', { action: '/admin/website/media/' + s.id + '/video', accept: '.mp4,.webm,video/mp4,video/webm', title: s.video ? 'Ganti video' : 'Unggah video', hint: KINDS.video.label + '. Disarankan 5 sampai 10 detik, tanpa suara.' }) %>
+      <% } %>
+      <div class="btns">
+        <% if (s.image) { %><form method="post" action="/admin/website/media/<%= s.id %>/image/delete" onsubmit="return confirm('Hapus foto unggahan ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus foto</button></form><% } %>
+        <% if (s.video) { %><form method="post" action="/admin/website/media/<%= s.id %>/video/delete" onsubmit="return confirm('Hapus video unggahan ini?')"><button class="btn btn--ghost btn--sm" type="submit">Hapus video</button></form><% } %>
+      </div>
+    </article>
+  <% }) %>
+  </div>
+</section>
+<% }) %>
+<%- include('_bottom') %>
