@@ -8,7 +8,7 @@
       <dt>Check-in</dt><dd><%= fmtDate(item.checkin) %></dd>
       <dt>Check-out</dt><dd><%= fmtDate(item.checkout) %> (<%= nights(item.checkin, item.checkout) %> malam)</dd>
       <dt>Tamu</dt><dd><%= item.guests %></dd>
-      <dt>Kamar</dt><dd><%= roomName(item.room) %></dd>
+      <% if (item.item) { %><dt>Aktivitas</dt><dd><%= item.item %></dd><% } else { %><dt>Kamar</dt><dd><%= roomName(item.room) %></dd><% } %>
       <dt>Pesan</dt><dd class="pre"><%= item.message || '-' %></dd>
       <dt>Bahasa</dt><dd><%= item.lang === 'en' ? 'English' : 'Indonesia' %></dd>
       <dt>Masuk</dt><dd><%= fmtDateTime(item.created_at) %></dd>

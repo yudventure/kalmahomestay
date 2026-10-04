@@ -37,6 +37,7 @@ async function initStorage(attempt = 1) {
     app.locals.instagram.start().catch(() => {}); // guest comments from Instagram, refreshed daily
     app.locals.calendar.start(); // OTA/agent calendars, every 30 minutes
     app.locals.media.reload().catch((e) => console.error('Uploaded media not loaded:', e.message));
+    app.locals.activities.seed().catch((e) => console.error('Activities not prepared:', e.message)); // first diving & trip list
     console.log(repo.kind === 'mysql' ? `Storage: MySQL database ready (${repo.connection})` : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
   } catch (e) {
     status.ready = false;

@@ -12,6 +12,7 @@ const { mountHr } = require('./admin-hr');
 const { mountFinance, soldNights } = require('./admin-finance');
 const { mountMedia } = require('./admin-media');
 const { mountFeedback } = require('./admin-feedback');
+const { mountActivities } = require('./admin-activities');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
@@ -52,7 +53,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, calendar, media, t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -222,6 +223,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, t }
   mountFinance(router, { repo, calendar, ah, idParam, toCSV });
   mountMedia(router, { repo, media, ah, idParam, t });
   mountFeedback(router, { repo, ah, idParam });
+  if (activities) mountActivities(router, { activities, media, ah, idParam });
 
   const stamp = () => todayISO();
 
@@ -423,7 +425,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, t }
   router.get('/export/inquiries.csv', ah(async (req, res) => {
     const rows = (await repo.exportInquiries()).map((r) => ({ ...r, room: r.room ? roomName(r.room) : '' }));
     res.type('text/csv').attachment(`kalma-inquiries-${stamp()}.csv`)
-      .send(toCSV(rows, ['id', 'created_at', 'status', 'name', 'phone', 'email', 'other_contact', 'country', 'checkin', 'checkout', 'guests', 'room', 'message', 'admin_note', 'lang', 'customer_id', 'order_id', 'total', 'amount', 'payment_status', 'payment_type', 'paid_at']));
+      .send(toCSV(rows, ['id', 'created_at', 'status', 'name', 'phone', 'email', 'other_contact', 'country', 'checkin', 'checkout', 'guests', 'room', 'item', 'message', 'admin_note', 'lang', 'customer_id', 'order_id', 'total', 'amount', 'payment_status', 'payment_type', 'paid_at']));
   }));
 
   router.use((req, res) => res.status(404).render('admin/notfound', { title: 'Tidak ditemukan' }));

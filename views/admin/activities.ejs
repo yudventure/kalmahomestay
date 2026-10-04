@@ -1,0 +1,33 @@
+<%- include('_top') %>
+<div class="panel__head" style="margin-bottom:0">
+  <div><h1>Aktivitas & trip</h1>
+  <p class="muted">Pilihan diving, snorkeling, dan trip yang tampil di halaman layanan. Tamu bisa langsung memesan dan membayar aktivitas yang sudah punya harga.</p></div>
+  <a class="btn btn--primary btn--sm" href="/admin/website/activities/new">+ Tambah aktivitas</a>
+</div>
+<% groups.forEach(function (g) { %>
+<section class="panel">
+  <div class="panel__head">
+    <div><p class="eyebrow-a">Halaman layanan</p><h2><%= g.label %></h2></div>
+    <div class="btns"><a class="link" href="<%= g.link %>" target="_blank" rel="noopener">Lihat di website</a><a class="btn btn--ghost btn--sm" href="/admin/website/activities/new?category=<%= g.id %>">+ Tambah</a></div>
+  </div>
+  <% if (!g.items.length) { %><p class="muted">Belum ada aktivitas.</p><% } else { %>
+  <div class="table"><table>
+    <thead><tr><th>Foto</th><th>Aktivitas</th><th>Harga / orang</th><th>Tingkat</th><th>Durasi</th><th>Tampil</th><th></th></tr></thead>
+    <tbody>
+    <% g.items.forEach(function (a) { var ph = photoOf(a.id); %>
+      <tr>
+        <td><% if (ph) { %><img class="act-thumb" src="<%= ph %>" alt="" loading="lazy"><% } else { %><span class="act-thumb act-thumb--empty">Belum ada</span><% } %></td>
+        <td><a href="/admin/website/activities/<%= a.id %>"><b><%= a.title_id %></b></a><br><small class="muted"><%= a.title_en || '-' %></small></td>
+        <td><%= a.price === 0 ? 'Gratis' : a.price ? rupiah(a.price) : 'Sesuai permintaan' %></td>
+        <td><%= LEVEL_LABEL[a.level] || '-' %></td>
+        <td><%= a.duration || '-' %></td>
+        <td><span class="chip <%= a.active ? 'chip--ok' : '' %>"><%= a.active ? 'Tampil' : 'Disembunyikan' %></span></td>
+        <td><a class="btn btn--ghost btn--sm" href="/admin/website/activities/<%= a.id %>">Ubah</a></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table></div>
+  <% } %>
+</section>
+<% }) %>
+<%- include('_bottom') %>

@@ -21,7 +21,7 @@
       <td><a href="/admin/customers/<%= it.customer_id %>"><b><%= it.name %></b></a><br><small><%= phoneDisplay(it.phone) || it.email || it.other_contact || '' %></small></td>
       <td><%= fmtDate(it.checkin) %> → <%= fmtDate(it.checkout) %><br><small><%= nights(it.checkin, it.checkout) %> malam</small></td>
       <td><%= it.guests %></td>
-      <td><%= roomName(it.room) %></td>
+      <td><%= it.item || roomName(it.room) %></td>
       <td><%- include('_status', { s: it.status }) %><% if (it.payment_status) { %> <%- include('_pay', { p: it.payment_status }) %><% } %></td>
     </tr>
   <% }) %>

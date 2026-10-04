@@ -313,3 +313,13 @@ input.copy { min-width: 260px; font: 400 var(--text-xs) ui-monospace, monospace 
 .fbk__stars { color: var(--kalma-coral); letter-spacing: 1px; }
 .fbk__form { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--a-line-soft); }
 .fbk__form select { min-height: 40px; border: 1px solid #CFDCE4; border-radius: 10px; padding: 0 10px; font: 400 var(--text-sm) var(--font-body); }
+
+/* activities (Website > Aktivitas & trip) */
+.act-thumb { width: 72px; height: 54px; border-radius: 10px; object-fit: cover; display: block; }
+.act-thumb--empty { display: grid; place-items: center; background: var(--a-soft); color: var(--a-muted); font-size: 11px; }
+.act-photo { display: grid; grid-template-columns: minmax(0, 340px) 1fr; gap: 20px; align-items: start; }
+.lang2 { margin-bottom: 4px; }
+.lang2 .chip { font-size: 10px; padding: 1px 7px; margin-left: 4px; vertical-align: 1px; }
+@media (max-width: 760px) { .act-photo { grid-template-columns: 1fr; } }
+.field label.check { display: flex; gap: 8px; align-items: center; margin-top: 30px; font-weight: 600; cursor: pointer; }
+.field label.check input { width: 18px; height: 18px; min-height: 0; }
