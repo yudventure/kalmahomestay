@@ -188,3 +188,14 @@ test('the booking dialog opens from /?book=<room> without JavaScript', async () 
   assert.doesNotMatch(plain, /<dialog class="checkout" id="checkout"[^>]* open>/);
   assert.doesNotMatch(plain, /id="pesan"/, 'the old booking section is gone');
 });
+
+test('social links only accept http(s) URLs and render as bubbles beside guest stories', async () => {
+  const c = loadConfig({ FACEBOOK_URL: 'https://facebook.com/kalma', TIKTOK_URL: 'javascript:alert(1)' }).contact;
+  assert.equal(c.facebookUrl, 'https://facebook.com/kalma');
+  assert.equal(c.tiktokUrl, '');
+  assert.equal(c.googleUrl, '');
+  const { base } = await start({ enabled: false, percent: 100 });
+  const html = await (await fetch(base + '/')).text();
+  assert.match(html, /<a class="soc soc--instagram" href="https:\/\/instagram\.com\/kalma"/);
+  for (const k of ['google', 'facebook', 'tiktok']) assert.match(html, new RegExp(`<span class="soc soc--${k}" aria-hidden="true">`));
+});

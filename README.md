@@ -76,7 +76,6 @@ Kotak foto masih berupa gradasi warna. Cukup simpan foto di `public/img/` dengan
 | `exp-1` … `exp-6` | Lingkaran pengalaman (snorkeling, island hopping, selam, cendrawasih, kampung, kayak) |
 | `room-laguna`, `room-pantai`, `room-keluarga` | Kartu kamar |
 | `feature` | Foto besar di samping daftar keunggulan |
-| `review` | Lingkaran di bagian "Kata tamu" |
 
 Contoh: `public/img/room-laguna.jpg`.
 
