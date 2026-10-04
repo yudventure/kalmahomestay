@@ -420,7 +420,8 @@
     "st_pending": "Waiting for payment",
     "st_request": "Waiting for confirmation",
     "st_failed": "Not paid",
-    "checkEmail": "Please check your email"
+    "checkEmail": "Please check your email",
+    "errPayOpen": "The payment page could not be opened. Your booking is saved. Please try again in a moment, or the Kalma team will email you the payment details."
   },
   "sv": {
     "crumbHome": "Home",

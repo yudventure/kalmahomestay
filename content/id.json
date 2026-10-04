@@ -420,7 +420,8 @@
     "st_pending": "Menunggu pembayaran",
     "st_request": "Menunggu konfirmasi",
     "st_failed": "Belum dibayar",
-    "checkEmail": "Mohon cek email kamu"
+    "checkEmail": "Mohon cek email kamu",
+    "errPayOpen": "Halaman pembayaran belum bisa dibuka. Pesananmu sudah kami simpan. Coba lagi beberapa saat lagi, atau tim Kalma akan mengirim rincian pembayaran lewat email."
   },
   "sv": {
     "crumbHome": "Beranda",

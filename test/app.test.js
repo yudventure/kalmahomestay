@@ -61,14 +61,14 @@ test('English is the default language at /, and /en goes there', async () => {
   assert.equal(old.headers.get('location'), '/');
 });
 
-test('partners scroll three at a time with a logo or initials, each listed twice for a seamless loop', async () => {
+test('partners scroll with their full name and an unframed logo, each listed twice for a seamless loop', async () => {
   const html = await (await fetch(base + '/id')).text();
   const names = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'content', 'partners.json'), 'utf8')).partners;
   if (!names.length) return assert.doesNotMatch(html, /class="partners"/);
   assert.match(html, /<div class="partners" role="region"[^>]*>\s*<div class="partners__viewport">/);
   const perCopy = Math.max(1, Math.ceil(6 / names.length)); // short lists repeat to fill two windows of three
   assert.equal(html.split('<span class="partners__name">' + names[0] + '<').length - 1, 2 * perCopy);
-  assert.match(html, /<span class="partners__logo partners__logo--mono" aria-hidden="true">P1<\/span>/, 'initials when there is no logo');
+  assert.doesNotMatch(html, /partners__logo--mono/, 'no initials badge when there is no logo');
   assert.match(html, /<ul class="partners__list" aria-hidden="true">/);
 });
 

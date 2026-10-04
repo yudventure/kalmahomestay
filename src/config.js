@@ -51,7 +51,14 @@ function webUrl(v) {
 function loadPayments(env) {
   const serverKey = String(env.MIDTRANS_SERVER_KEY || '').trim();
   const clientKey = String(env.MIDTRANS_CLIENT_KEY || '').trim();
-  const production = env.MIDTRANS_IS_PRODUCTION === 'true';
+  // Sandbox keys start with "SB-". The key decides the environment, so a production key never hits the sandbox
+  // (and fails with 401) just because MIDTRANS_IS_PRODUCTION was left out in hPanel.
+  const production = serverKey ? !/^SB-/i.test(serverKey) : env.MIDTRANS_IS_PRODUCTION === 'true';
+  const problems = [];
+  if (serverKey && !clientKey) problems.push('MIDTRANS_CLIENT_KEY belum diisi');
+  if (clientKey && !serverKey) problems.push('MIDTRANS_SERVER_KEY belum diisi');
+  if (serverKey && clientKey && /^SB-/i.test(serverKey) !== /^SB-/i.test(clientKey)) problems.push('Server Key dan Client Key berasal dari lingkungan berbeda (sandbox dan production)');
+  if (/client/i.test(serverKey) || /server/i.test(clientKey)) problems.push('Server Key dan Client Key tertukar');
   const percent = Math.min(100, Math.max(1, Math.round(Number(env.PAYMENT_DEPOSIT_PERCENT) || 100)));
   return {
     enabled: Boolean(serverKey && clientKey),
@@ -59,6 +66,7 @@ function loadPayments(env) {
     serverKey,
     clientKey,
     production,
+    problems,
     percent,              // share of the total paid online (100 = full payment, e.g. 30 = deposit)
     snapUrl: production ? 'https://app.midtrans.com/snap/v1/transactions' : 'https://app.sandbox.midtrans.com/snap/v1/transactions',
     snapJs: production ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js',

@@ -58,7 +58,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState = {}, t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -234,6 +234,15 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
         if (arr || dep) alerts.push({ label: `${arr} check-in, ${dep} check-out hari ini`, sub: 'Lihat di kalender', href: '/admin/calendar' });
         status.push(arr || dep ? `${arr} check-in dan ${dep} check-out hari ini.` : 'Tidak ada check-in atau check-out hari ini.');
         for (const c of chans.filter((x) => /^Gagal/.test(x.last_sync_status || ''))) alerts.push({ label: `Sinkron ${c.name} gagal`, sub: c.last_sync_status, href: '/admin/channels' });
+      }
+      if (can(role, 'reservations') || can(role, 'finance')) {
+        const pay = config.payments || {};
+        for (const p of pay.problems || []) alerts.push({ label: 'Pengaturan Midtrans perlu diperbaiki', sub: p, href: '/admin/inquiries' });
+        if (pay.enabled && payState.lastError && (!payState.lastOkAt || payState.lastOkAt < payState.lastErrorAt)) {
+          alerts.push({ label: 'Halaman pembayaran gagal dibuka', sub: /\b401\b/.test(payState.lastError)
+            ? 'Midtrans menolak Server Key. Periksa MIDTRANS_SERVER_KEY di hPanel dan pastikan akun Midtrans production sudah aktif.'
+            : 'Midtrans: ' + payState.lastError, href: '/admin/inquiries' });
+        }
       }
       if (can(role, 'content')) {
         const c = await contentAlerts(repo, today);

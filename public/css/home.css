@@ -154,18 +154,17 @@
 
 /* ------------------------------------------------ partner running text */
 .partners { background: #fff; padding: 18px 16px; }
-/* a narrow window that shows three partners at a time */
-.partners__viewport { --item: 240px; width: min(calc(var(--item) * 3), 100%); margin: 0 auto; overflow: hidden;
+/* a narrow window; full partner names, logos without a frame */
+.partners__viewport { width: min(880px, 100%); margin: 0 auto; overflow: hidden;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent); }
 .partners__track { display: flex; width: max-content; animation: partners-scroll calc(var(--n, 6) * 3.2s) linear infinite; }
 .partners:hover .partners__track { animation-play-state: paused; }
 .partners__list { display: flex; flex: none; margin: 0; padding: 0; list-style: none; }
-.partners__list li { flex: none; width: var(--item); display: flex; align-items: center; justify-content: center; gap: 12px; padding: 0 12px; }
-.partners__logo { flex: none; width: 44px; height: 44px; border-radius: 12px; object-fit: contain; background: #fff; border: 1px solid var(--line); padding: 4px; }
-.partners__logo--mono { display: grid; place-items: center; padding: 0; background: var(--tint); border-color: transparent; color: var(--kalma-deep-sea); font: 700 var(--text-sm) var(--font-body); letter-spacing: .04em; }
-.partners__name { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-weight: 500; font-size: var(--text-lg); color: var(--kalma-deep-sea); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.partners__list li { flex: none; display: flex; align-items: center; gap: 12px; padding: 0 32px; }
+.partners__logo { flex: none; height: 40px; width: auto; max-width: 120px; object-fit: contain; }
+.partners__name { font-family: var(--font-display); font-variation-settings: "SOFT" 100; font-weight: 500; font-size: var(--text-lg); color: var(--kalma-deep-sea); white-space: nowrap; }
 @keyframes partners-scroll { to { transform: translateX(-50%); } }
-@media (max-width: 560px) { .partners__viewport { --item: 190px; } .partners__name { font-size: var(--text-base); } }
+@media (max-width: 560px) { .partners__list li { padding: 0 20px; } .partners__name { font-size: var(--text-base); } }
 
 /* ------------------------------------------------ sections */
 .sec { padding: var(--space-9) 0; position: relative; }

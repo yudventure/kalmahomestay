@@ -141,12 +141,11 @@
 <div class="partners" role="region" aria-label="Partner Kalma">
   <div class="partners__viewport">
   <% let loop = partners.slice(); while (loop.length < 6) loop = loop.concat(partners); /* at least two screens of three */ %>
-  <% const initials = (n) => String(n).split(/\s+/).map((w) => w.charAt(0)).join('').slice(0, 2).toUpperCase(); %>
   <div class="partners__track" style="--n: <%= loop.length %>">
     <% [0, 1].forEach(function (copy) { %>
     <ul class="partners__list"<%- copy ? ' aria-hidden="true"' : '' %>>
       <% loop.forEach(function (p, i) { %><li<%- !copy && i >= partners.length ? ' aria-hidden="true"' : '' %>>
-        <% if (p.logo) { %><img class="partners__logo" src="<%= p.logo %>" alt="" loading="lazy" width="44" height="44"><% } else { %><span class="partners__logo partners__logo--mono" aria-hidden="true"><%= initials(p.name) %></span><% } %>
+        <% if (p.logo) { %><img class="partners__logo" src="<%= p.logo %>" alt="" loading="lazy" height="40"><% } %>
         <span class="partners__name"><%= p.name %></span>
       </li><% }) %>
     </ul>

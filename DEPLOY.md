@@ -58,7 +58,7 @@ Isi di bagian **Environment variables** (jangan upload file `.env` ke GitHub).
 | `GOOGLE_SITE_VERIFICATION` | `AbC123…` | Kode verifikasi Search Console (langkah 8) |
 | `MIDTRANS_SERVER_KEY` | `SB-Mid-server-…` | Pembayaran online (langkah 10). Rahasia, jangan dibagikan |
 | `MIDTRANS_CLIENT_KEY` | `SB-Mid-client-…` | Pembayaran online (langkah 10) |
-| `MIDTRANS_IS_PRODUCTION` | `false` | `true` setelah akun Midtrans aktif (production) |
+| `MIDTRANS_IS_PRODUCTION` | (tidak wajib) | Otomatis dari key: key berawalan `SB-` = sandbox, lainnya = production |
 | `PAYMENT_DEPOSIT_PERCENT` | `100` | Opsional: `30` = tamu bayar DP 30% online |
 
 `PORT` **tidak perlu** diisi; Hostinger mengaturnya sendiri.
