@@ -162,7 +162,7 @@ function createApp(options = {}) {
       lang, t, rupiah,
       photo: withUploads(photoFinder(), media),
       video: ((files) => (name) => media.video(name) || files(name))(videoFinder()),
-      partners: site.partners() || loadPartners(),
+      partners: (site.partners() || loadPartners()).map((name) => ({ name, logo: media.logoUrl(name) })),
       igReviews: instagram.comments,
       rooms: ROOMS,
       guestOptions: GUEST_OPTIONS,

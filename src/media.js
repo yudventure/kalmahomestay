@@ -53,15 +53,22 @@ class UploadError extends Error {
 function createMedia({ repo, dir }) {
   const table = repo.table('media');
   let slots = {}; // slot → { image: row, video: row }
+  let logos = {}; // partner name (lowercase) → row
+  const PUBLIC = ['website', 'partner'];
 
   const filePath = (row) => path.join(dir, path.basename(row.file));
   const urlOf = (row) => `/media/${row.file}`;
 
   async function reload() {
-    const rows = await table.list({ where: { owner_type: 'website' }, order: [['id', 'asc']] });
+    const rows = await table.list({ where: { owner_type: PUBLIC }, order: [['id', 'asc']] });
     const next = {};
-    for (const r of rows) if (r.slot) (next[r.slot] ||= {})[r.kind] = r;
+    const nextLogos = {};
+    for (const r of rows) {
+      if (r.owner_type === 'website' && r.slot) (next[r.slot] ||= {})[r.kind] = r;
+      if (r.owner_type === 'partner' && r.label) nextLogos[r.label.toLowerCase()] = r;
+    }
     slots = next;
+    logos = nextLogos;
     return slots;
   }
 
@@ -101,15 +108,19 @@ function createMedia({ repo, dir }) {
 
   /** Record an uploaded file. A website slot keeps one photo and one video: the old one is removed. */
   async function save(file, { kind, slot = null, ownerType, ownerId = null, label = '', by = '' }) {
+    if (ownerType === 'partner') {
+      // one logo per partner name
+      for (const old of await table.list({ where: { owner_type: 'partner' } })) if ((old.label || '').toLowerCase() === String(label).toLowerCase()) await remove(old.id);
+    }
     if (slot) {
       for (const old of await table.list({ where: { owner_type: 'website', slot, kind } })) await remove(old.id);
     }
     const ext = path.extname(file.filename);
     const id = await table.insert({
       kind, file: file.filename, original_name: String(file.originalname).slice(0, 200), mime: MIME[ext] || 'application/octet-stream', size: file.size,
-      slot, owner_type: ownerType, owner_id: ownerId, label: String(label || '').slice(0, 120), public: ownerType === 'website', uploaded_by: by,
+      slot, owner_type: ownerType, owner_id: ownerId, label: String(label || '').slice(0, 120), public: PUBLIC.includes(ownerType), uploaded_by: by,
     });
-    if (ownerType === 'website') await reload();
+    if (PUBLIC.includes(ownerType)) await reload();
     return id;
   }
 
@@ -118,7 +129,7 @@ function createMedia({ repo, dir }) {
     if (!row) return false;
     await table.remove(id);
     await fs.promises.rm(filePath(row), { force: true });
-    if (row.owner_type === 'website') await reload();
+    if (PUBLIC.includes(row.owner_type)) await reload();
     return row;
   }
 
@@ -128,6 +139,9 @@ function createMedia({ repo, dir }) {
     list: (q) => table.list(q),
     get: (id) => table.get(id),
     findPublic: (file) => table.find({ file, public: true }),
+    /** Uploaded logo for a partner name, or ''. */
+    logoUrl: (name) => (logos[String(name || '').toLowerCase()] ? urlOf(logos[String(name).toLowerCase()]) : ''),
+    logoRow: (name) => logos[String(name || '').toLowerCase()] || null,
     photoUrl: (slot) => (slots[slot] && slots[slot].image ? urlOf(slots[slot].image) : ''),
     video: (slot) => {
       const v = slots[slot] && slots[slot].video;

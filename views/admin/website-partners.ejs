@@ -1,10 +1,36 @@
 <%- include('_top') %>
 <h1>Partner</h1>
-<p class="muted">Nama partner yang berjalan di bawah strip fakta di halaman depan. Satu nama per baris, maksimal 40.</p>
-<form method="post" action="/admin/website/partners" class="panel stack">
-  <div class="field"><label for="p-list">Daftar partner</label><textarea id="p-list" name="partners" rows="10"><%= (partners || fallback).join('\n') %></textarea></div>
-  <% if (!partners) { %><p class="muted small">Sekarang memakai daftar bawaan dari content/partners.json.</p><% } %>
-  <div class="btns"><button class="btn btn--primary btn--sm" type="submit">Simpan</button>
-  <% if (partners) { %><button class="btn btn--ghost btn--sm" type="submit" name="reset" value="1">Kembali ke daftar bawaan</button><% } %></div>
-</form>
+<p class="muted">Partner tampil bergulir di bawah strip fakta di halaman depan, tiga sekaligus, lengkap dengan logonya.</p>
+<% if (flashErr === 'partner') { %><p class="alert alert--err" role="alert">Simpan dulu nama partner di daftar, lalu unggah logonya.</p><% } %>
+<% var list = partners || fallback; %>
+<div class="grid2">
+  <form method="post" action="/admin/website/partners" class="panel stack">
+    <p class="eyebrow-a">Langkah 1</p>
+    <h2>Daftar nama partner</h2>
+    <div class="field"><label for="p-list">Satu nama per baris, maksimal 40</label><textarea id="p-list" name="partners" rows="10"><%= list.join('\n') %></textarea></div>
+    <% if (!partners) { %><p class="muted small">Sekarang memakai daftar bawaan dari content/partners.json.</p><% } %>
+    <div class="btns"><button class="btn btn--primary btn--sm" type="submit">Simpan daftar</button>
+    <% if (partners) { %><button class="btn btn--ghost btn--sm" type="submit" name="reset" value="1">Kembali ke daftar bawaan</button><% } %></div>
+  </form>
+  <section class="panel">
+    <p class="eyebrow-a">Tips</p>
+    <h2>Logo yang bagus</h2>
+    <p class="muted">Pakai logo dengan latar putih atau transparan (PNG). Bentuk persegi atau lingkaran paling rapi. Partner tanpa logo tampil dengan inisial namanya.</p>
+  </section>
+</div>
+<section class="panel">
+  <p class="eyebrow-a">Langkah 2</p>
+  <h2>Logo partner</h2>
+  <div class="media-grid">
+  <% list.forEach(function (name) { var logo = logoUrl(name); %>
+    <article class="media-card">
+      <h3><%= name %></h3>
+      <div class="thumb thumb--logo"><% if (logo) { %><img src="<%= logo %>" alt="Logo <%= name %>" loading="lazy"><% } else { %><span class="thumb__empty">Belum ada logo</span><% } %></div>
+      <%- include('_upload', { action: '/admin/website/partners/logo', accept: '.jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp', title: logo ? 'Ganti logo' : 'Unggah logo', hint: KINDS.image.label,
+           fields: '<input type="hidden" name="name" value="' + name.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;') + '">' }) %>
+      <% if (logo) { %><form method="post" action="/admin/website/partners/logo/delete" onsubmit="return confirm('Hapus logo ini?')"><input type="hidden" name="name" value="<%= name %>"><button class="btn btn--ghost btn--sm" type="submit">Hapus logo</button></form><% } %>
+    </article>
+  <% }) %>
+  </div>
+</section>
 <%- include('_bottom') %>

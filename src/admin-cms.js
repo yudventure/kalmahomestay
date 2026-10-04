@@ -109,7 +109,7 @@ function mountWebsite(router, { site, ah, t }) {
 
   /* partners running text */
   router.get('/website/partners', (req, res) => {
-    res.render('admin/website-partners', { title: 'Partner', partners: site.partners(), fallback: req.app.locals.loadPartners() });
+    res.render('admin/website-partners', { title: 'Partner', partners: site.partners(), fallback: req.app.locals.loadPartners(), logoUrl: req.app.locals.media.logoUrl, KINDS: req.app.locals.media.KINDS });
   });
   router.post('/website/partners', ah(async (req, res) => {
     const list = String(req.body.partners || '').split(/\r?\n/).map((s) => s.trim().slice(0, 60)).filter(Boolean).slice(0, 40);

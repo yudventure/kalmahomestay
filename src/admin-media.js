@@ -47,6 +47,26 @@ function mountMedia(router, { repo, media, ah, idParam, t }) {
     res.redirect(303, `/admin/website/media?ok=deleted#${req.params.slot}`);
   }));
 
+  /* ---------- partner logos (name sent with the file) ---------- */
+  router.post('/website/partners/logo', media.receive('image'), ah(async (req, res) => {
+    const name = String(req.body.name || '').trim().slice(0, 60);
+    const list = req.app.locals.site.partners() || req.app.locals.loadPartners();
+    if (!name || !list.some((p) => p.toLowerCase() === name.toLowerCase())) {
+      if (req.file) fs.rm(req.file.path, { force: true }, () => {});
+      return res.redirect(303, '/admin/website/partners?err=partner');
+    }
+    if (req.uploadError) return res.redirect(303, `/admin/website/partners?err=upload-${req.uploadError}`);
+    await media.save(req.file, { kind: 'image', ownerType: 'partner', label: name, by: req.staff.username });
+    res.redirect(303, '/admin/website/partners?ok=uploaded');
+  }));
+
+  router.post('/website/partners/logo/delete', ah(async (req, res, next) => {
+    const row = media.logoRow(req.body.name);
+    if (!row) return next();
+    await media.remove(row.id);
+    res.redirect(303, '/admin/website/partners?ok=deleted');
+  }));
+
   /* ---------- employee documents (contract, ID card, certificates) ---------- */
   router.post('/hr/employees/:id/files', (req, res, next) => (idParam(req) ? media.receive('document')(req, res, next) : next('route')), ah(async (req, res, next) => {
     const id = idParam(req);
