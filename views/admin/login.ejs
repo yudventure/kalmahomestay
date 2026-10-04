@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Masuk · Admin Kalma</title>
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png">
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/admin.css?v=<%= v %>">
+</head>
+<body class="admin">
+<main class="login">
+  <form class="login__box admin" method="post" action="/admin/login">
+    <img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="96" height="46">
+    <h1>Masuk ke admin</h1>
+    <% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+    <% if (locals.query && query.ok === 'password') { %><p class="alert alert--ok" role="status">Password diganti. Silakan masuk lagi.</p><% } %>
+    <input type="hidden" name="next" value="<%= next %>">
+    <div class="field"><label for="username">Username</label><input id="username" name="username" required autocomplete="username" value="<%= username %>" autofocus></div>
+    <div class="field"><label for="password">Password</label><input id="password" name="password" type="password" required autocomplete="current-password"></div>
+    <button class="btn btn--primary" type="submit">Masuk</button>
+    <p class="muted small" style="margin-top: var(--space-4)">Owner masuk dengan username <b>admin</b> dan ADMIN_PASSWORD dari hPanel. Staf lain memakai akun yang dibuat owner di menu Pengguna.</p>
+  </form>
+</main>
+</body>
+</html>

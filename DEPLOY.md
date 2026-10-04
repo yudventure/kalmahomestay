@@ -178,3 +178,27 @@ Catatan:
 - Token berlaku 60 hari, tetapi website memperbaruinya otomatis setiap hari dan menyimpannya di database, jadi tidak perlu diganti selama sinkronisasi berjalan. Kalau sinkronisasi gagal lebih dari 60 hari, buat token baru (langkah 3) dan ganti isi `INSTAGRAM_ACCESS_TOKEN`.
 - Jika Instagram sedang bermasalah, komentar terakhir yang tersimpan tetap tampil dan website mencoba lagi tiap jam.
 - Nama akun (@username) dan isi komentar ditampilkan di website dengan link ke postingannya.
+
+## 12. Dashboard admin (CMS)
+
+Buka `https://halokalma.com/admin` → halaman **Masuk**.
+
+- **Owner** masuk dengan username `admin` dan password = `ADMIN_PASSWORD` di hPanel.
+- Owner membuat akun staf di **Sistem → Pengguna & peran**. Setiap staf punya username & password sendiri dan hanya melihat menu sesuai perannya:
+
+| Peran | Menu |
+|---|---|
+| Owner | Semua, termasuk pengguna |
+| Manager | Reservasi, Website, SDM, Penggajian, Keuangan |
+| Reservasi / Front office | Permintaan & booking, Kalender, Channel OTA & agen, Customer |
+| HRD | Karyawan, Absensi, Cuti & izin, Penggajian |
+| Finance | Transaksi, Laporan, Penggajian |
+
+- Menonaktifkan akun atau mengganti passwordnya langsung mengeluarkan staf itu dari admin. Staf bisa mengganti password sendiri di **Akun saya**.
+- Sesi login berlaku 12 jam. Opsional: isi `SESSION_SECRET` (teks acak panjang) di hPanel agar sesi tidak ikut berubah saat `ADMIN_PASSWORD` diganti.
+
+**Website** (tanpa deploy ulang, langsung tampil):
+- **Teks website** — semua tulisan per bagian, Indonesia & Inggris. Kosongkan kolom untuk kembali ke teks bawaan.
+- **Kamar & harga** — harga per orang per malam, maksimal tamu, dan jumlah unit tiap kamar.
+- **Kontak & sosial media** — WhatsApp, email, Instagram, Facebook, TikTok, Google. Mengganti nilai dari hPanel.
+- **Partner** — nama partner di running text.

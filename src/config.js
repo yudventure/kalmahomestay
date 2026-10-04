@@ -16,6 +16,7 @@ function loadConfig(env = process.env) {
     dataDir: env.DATA_DIR || require('path').join(__dirname, '..', 'data'),
     adminPassword: env.ADMIN_PASSWORD || '',
     googleVerification: env.GOOGLE_SITE_VERIFICATION || '',
+    sessionSecret: env.SESSION_SECRET || '', // optional; admin sessions are otherwise signed with ADMIN_PASSWORD
     db: loadDb(env),
     dbAutoMigrate: env.DB_AUTO_MIGRATE !== 'false',
     payments: loadPayments(env),
@@ -87,9 +88,9 @@ function loadDb(env) {
 
 /** Rooms: prices are per person per night in IDR. Names/descriptions live in content/<lang>.json. */
 const ROOMS = [
-  { id: 'laguna', nameKey: 'r1.name', price: 850000, maxGuests: 2 },
-  { id: 'pantai', nameKey: 'r2.name', price: 750000, maxGuests: 3 },
-  { id: 'keluarga', nameKey: 'r3.name', price: 700000, maxGuests: 5 },
+  { id: 'laguna', nameKey: 'r1.name', price: 850000, maxGuests: 2, units: 1 },
+  { id: 'pantai', nameKey: 'r2.name', price: 750000, maxGuests: 3, units: 1 },
+  { id: 'keluarga', nameKey: 'r3.name', price: 700000, maxGuests: 5, units: 1 },
 ];
 
 const GUEST_OPTIONS = ['1', '2', '3', '4', '5', '6+'];

@@ -1,0 +1,19 @@
+<%- include('_top') %>
+<h1>Akun saya</h1>
+<section class="panel">
+  <p><b><%= me.name %></b> · <%= me.username %> · <%= roleLabel(me.role) %></p>
+  <% if (me.id === 'admin') { %>
+    <p class="muted">Password owner adalah ADMIN_PASSWORD di environment variables hPanel. Ganti di sana lalu deploy ulang.</p>
+  <% } else { %>
+    <% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+    <form method="post" action="/admin/account" class="stack">
+      <div class="field"><label for="a-cur">Password lama</label><input id="a-cur" name="current_password" type="password" required autocomplete="current-password"></div>
+      <div class="row2">
+        <div class="field"><label for="a-new">Password baru</label><input id="a-new" name="new_password" type="password" required minlength="8" autocomplete="new-password"></div>
+        <div class="field"><label for="a-conf">Ulangi password baru</label><input id="a-conf" name="confirm_password" type="password" required minlength="8" autocomplete="new-password"></div>
+      </div>
+      <button class="btn btn--primary btn--sm" type="submit">Ganti password</button>
+    </form>
+  <% } %>
+</section>
+<%- include('_bottom') %>

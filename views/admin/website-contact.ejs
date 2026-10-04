@@ -1,0 +1,21 @@
+<%- include('_top') %>
+<h1>Kontak & sosial media</h1>
+<p class="muted">Dipakai di seluruh website: tombol WhatsApp, footer, dan ikon sosial media di "Kata tamu". Kosongkan untuk memakai nilai dari hPanel (ditampilkan sebagai contoh).</p>
+<% if (flashErr === 'whatsapp') { %><p class="alert alert--err" role="alert">Nomor WhatsApp harus 8–15 angka, mis. 6281234567890.</p><% } %>
+<form method="post" action="/admin/website/contact" class="panel stack">
+  <div class="row2">
+    <div class="field"><label for="c-wa">Nomor WhatsApp (tanpa +)</label><input id="c-wa" name="whatsapp" inputmode="numeric" value="<%= s.whatsapp || '' %>" placeholder="<%= env.whatsapp %>"></div>
+    <div class="field"><label for="c-wad">Tampilan nomor</label><input id="c-wad" name="whatsappDisplay" value="<%= s.whatsappDisplay || '' %>" placeholder="<%= env.whatsappDisplay %>"></div>
+  </div>
+  <div class="row2">
+    <div class="field"><label for="c-email">Email</label><input id="c-email" name="email" type="email" value="<%= s.email || '' %>" placeholder="<%= env.email %>"></div>
+    <div class="field"><label for="c-ig">Instagram (username atau link)</label><input id="c-ig" name="instagram" value="<%= s.instagram || '' %>" placeholder="<%= env.instagram %>"></div>
+  </div>
+  <div class="row3">
+    <div class="field"><label for="c-fb">Link Facebook</label><input id="c-fb" name="facebookUrl" type="url" value="<%= s.facebookUrl || '' %>" placeholder="<%= env.facebookUrl || 'https://facebook.com/…' %>"></div>
+    <div class="field"><label for="c-tt">Link TikTok</label><input id="c-tt" name="tiktokUrl" type="url" value="<%= s.tiktokUrl || '' %>" placeholder="<%= env.tiktokUrl || 'https://tiktok.com/@…' %>"></div>
+    <div class="field"><label for="c-g">Link Google (Maps/ulasan)</label><input id="c-g" name="googleUrl" type="url" value="<%= s.googleUrl || '' %>" placeholder="<%= env.googleUrl || 'https://maps.app.goo.gl/…' %>"></div>
+  </div>
+  <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+</form>
+<%- include('_bottom') %>

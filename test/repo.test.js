@@ -85,7 +85,7 @@ for (const [kind, make] of backends) {
       ({ repo, cleanup } = make());
       if (kind === 'mysql') {
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 0');
-        for (const tname of ['ig_comments', 'app_settings', 'survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
+        for (const tname of ['staff_users', 'channels', 'calendar_blocks', 'employees', 'attendance', 'leave_requests', 'payroll', 'transactions', 'ig_comments', 'app_settings', 'survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 1');
       }
       await repo.init();
@@ -242,6 +242,38 @@ for (const [kind, make] of backends) {
       assert.equal(await repo.deleteIgComment('2'), false);
       await repo.saveIgComments([], ['m1']);
       assert.equal((await repo.listIgComments()).length, 0);
+    });
+
+    test('CMS tables: insert, filter, overlap, update and remove', async () => {
+      const blocks = repo.table('calendar_blocks');
+      const a = await blocks.insert({ room: 'laguna', start_date: '2030-05-01', end_date: '2030-05-04', source: 'channel', channel_id: 7, external_uid: 'abc', amount: '1500000', bogus: 'x' });
+      await blocks.insert({ room: 'laguna', start_date: '2030-05-04', end_date: '2030-05-06', source: 'block' });
+      await blocks.insert({ room: 'pantai', start_date: '2030-05-02', end_date: '2030-05-03', source: 'walkin' });
+      const got = await blocks.get(a);
+      assert.equal(got.start_date, '2030-05-01');
+      assert.equal(got.amount, 1500000);
+      assert.equal(got.channel_id, 7);
+      assert.ok(got.created_at instanceof Date);
+      const overlap = (from, to, where) => blocks.list({ where, overlap: { start: 'start_date', end: 'end_date', from, to }, order: [['start_date', 'asc']] });
+      assert.deepEqual((await overlap('2030-05-03', '2030-05-05', { room: 'laguna' })).map((b) => b.start_date), ['2030-05-01', '2030-05-04']);
+      assert.equal((await overlap('2030-05-04', '2030-05-05', { room: 'laguna' })).length, 1, 'check-out day is free');
+      assert.equal((await overlap('2030-05-01', '2030-05-10', { room: ['pantai'] })).length, 1);
+      assert.equal(await blocks.count({ where: { room: 'laguna' } }), 2);
+      assert.equal((await blocks.find({ channel_id: 7, external_uid: 'abc' })).id, a);
+      assert.equal(await blocks.update(a, { guest_name: 'Tom', end_date: '2030-05-03' }), true);
+      assert.equal((await blocks.get(a)).guest_name, 'Tom');
+      assert.equal((await blocks.list({ search: { cols: ['guest_name'], q: 'to' } })).length, 1);
+      assert.equal((await blocks.list({ range: { col: 'start_date', from: '2030-05-02', to: '2030-05-04' } })).length, 1);
+      assert.equal(await blocks.remove(a), true);
+      assert.equal(await blocks.get(a), null);
+
+      const users = repo.table('staff_users');
+      const u = await users.insert({ name: 'Sari', username: 'sari', password_hash: 'x', role: 'hrd', active: true });
+      assert.equal((await users.get(u)).active, true);
+      await users.update(u, { active: false });
+      assert.equal((await users.get(u)).active, false);
+      for (const b of await blocks.list()) await blocks.remove(b.id);
+      await users.remove(u);
     });
 
     test('data survives reopening the store', async () => {
