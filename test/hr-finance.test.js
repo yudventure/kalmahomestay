@@ -19,7 +19,7 @@ const page = async (p, headers = AUTH) => (await fetch(base + p, { headers, redi
 
 before(async () => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-hr-'));
-  app = createApp({ dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
+  app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
   repo = app.locals.repo;
   await repo.init();
   server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });

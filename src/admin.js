@@ -1,6 +1,7 @@
 'use strict';
 
 const crypto = require('crypto');
+const path = require('path');
 const express = require('express');
 const { ROOMS } = require('./config');
 const { STATUSES, STATUS_IDS } = require('./db/shared');
@@ -16,6 +17,7 @@ const { mountActivities } = require('./admin-activities');
 const { mountContent, contentAlerts } = require('./admin-content');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
+const { LANG_COOKIE, exact, phrases, buildEnglishViews, translateValue } = require('./admin-i18n');
 const { ROLES, can, verifyPassword, passwordVersion, createSessions, readCookie, COOKIE, SESSION_HOURS } = require('./staff');
 
 const ah = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -30,6 +32,8 @@ function fmtDate(iso) {
   if (!iso) return '-';
   return new Date(String(iso).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('id-ID', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' });
 }
+const fmtDateTimeEn = (d) => (d ? new Date(d).toLocaleString('en-GB', { timeZone: TZ, day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) + ' WIT' : '-');
+const fmtDateEn = (iso) => (iso ? new Date(String(iso).slice(0, 10) + 'T00:00:00Z').toLocaleDateString('en-GB', { timeZone: 'UTC', day: 'numeric', month: 'short', year: 'numeric' }) : '-');
 function nights(a, b) {
   return Math.round((Date.parse(String(b).slice(0, 10)) - Date.parse(String(a).slice(0, 10))) / 864e5);
 }
@@ -75,6 +79,50 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
     if (!config.adminPassword) return res.status(404).send('Not found');
     res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' });
     next();
+  });
+
+  /* ---------- admin language: English by default, Indonesian on request (account menu, login page) ---------- */
+  let enRoot = null;
+  const LABEL_KEYS = ['title', 'greeting', 'alerts', 'STATUSES', 'UPLOAD_ERRORS', 'ROLES', 'KINDS', 'TOPICS', 'LEVEL_LABEL', 'CAT_LABEL', 'FORMATS',
+    'PILLARS', 'PLATFORMS', 'ATTENDANCE', 'LEAVE_KINDS', 'PRESETS', 'groups', 'DAY_NAMES', 'columns', 'STATUS_LIST', 'SOURCES'];
+  const FN_KEYS = ['groupLabel', 'statusLabel', 'roleLabel', 'roomLabel', 'roomName'];
+  const tr = (s) => { const out = exact(s); return out === undefined ? s : out; };
+  const english = (o) => {
+    for (const k of LABEL_KEYS) if (o[k] !== undefined) o[k] = translateValue(o[k]);
+    for (const k of FN_KEYS) if (typeof o[k] === 'function' && !o[k].en) { const f = o[k]; o[k] = (...a) => tr(f(...a)); o[k].en = true; }
+    if (typeof o.reply === 'function' && !o.reply.en) { const f = o.reply; o.reply = (c) => { const r = f(c); return r && { ...r, label: tr(r.label) }; }; o.reply.en = true; }
+    if (o.fmtDate) { o.fmtDate = fmtDateEn; o.fmtDateTime = fmtDateTimeEn; o.L = tr; }
+    if (typeof o.error === 'string') o.error = phrases(o.error);
+    if (typeof o.todayStatus === 'string') o.todayStatus = o.todayStatus.split(/(?<=\.)\s+/).map(phrases).join(' ');
+    return o;
+  };
+  router.use((req, res, next) => {
+    const chosen = readCookie(req, LANG_COOKIE);
+    const lang = chosen === 'id' || chosen === 'en' ? chosen : (config.adminLang || 'en');
+    req.adminLang = lang;
+    res.locals.adminLang = lang;
+    if (lang === 'en' && enRoot !== false) {
+      const render = res.render.bind(res);
+      res.render = (view, opts, cb) => {
+        if (typeof opts === 'function') { cb = opts; opts = {}; }
+        if (typeof view === 'string' && view.startsWith('admin/')) {
+          if (enRoot === null) {
+            try { enRoot = buildEnglishViews(req.app.get('views')); } catch (e) { enRoot = false; console.error('English admin not available:', e.message); }
+          }
+          if (!enRoot) return render(view, opts, cb);
+          view = path.join(enRoot, view);
+          english(res.locals);
+          opts = english({ ...(opts || {}) });
+        }
+        return render(view, opts, cb);
+      };
+    }
+    next();
+  });
+  router.post('/lang', (req, res) => {
+    const lang = req.body.lang === 'id' ? 'id' : 'en';
+    res.cookie(LANG_COOKIE, lang, { path: '/admin', httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 365 * 24 * 3600 * 1000 });
+    res.redirect(303, safeNext(req.body.next));
   });
 
   /* State-changing requests must come from this site (CSRF guard; the session cookie is sent automatically). */
@@ -154,7 +202,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
 
   router.use((req, res, next) => {
     Object.assign(res.locals, {
-      STATUSES, fmtDateTime, fmtDate, nights, phoneDisplay, reply, roomName, rupiah: fmtRupiah,
+      L: (s) => s, STATUSES, fmtDateTime, fmtDate, nights, phoneDisplay, reply, roomName, rupiah: fmtRupiah,
       statusLabel: (id) => (STATUSES.find((s) => s.id === id) || {}).label || id,
       storage: repo.kind, flash: req.query.ok || '', flashErr: req.query.err || '',
       current: req.path, qs: (o) => new URLSearchParams(Object.entries(o).filter(([, v]) => v)).toString(),

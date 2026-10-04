@@ -12,7 +12,7 @@
     <tr><th>Tunjangan</th><td class="num"><%= rupiah(r.allowance) %></td></tr>
     <tr><th>Bonus</th><td class="num"><%= rupiah(r.bonus) %></td></tr>
     <tr><th>Potongan</th><td class="num">− <%= rupiah(r.deduction) %></td></tr>
-    <tr class="slip__total"><th>Diterima</th><td class="num"><%= rupiah(r.net) %></td></tr>
+    <tr class="slip__total"><th>Gaji bersih</th><td class="num"><%= rupiah(r.net) %></td></tr>
   </table>
   <% if (r.note) { %><p><small><%= r.note %></small></p><% } %>
   <p><small><%= r.status === 'paid' ? 'Dibayar ' + fmtDateTime(r.paid_at) : 'Belum dibayar (draf)' %></small></p>

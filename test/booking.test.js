@@ -17,7 +17,7 @@ let app, base, server, dataDir;
 
 before(async () => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-book-'));
-  app = createApp({ dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
+  app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
   await app.locals.repo.init();
   await app.locals.activities.seed();
   server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });

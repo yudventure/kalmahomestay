@@ -33,7 +33,7 @@ before(async () => {
   await new Promise((r) => ota.listen(0, r));
   otaUrl = `http://127.0.0.1:${ota.address().port}/airbnb.ics`;
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-cal-'));
-  app = createApp({ dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 }, allowPrivateIcal: true });
+  app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 }, allowPrivateIcal: true });
   await app.locals.repo.init();
   server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
   base = `http://127.0.0.1:${server.address().port}`;

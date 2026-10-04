@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id">
+<html lang="<%= locals.adminLang || 'id' %>">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,6 +14,7 @@
 <main class="login">
   <form class="login__box admin" method="post" action="/admin/login">
     <img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="96" height="46">
+    <div class="login__lang"><button type="submit" form="lang-form" name="lang" value="en"<%- locals.adminLang === 'en' ? ' aria-pressed="true"' : '' %>>EN</button><button type="submit" form="lang-form" name="lang" value="id"<%- locals.adminLang !== 'en' ? ' aria-pressed="true"' : '' %>>ID</button></div>
     <h1>Masuk ke admin</h1>
     <% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
     <% if (locals.query && query.ok === 'password') { %><p class="alert alert--ok" role="status">Password diganti. Silakan masuk lagi.</p><% } %>
@@ -23,6 +24,7 @@
     <button class="btn btn--primary" type="submit">Masuk</button>
     <p class="muted small" style="margin-top: var(--space-4)">Owner masuk dengan username <b>admin</b> dan ADMIN_PASSWORD dari hPanel. Staf lain memakai akun yang dibuat owner di menu Pengguna.</p>
   </form>
+  <form id="lang-form" method="post" action="/admin/lang" hidden><input type="hidden" name="next" value="/admin/login"></form>
 </main>
 </body>
 </html>

@@ -4,7 +4,7 @@
   <div class="hello__row">
     <div>
       <h1><%= greeting %>, <%= firstName %>.</h1>
-      <p><% if (alerts.length) { %>Ada <%= alerts.length %> hal yang perlu ditindaklanjuti hari ini.<% } else { %>Semua beres. Tidak ada yang menunggu tindak lanjut saat ini.<% } %></p>
+      <p><% if (alerts.length) { %>Hal yang perlu ditindaklanjuti hari ini: <%= alerts.length %>.<% } else { %>Semua beres. Tidak ada yang menunggu tindak lanjut saat ini.<% } %></p>
     </div>
     <div class="hello__clock"><b id="clock">--.--.--</b><small id="clock-date"><%= fmtDate(today) %> · WIT</small></div>
   </div>

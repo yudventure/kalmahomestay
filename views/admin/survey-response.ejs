@@ -1,4 +1,5 @@
 <%- include('_top') %>
+<% var sl = locals.adminLang === 'en' ? 'en' : 'id'; %>
 <p class="crumb"><a href="/admin/survey">← Rekap survei</a></p>
 <h1>Jawaban survei #<%= r.id %></h1>
 <p class="muted"><%= fmtDateTime(r.created_at) %> · <%= r.lang === 'en' ? 'English' : 'Indonesia' %><% if (r.contact) { %> · Kontak: <b><%= r.contact %></b><% } %></p>
@@ -7,9 +8,9 @@
   <% var n = 0; sections.forEach(function (sec) { sec.questions.forEach(function (q) { n += 1; if (q.contact) return;
        var v = r.answers[q.id]; var shown;
        if (v == null) shown = '-';
-       else if (q.options) shown = (Array.isArray(v) ? v : [v]).map(function (id) { var o = q.options.find(function (x) { return x.id === id; }); return o ? o.label.id : id; }).join(', ');
+       else if (q.options) shown = (Array.isArray(v) ? v : [v]).map(function (id) { var o = q.options.find(function (x) { return x.id === id; }); return o ? o.label[sl] : id; }).join(', ');
        else shown = v; %>
-    <dt><%= n %>. <%= q.text.id %></dt><dd class="pre"><%= shown %></dd>
+    <dt><%= n %>. <%= q.text[sl] %></dt><dd class="pre"><%= shown %></dd>
   <% }) }) %>
   </dl>
 </section>

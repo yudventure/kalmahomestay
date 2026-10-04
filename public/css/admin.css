@@ -377,3 +377,13 @@ small.warn { color: var(--color-danger); }
   .ct-day.is-today { display: flex; }
   .ct-filter { margin-left: 0; }
 }
+
+/* admin language switch */
+.menu-pop__lang { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-top: 1px solid var(--a-line); border-bottom: 1px solid var(--a-line); margin: 4px 0; }
+.menu-pop__lang span { flex: 1; font-size: var(--text-xs); color: var(--a-muted); }
+.menu-pop__box .menu-pop__lang button { width: auto; padding: 4px 10px; border-radius: 999px; font-size: var(--text-xs); border: 1px solid var(--a-line); background: #fff; }
+.menu-pop__box .menu-pop__lang button[aria-pressed="true"] { background: var(--kalma-deep-sea); border-color: var(--kalma-deep-sea); color: #fff; }
+.login__box { position: relative; }
+.login__lang { position: absolute; top: 24px; right: 24px; display: flex; border: 1px solid var(--a-line); border-radius: 999px; padding: 2px; }
+.login__lang button { border: 0; background: none; padding: 5px 10px; border-radius: 999px; font: 600 12px var(--font-body); color: var(--kalma-deep-sea); cursor: pointer; }
+.login__lang button[aria-pressed="true"] { background: var(--kalma-deep-sea); color: #fff; }

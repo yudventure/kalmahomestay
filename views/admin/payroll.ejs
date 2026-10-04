@@ -16,7 +16,7 @@
 <% } %>
 <div class="table">
 <table>
-  <thead><tr><th>Karyawan</th><th class="num">Pokok</th><th class="num">Tunjangan</th><th class="num">Bonus</th><th class="num">Potongan</th><th class="num">Diterima</th><th>Status</th><th></th></tr></thead>
+  <thead><tr><th>Karyawan</th><th class="num">Pokok</th><th class="num">Tunjangan</th><th class="num">Bonus</th><th class="num">Potongan</th><th class="num">Gaji bersih</th><th>Status</th><th></th></tr></thead>
   <tbody>
   <% if (!rows.length) { %><tr><td colspan="8" class="muted">Belum ada slip untuk periode ini.</td></tr><% } %>
   <% rows.forEach(function (r) { var paid = r.status === 'paid'; %>

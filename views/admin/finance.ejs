@@ -20,8 +20,8 @@
       <div class="field"><label for="t-date">Tanggal</label><input id="t-date" name="date" type="date" required value="<%= today %>"></div>
       <div class="field"><label for="t-kind">Jenis</label><select id="t-kind" name="kind" onchange="var k=this.value;document.querySelectorAll('#t-cat optgroup').forEach(function(g){g.disabled=g.dataset.kind!==k});document.getElementById('t-cat').value=document.querySelector('#t-cat optgroup[data-kind='+k+'] option').value"><option value="income">Pemasukan</option><option value="expense">Pengeluaran</option></select></div>
       <div class="field"><label for="t-cat">Kategori</label><select id="t-cat" name="category">
-        <optgroup label="Pemasukan" data-kind="income"><% CATEGORIES.income.forEach(function (c) { %><option><%= c %></option><% }) %></optgroup>
-        <optgroup label="Pengeluaran" data-kind="expense" disabled><% CATEGORIES.expense.forEach(function (c) { %><option><%= c %></option><% }) %></optgroup>
+        <optgroup label="Pemasukan" data-kind="income"><% CATEGORIES.income.forEach(function (c) { %><option value="<%= c %>"><%= L(c) %></option><% }) %></optgroup>
+        <optgroup label="Pengeluaran" data-kind="expense" disabled><% CATEGORIES.expense.forEach(function (c) { %><option value="<%= c %>"><%= L(c) %></option><% }) %></optgroup>
       </select></div>
       <div class="field"><label for="t-amt">Jumlah (Rp)</label><input id="t-amt" name="amount" inputmode="numeric" required></div>
     </div>
@@ -36,7 +36,7 @@
 <form class="filters" method="get" action="/admin/finance">
   <input type="hidden" name="m" value="<%= m %>">
   <select name="kind" aria-label="Jenis"><option value="">Semua</option><option value="income"<%= kind === 'income' ? ' selected' : '' %>>Pemasukan</option><option value="expense"<%= kind === 'expense' ? ' selected' : '' %>>Pengeluaran</option></select>
-  <select name="category" aria-label="Kategori"><option value="">Semua kategori</option><% CATEGORIES.income.concat(CATEGORIES.expense).filter(function (c, i, a) { return a.indexOf(c) === i; }).forEach(function (c) { %><option<%= category === c ? ' selected' : '' %>><%= c %></option><% }) %></select>
+  <select name="category" aria-label="Kategori"><option value="">Semua kategori</option><% CATEGORIES.income.concat(CATEGORIES.expense).filter(function (c, i, a) { return a.indexOf(c) === i; }).forEach(function (c) { %><option value="<%= c %>"<%= category === c ? ' selected' : '' %>><%= L(c) %></option><% }) %></select>
   <button class="btn btn--ghost btn--sm" type="submit">Saring</button>
   <a class="filters__right link" href="/admin/finance/export.csv?y=<%= m.slice(0, 4) %>">Unduh CSV <%= m.slice(0, 4) %></a>
 </form>
@@ -47,7 +47,7 @@
   <% if (!list.length) { %><tr><td colspan="6" class="muted">Belum ada transaksi.</td></tr><% } %>
   <% list.forEach(function (t) { %>
     <tr><td><%= fmtDate(t.date) %></td>
-      <td><span class="chip <%= t.kind === 'income' ? 'chip--ok' : 'chip--err' %>"><%= t.kind === 'income' ? '+' : '−' %></span> <%= t.category %></td>
+      <td><span class="chip <%= t.kind === 'income' ? 'chip--ok' : 'chip--err' %>"><%= t.kind === 'income' ? '+' : '−' %></span> <%= L(t.category) %></td>
       <td class="admin__msg"><% if (t.ref_type === 'inquiry') { %><a href="/admin/inquiries/<%= t.ref_id %>"><%= t.description %></a><% } else { %><%= t.description || '-' %><% } %><br><small class="muted"><%= t.created_by || '' %></small></td>
       <td><%= t.method || '-' %></td>
       <td class="num"><b><%= t.kind === 'income' ? '' : '−' %><%= rupiah(t.amount) %></b></td>

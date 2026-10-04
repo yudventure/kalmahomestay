@@ -141,7 +141,7 @@ test('a failed sync keeps the saved comments and retries after an hour', async (
 
 test('Instagram comments appear under guest stories and can be hidden in the admin', async () => {
   const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-ig-app-'));
-  const app = createApp({ dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, instagram: { token: 'tok' }, instagramApi: api });
+  const app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, instagram: { token: 'tok' }, instagramApi: api });
   await app.locals.repo.init();
   const server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
   const base = `http://127.0.0.1:${server.address().port}`;

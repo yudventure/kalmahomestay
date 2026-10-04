@@ -18,7 +18,10 @@ Baca juga `.claude/skills/kalma-cms/SKILL.md` sebelum mengubah admin atau menamb
 4. **Animasi website harus jalan di semua perangkat**, termasuk Windows dengan "Animation effects" mati dan
    Android dengan "Remove animations". Jangan mematikan animasi dekoratif (partner, gelembung komentar, logo sosial,
    kelomang, video hero, efek muncul) lewat `prefers-reduced-motion`. Pengaturan itu hanya dipakai untuk smooth scroll.
-5. Buat setiap fitur semudah mungkin dipakai staf homestay yang bukan orang teknis. Bahasa admin: Indonesia.
+5. Buat setiap fitur semudah mungkin dipakai staf homestay yang bukan orang teknis.
+6. **Bahasa bawaan website dan admin: Inggris.** Website Inggris di `/`, Indonesia di `/id`. Admin ditulis dalam bahasa
+   Indonesia di template, lalu diterjemahkan otomatis ke Inggris lewat kamus `src/admin-i18n-en.js` (staf bisa memilih
+   Indonesia di menu akun). Setiap menambah teks admin, tambahkan juga baris terjemahannya di kamus itu.
 
 ## Alur kerja
 

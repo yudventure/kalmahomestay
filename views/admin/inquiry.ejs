@@ -11,7 +11,7 @@
       <% if (item.item) { %><dt>Aktivitas</dt><dd><%= item.item %></dd><% } else { %><dt>Kamar</dt><dd><%= roomName(item.room) %></dd><% } %>
       <dt>Pesan</dt><dd class="pre"><%= item.message || '-' %></dd>
       <dt>Bahasa</dt><dd><%= item.lang === 'en' ? 'English' : 'Indonesia' %></dd>
-      <dt>Masuk</dt><dd><%= fmtDateTime(item.created_at) %></dd>
+      <dt>Diterima</dt><dd><%= fmtDateTime(item.created_at) %></dd>
     </dl>
     <% if (item.order_id) { %>
     <h2>Pembayaran online</h2>
@@ -25,7 +25,7 @@
     <% } %>
   </section>
   <section class="panel">
-    <h2>Customer</h2>
+    <h2>Data customer</h2>
     <dl class="dl">
       <dt>Nama</dt><dd><a href="/admin/customers/<%= item.customer_id %>"><b><%= item.name %></b></a></dd>
       <dt>WhatsApp/HP</dt><dd><%= phoneDisplay(item.phone) || '-' %></dd>

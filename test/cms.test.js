@@ -14,7 +14,7 @@ let base, server, dataDir, app;
 
 before(async () => {
   dataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'kalma-cms-'));
-  app = createApp({ dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
+  app = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', siteUrl: 'https://kalma.test', contact, payments: { enabled: false, percent: 100 } });
   await app.locals.repo.init();
   await app.locals.site.load();
   server = await new Promise((r) => { const s = app.listen(0, () => r(s)); });
@@ -136,7 +136,7 @@ test('website settings change contacts, prices, partners and texts on the live s
   assert.doesNotMatch(await (await fetch(base + '/')).text(), /Selamat datang/, 'empty English keeps the default');
 
   // settings survive a restart
-  const again = createApp({ dataDir, db: null, adminPassword: 'rahasia', contact, payments: { enabled: false, percent: 100 } });
+  const again = createApp({ adminLang: 'id', dataDir, db: null, adminPassword: 'rahasia', contact, payments: { enabled: false, percent: 100 } });
   await again.locals.repo.init();
   await again.locals.site.load();
   assert.equal(again.locals.site.settings.contact.email, 'halo@kalma.id');
