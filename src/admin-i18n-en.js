@@ -927,6 +927,8 @@ module.exports = {
 
   /* ---------- developer mode ---------- */
   'Mode developer': 'Developer mode',
+  'Lihat sebagai tamu': 'See it as a guest',
+  'Selama kamu login, website asli tetap terlihat dengan pita merah di atas. Pakai tombol Lihat sebagai tamu untuk melihat persis apa yang dilihat tamu. Perubahan berlaku untuk semua tamu dalam 10 detik.': 'While you are signed in you still see the real website, with a red ribbon on top. Use See it as a guest to see exactly what guests see. Changes reach every guest within 10 seconds.',
   'Tutup seluruh website atau sebagian saja saat sedang diperbaiki. Staf yang login tetap melihat website asli dengan tanda berwarna, tamu melihat halaman maintenance.': 'Close the whole website, or only part of it, while it is being worked on. Signed-in staff still see the real website with a coloured marker, guests see the maintenance page.',
   'Seluruh website': 'Whole website',
   'Online': 'Online',

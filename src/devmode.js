@@ -6,7 +6,8 @@
  *   - Each homepage section can be shown, hidden, or shown as a small "being refreshed" note.
  *   - The booking, service and feedback pages can each be put into maintenance.
  * Staff who are signed in to the admin carry a preview pass (cookie on the whole site), so they keep
- * seeing the real website with a ribbon that says what guests see.
+ * seeing the real website with a ribbon that says what guests see. Adding ?as=guest to any address
+ * shows staff exactly what guests see.
  * Settings live in app_settings (key "devmode") and are cached in memory.
  */
 const { createSessions, readCookie } = require('./staff');
@@ -36,15 +37,24 @@ const ALWAYS_OPEN = /^\/(admin|api\/payments\/|healthz|robots\.txt|sitemap\.xml|
 
 const blank = () => ({ site: { on: false, until: '', msg_en: '', msg_id: '' }, sections: {}, pages: {} });
 
-function createDevMode({ repo, secret }) {
+function createDevMode({ repo, secret, ttl = 10000 }) {
   let state = blank();
   let loaded = false;
+  let loadedAt = 0;
   const pass = createSessions('preview:' + secret);
 
   async function load() {
     const saved = await repo.getSetting('devmode').catch(() => null);
     state = { ...blank(), ...(saved || {}), site: { ...blank().site, ...((saved || {}).site || {}) } };
     loaded = true;
+    loadedAt = Date.now();
+    return state;
+  }
+
+  /** Hostinger can run several app processes. Each one re-reads the setting every few seconds,
+   *  so a change saved in the admin reaches every visitor, not only the process that saved it. */
+  async function fresh() {
+    if (!loaded || Date.now() - loadedAt >= ttl) await load().catch(() => {});
     return state;
   }
 
@@ -62,6 +72,7 @@ function createDevMode({ repo, secret }) {
   async function save(body) {
     state = clean(body);
     loaded = true;
+    loadedAt = Date.now();
     await repo.setSetting('devmode', state);
     return state;
   }
@@ -69,7 +80,7 @@ function createDevMode({ repo, secret }) {
   const isStaff = (req) => Boolean(pass.read(readCookie(req, PREVIEW_COOKIE)));
 
   return {
-    SECTIONS, PAGES, load, save, isStaff,
+    SECTIONS, PAGES, load, fresh, save, isStaff,
     get state() { return state; },
     get loaded() { return loaded; },
     section: (id) => state.sections[id] || 'show',

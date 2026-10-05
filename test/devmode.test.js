@@ -90,10 +90,30 @@ test('the whole site in maintenance: guests get the maintenance page, the admin 
   assert.equal((await guest('/css/home.css')).status, 200);
   assert.notEqual((await fetch(base + '/api/payments/midtrans', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status, 503);
   assert.equal((await staff('/')).status, 200, 'staff preview the real site');
+  assert.match(await (await staff('/')).text(), /See it as a guest/);
+  assert.equal((await staff('/?as=guest')).status, 503, 'staff can see exactly what guests see');
+  assert.equal((await guest('/')).headers.get('cache-control'), 'no-store');
   // the bell tells the team
   assert.match(await (await fetch(base + '/admin', { headers: AUTH })).text(), /Website sedang mode maintenance/);
   // a forged preview cookie does not get through
   assert.equal((await fetch(base + '/', { headers: { Cookie: 'kalma_preview=abc.def' } })).status, 503);
   await save({ site_on: '0' });
   assert.equal((await guest('/')).status, 200);
+});
+
+test('a change saved in one app process reaches the others (Hostinger can run several)', async () => {
+  const { createDevMode } = require('../src/devmode');
+  let saved = null;
+  const repo = { getSetting: async () => saved, setSetting: async (k, v) => { saved = JSON.parse(JSON.stringify(v)); } };
+  const a = createDevMode({ repo, secret: 's', ttl: 0 });
+  const b = createDevMode({ repo, secret: 's', ttl: 0 });
+  assert.equal((await b.fresh()).site.on, false);
+  await a.save({ site_on: '1' });
+  assert.equal((await b.fresh()).site.on, true, 'the other process picks it up');
+  await a.save({ site_on: '0' });
+  assert.equal((await b.fresh()).site.on, false);
+  const slow = createDevMode({ repo, secret: 's', ttl: 60000 });
+  await slow.fresh();
+  await a.save({ site_on: '1' });
+  assert.equal((await slow.fresh()).site.on, false, 'within the refresh window the cached value is used');
 });
