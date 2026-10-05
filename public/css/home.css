@@ -231,7 +231,9 @@
 @media (max-width: 900px) {
   .svc-grid { flex-direction: column; height: auto; align-items: stretch; }
   .svc, .svc.is-active { height: auto; min-height: 420px; flex: none; cursor: default; }
-  .svc__body { position: relative; padding-top: 220px; }
+  /* text sits high in the card: the card is shorter and its rooms stay readable longer before the next card slides over */
+  .svc__body { position: relative; padding-top: 112px; }
+  .svc::after { background: linear-gradient(180deg, rgba(15, 34, 51, .15) 0%, rgba(15, 34, 51, .7) 32%, rgba(15, 34, 51, .94) 100%); }
   .svc__more { max-height: none; opacity: 1; margin-top: var(--space-4); }
   /* phones and tablets: the cards stack while scrolling, each one sticks under the header and the next slides over it */
   .svc-grid { gap: 28px; }
