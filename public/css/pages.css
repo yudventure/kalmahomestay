@@ -57,7 +57,7 @@
 
 /* ------------------------------------------------ activities (diving, trips) */
 .acts-sec { padding-top: var(--space-6); }
-.acts-nav { position: sticky; top: 72px; z-index: 5; display: flex; gap: 8px; overflow-x: auto; padding: 12px 0; margin-bottom: var(--space-5); background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); scrollbar-width: none; }
+.acts-nav { position: sticky; top: 72px; z-index: 5; display: flex; gap: 8px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; padding: 12px 0; margin-bottom: var(--space-5); background: rgba(255, 255, 255, .92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); scrollbar-width: none; }
 .acts-nav::-webkit-scrollbar { display: none; }
 .acts-nav a { flex: none; padding: 9px 16px; border-radius: 999px; background: var(--tint); color: var(--heading); text-decoration: none; font-size: var(--text-sm); font-weight: 600; white-space: nowrap; transition: background var(--dur-fast), color var(--dur-fast); }
 .acts-nav a:hover { background: var(--kalma-deep-sea); color: #fff; }
