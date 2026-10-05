@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %></title>
+<meta name="description" content="<%= doc.lead %>">
+<link rel="canonical" href="<%= siteUrl %><%= path %>">
+<link rel="alternate" hreflang="id" href="<%= siteUrl %><%= alt.id %>">
+<link rel="alternate" hreflang="en" href="<%= siteUrl %><%= alt.en %>">
+<meta name="theme-color" content="#FFFFFF">
+<link rel="icon" href="/brand/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="preload" href="/fonts/jakarta-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/home.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/pages.css?v=<%= v %>">
+</head>
+<body class="home page page--legal">
+<a class="skip" href="#main"><%- t('skip') %></a>
+<%- include('partials/site-nav', { alt: alt }) %>
+<%
+  const fmt = new Date(updated + 'T00:00:00Z').toLocaleDateString(lang === 'en' ? 'en-GB' : 'id-ID', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const contactLine = L.contactText
+    .replace('{email}', '<a href="mailto:' + contact.email + '">' + contact.email + '</a>')
+    .replace('{wa}', '<a href="https://wa.me/' + contact.whatsapp + '" target="_blank" rel="noopener">' + contact.whatsappDisplay + '</a>');
+%>
+<main id="main" class="legal">
+  <div class="wrap legal__in">
+    <header class="legal__head">
+      <p class="eyebrow">Kalma Raja Ampat</p>
+      <h1><%= doc.title %></h1>
+      <p class="legal__lead"><%= doc.lead %></p>
+      <p class="legal__date"><%= L.updated %> <%= fmt %></p>
+    </header>
+    <ol class="legal__toc">
+      <% doc.sections.forEach(function (s, i) { %><li><a href="#s<%= i + 1 %>"><%= s[0] %></a></li><% }) %>
+    </ol>
+    <% doc.sections.forEach(function (s, i) { %>
+    <section class="legal__sec" id="s<%= i + 1 %>">
+      <h2><span><%= i + 1 %></span><%= s[0] %></h2>
+      <ul><% s[1].forEach(function (p) { %><li><%= p %></li><% }) %></ul>
+    </section>
+    <% }) %>
+    <section class="legal__sec legal__contact">
+      <h2><%= L.contactTitle %></h2>
+      <p><%- contactLine %></p>
+      <p><a class="legal__other" href="<%= other %>"><%= otherTitle %> →</a></p>
+    </section>
+  </div>
+</main>
+<%- include('partials/site-foot') %>
+<script src="/js/site.js?v=<%= v %>" defer></script>
+</body>
+</html>
