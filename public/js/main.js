@@ -161,6 +161,20 @@
     });
     svcGrid.addEventListener("mouseleave", function () { if (!svcGrid.contains(document.activeElement)) activate(cards[0]); });
     svcGrid.addEventListener("focusout", function (e) { if (!svcGrid.contains(e.relatedTarget)) activate(cards[0]); });
+    /* phones: stacked cards. A card taller than the screen sticks only once its bottom is in view,
+       so every room and price is seen before the next card slides over it. */
+    var stacked = window.matchMedia("(max-width: 900px)");
+    var placeStack = function () {
+      cards.forEach(function (card, i) {
+        if (!stacked.matches) { card.style.top = ""; return; }
+        var want = 84 + 12 * i;
+        var room = window.innerHeight - card.offsetHeight - 12;
+        card.style.top = Math.min(want, room) + "px";
+      });
+    };
+    placeStack();
+    window.addEventListener("resize", placeStack);
+    window.addEventListener("load", placeStack);
   }
 
   /* ---------------------------------------------------------------- card carousel arrows */

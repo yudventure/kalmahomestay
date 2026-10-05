@@ -10,6 +10,7 @@ const { createSite } = require('./site');
 const { createCalendar } = require('./calendar');
 const { createMedia } = require('./media');
 const { createActivities, servicePath, bookPath, homePath } = require('./activities');
+const { mountLegal, PATHS: LEGAL_PATHS } = require('./legal');
 const { mountBooking } = require('./booking');
 const { recordWebsitePayment } = require('./admin-finance');
 const payments = require('./payments');
@@ -199,6 +200,7 @@ function createApp(options = {}) {
     payState, repo, config, pay, calendar, media, activities, translator, rupiah, rateLimited, ah, embedJSON,
     photo: () => withUploads(photoFinder(), media),
   });
+  mountLegal(app, { page: booking.page });
   // old links like /?book=laguna opened a booking dialog; they now go to the booking page
   // English is the default language; Indonesian lives under /id
   app.get('/', booking.redirectOldBook, (req, res) => renderHome(res, 'en'));
@@ -302,6 +304,10 @@ function createApp(options = {}) {
         const pid = u + servicePath('id', id), pen = u + servicePath('en', id);
         const a = `<xhtml:link rel="alternate" hreflang="id" href="${pid}"/><xhtml:link rel="alternate" hreflang="en" href="${pen}"/>`;
         return `  <url><loc>${pid}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n  <url><loc>${pen}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n`;
+      }).join('') +
+      Object.values(LEGAL_PATHS).map((p) => {
+        const a = `<xhtml:link rel="alternate" hreflang="id" href="${u + p.id}"/><xhtml:link rel="alternate" hreflang="en" href="${u + p.en}"/>`;
+        return `  <url><loc>${u + p.id}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n  <url><loc>${u + p.en}</loc><lastmod>${lastmod}</lastmod>${a}</url>\n`;
       }).join('') +
       '</urlset>\n');
   });

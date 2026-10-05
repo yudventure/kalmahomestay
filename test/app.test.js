@@ -336,7 +336,7 @@ test('admin still shows earlier survey answers, CSV and delete', async () => {
 test('sitemap has hreflang alternates and lastmod; verification meta is rendered', async () => {
   const xml = await (await fetch(base + '/sitemap.xml')).text();
   assert.match(xml, /xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml"/);
-  assert.equal((xml.match(/<url>/g) || []).length, 8, 'home and the three service pages, in both languages');
+  assert.equal((xml.match(/<url>/g) || []).length, 12, 'home, the three service pages, privacy and terms, in both languages');
   assert.match(xml, /<loc>https:\/\/kalma\.test\/en\/services\/diving-snorkeling<\/loc>/);
   assert.match(xml, /<loc>https:\/\/kalma\.test\/id<\/loc><lastmod>\d{4}-\d{2}-\d{2}<\/lastmod>/);
   assert.match(xml, /hreflang="x-default" href="https:\/\/kalma\.test\/"/);

@@ -229,6 +229,11 @@
   .svc, .svc.is-active { height: auto; min-height: 420px; flex: none; cursor: default; }
   .svc__body { position: relative; padding-top: 220px; }
   .svc__more { max-height: none; opacity: 1; margin-top: var(--space-4); }
+  /* phones and tablets: the cards stack while scrolling, each one sticks under the header and the next slides over it */
+  .svc-grid { gap: 28px; }
+  .svc, .svc.is-active { position: sticky; top: 84px; box-shadow: 0 -14px 34px -18px rgba(15, 34, 51, .55), var(--card-shadow); }
+  .svc:nth-child(2) { top: 96px; }
+  .svc:nth-child(3) { top: 108px; }
   .svc-hint { display: none; }
   .svc-hint--touch { display: inline; }
 }
@@ -373,6 +378,13 @@ a.bubble__tag:hover { text-decoration: underline; }
 .foot__social a { width: 40px; height: 40px; border-radius: 50%; background: #fff; color: #0F2233; display: grid; place-items: center; transition: transform var(--dur-fast); }
 .foot__social a:hover { transform: translateY(-2px); }
 .foot__social svg { width: 20px; height: 20px; }
+.foot__legal { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding: var(--space-4) 0; border-top: 1px solid rgba(255, 255, 255, .1); }
+.foot__links { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5); }
+.foot__links a { color: #B7C6D1; text-decoration: none; font-size: var(--text-xs); }
+.foot__links a:hover { color: #fff; text-decoration: underline; }
+.foot__operator { display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(237, 224, 181, .45); color: var(--kalma-sand); text-decoration: none; font-size: var(--text-xs); font-weight: 700; transition: background var(--dur-fast), color var(--dur-fast); }
+.foot__operator:hover, .foot__operator:focus-visible { background: var(--kalma-sand); color: #0F2233; }
+.foot__operator svg { width: 16px; height: 16px; }
 .foot__bottom { display: flex; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; padding-top: var(--space-4); border-top: 1px solid rgba(255, 255, 255, .1); font-size: var(--text-xs); }
 .credit b { color: var(--kalma-sand); letter-spacing: .14em; text-transform: uppercase; font-size: 11px; }
 @media (max-width: 900px) {

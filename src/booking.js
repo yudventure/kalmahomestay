@@ -242,6 +242,7 @@ function mountBooking(app, ctx) {
 
   /* old links: /?book=<room> opened the booking dialog on the homepage */
   return {
+    page,
     redirectOldBook: (req, res, next) => {
       if (!req.query.book) return next();
       const lang = req.path.startsWith('/id') ? 'id' : 'en';
