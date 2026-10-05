@@ -53,12 +53,33 @@
   <p class="muted" style="margin-top: -10px; margin-bottom: 22px">Selama kamu login, website asli tetap terlihat dengan pita merah di atas. Pakai tombol Lihat sebagai tamu untuk melihat persis apa yang dilihat tamu. Perubahan berlaku untuk semua tamu dalam 10 detik.</p>
 </form>
 
+<section class="panel" id="share">
+  <h2>Link pratinjau</h2>
+  <p class="muted">Salin link lalu kirim lewat WhatsApp atau email.</p>
+  <div class="copy-list">
+    <div class="copy-row">
+      <div><b>Website asli untuk orang tanpa akun admin</b><small>Untuk pemilik, klien, atau tim yang ingin melihat website selama maintenance. Berlaku 7 hari.</small></div>
+      <div class="copy-row__field"><input class="copy" id="link-share" readonly value="<%= shareUrl %>" aria-label="Link pratinjau website asli"><button class="btn btn--primary btn--sm" type="button" data-copy="#link-share">Salin link</button></div>
+    </div>
+    <div class="copy-row">
+      <div><b>Tampilan tamu</b><small>Menunjukkan persis apa yang dilihat tamu saat ini.</small></div>
+      <div class="copy-row__field"><input class="copy" id="link-guest" readonly value="<%= guestUrl %>" aria-label="Link tampilan tamu"><button class="btn btn--ghost btn--sm" type="button" data-copy="#link-guest">Salin link</button></div>
+    </div>
+  </div>
+  <form method="post" action="/admin/website/devmode/share" class="copy-reset" onsubmit="return confirm('Buat link baru? Link pratinjau lama langsung tidak berlaku.')">
+    <button class="btn btn--ghost btn--sm" type="submit">Buat link pratinjau baru</button><small class="muted">Pakai ini jika link lama sudah terlanjur dibagikan ke orang yang salah.</small>
+  </form>
+</section>
+
 <section class="panel">
   <h2>Pratinjau halaman error</h2>
-  <p class="muted">Begini tampilan halaman yang dilihat tamu.</p>
+  <p class="muted">Begini tampilan halaman yang dilihat tamu. Link ini hanya bisa dibuka staf yang sudah login.</p>
   <div class="dev-previews">
-    <% [['503', 'Maintenance'], ['page', 'Halaman diperbarui'], ['404', '404 tidak ditemukan'], ['500', '500 gangguan server'], ['403', '403 akses ditolak'], ['401', '401 harus masuk']].forEach(function (x) { %>
-    <div class="dev-prev"><b><%= x[1] %></b><span><a href="/admin/website/devmode/preview/<%= x[0] %>" target="_blank" rel="noopener">English</a> · <a href="/admin/website/devmode/preview/<%= x[0] %>?lang=id" target="_blank" rel="noopener">Indonesia</a></span></div>
+    <% [['503', 'Maintenance'], ['page', 'Halaman diperbarui'], ['404', '404 tidak ditemukan'], ['500', '500 gangguan server'], ['403', '403 akses ditolak'], ['401', '401 harus masuk']].forEach(function (x) { var u = site + '/admin/website/devmode/preview/' + x[0]; %>
+    <div class="dev-prev"><b><%= x[1] %></b>
+      <span><a href="<%= u %>" target="_blank" rel="noopener">English</a> <button class="link-copy" type="button" data-copy-text="<%= u %>">Salin</button></span>
+      <span><a href="<%= u %>?lang=id" target="_blank" rel="noopener">Indonesia</a> <button class="link-copy" type="button" data-copy-text="<%= u %>?lang=id">Salin</button></span>
+    </div>
     <% }) %>
   </div>
 </section>

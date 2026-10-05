@@ -27,6 +27,23 @@ document.querySelectorAll('form[data-upload]').forEach(function (form) {
   ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('is-over'); }); });
   drop.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer.files.length) { input.files = e.dataTransfer.files; send(); } });
 });
+// copy buttons: data-copy="#input" copies that field, data-copy-text copies its own text
+document.querySelectorAll('[data-copy], [data-copy-text]').forEach(function (btn) {
+  var label = btn.textContent;
+  btn.addEventListener('click', function () {
+    var field = btn.dataset.copy ? document.querySelector(btn.dataset.copy) : null;
+    var text = field ? field.value : btn.dataset.copyText;
+    function done() { btn.textContent = 'Tersalin'; btn.classList.add('is-copied'); setTimeout(function () { btn.textContent = label; btn.classList.remove('is-copied'); }, 1800); }
+    function fallback() {
+      var tmp = field || Object.assign(document.createElement('textarea'), { value: text });
+      if (!field) { tmp.style.position = 'fixed'; tmp.style.opacity = '0'; document.body.appendChild(tmp); }
+      tmp.select();
+      try { document.execCommand('copy'); done(); } catch (e) { /* the field stays selected for a manual copy */ }
+      if (!field) tmp.remove();
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(done, fallback); else fallback();
+  });
+});
 // close the notification and account menus when clicking elsewhere
 document.addEventListener('click', function (e) {
   document.querySelectorAll('.menu-pop[open]').forEach(function (d) { if (!d.contains(e.target)) d.removeAttribute('open'); });

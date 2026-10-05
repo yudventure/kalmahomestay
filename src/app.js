@@ -177,6 +177,10 @@ function createApp(options = {}) {
     const busy = st.site.on || Object.keys(st.sections).length || Object.keys(st.pages).length;
     // pages must follow the switch right away, so they are never kept in a cache while it is in use
     if (busy) res.set('Cache-Control', 'no-store');
+    // a shared preview link (Admin › Mode developer) lets someone without an account see the real website
+    if (req.method === 'GET' && req.query.preview) {
+      if (devmode.readShare(req.query.preview)) { devmode.grant(res, req.secure); return res.redirect(302, req.path); }
+    }
     if (devmode.isStaff(req) && req.query.as !== 'guest') {
       res.locals.devStaff = true;
       if (busy) {

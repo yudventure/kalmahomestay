@@ -8,12 +8,22 @@ const PREVIEW = ['401', '403', '404', '500', '503', 'page'];
 function mountDevMode(router, { devmode, ah }) {
   router.get('/website/devmode', ah(async (req, res) => {
     await devmode.load().catch(() => {});
-    res.render('admin/website-devmode', { title: 'Mode developer', d: devmode.state, SECTIONS, PAGES, PREVIEW });
+    const site = `${req.protocol}://${req.get('host')}`;
+    res.render('admin/website-devmode', {
+      title: 'Mode developer', d: devmode.state, SECTIONS, PAGES, PREVIEW, site,
+      shareUrl: `${site}/?preview=${devmode.shareToken()}`, guestUrl: `${site}/?as=guest`, shareDays: devmode.SHARE_DAYS,
+    });
   }));
 
   router.post('/website/devmode', ah(async (req, res) => {
     await devmode.save(req.body || {});
     res.redirect(303, '/admin/website/devmode?ok=saved');
+  }));
+
+  // a new shareable preview link; every older link stops working
+  router.post('/website/devmode/share', ah(async (req, res) => {
+    await devmode.resetShare();
+    res.redirect(303, '/admin/website/devmode?ok=saved#share');
   }));
 
   // how a guest sees each error page, in English or Indonesian
