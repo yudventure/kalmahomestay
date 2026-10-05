@@ -10,9 +10,12 @@
  * shows staff exactly what guests see.
  * Settings live in app_settings (key "devmode") and are cached in memory.
  */
+const crypto = require('crypto');
 const { createSessions, readCookie } = require('./staff');
 
 const PREVIEW_COOKIE = 'kalma_preview';
+/** A shared preview link lets someone without an admin account see the real website for this many days. */
+const SHARE_DAYS = 7;
 
 const SECTIONS = [
   { id: 'hero', label: 'Hero dan pencarian tanggal' },
@@ -35,13 +38,15 @@ const SECTION_STATES = ['show', 'hide', 'maint'];
 /** Paths that keep working during maintenance: the admin, payment notifications, health check, files. */
 const ALWAYS_OPEN = /^\/(admin|api\/payments\/|healthz|robots\.txt|sitemap\.xml|media\/|favicon|brand\/|css\/|js\/|fonts\/|img\/|video\/)/;
 
-const blank = () => ({ site: { on: false, until: '', msg_en: '', msg_id: '' }, sections: {}, pages: {} });
+const blank = () => ({ site: { on: false, until: '', msg_en: '', msg_id: '' }, sections: {}, pages: {}, share_v: 1 });
 
 function createDevMode({ repo, secret, ttl = 10000 }) {
   let state = blank();
   let loaded = false;
   let loadedAt = 0;
   const pass = createSessions('preview:' + secret);
+  const shareKey = crypto.createHash('sha256').update('kalma-share:' + secret).digest();
+  const shareSign = (data) => crypto.createHmac('sha256', shareKey).update(data).digest('base64url');
 
   async function load() {
     const saved = await repo.getSetting('devmode').catch(() => null);
@@ -66,6 +71,7 @@ function createDevMode({ repo, secret, ttl = 10000 }) {
     v.site.msg_id = String(b.msg_id || '').trim().slice(0, 400);
     for (const s of SECTIONS) { const x = b['sec_' + s.id]; if (SECTION_STATES.includes(x) && x !== 'show') v.sections[s.id] = x; }
     for (const p of PAGES) if (b['page_' + p.id] === 'maint') v.pages[p.id] = 'maint';
+    v.share_v = state.share_v || 1;
     return v;
   }
 
@@ -79,8 +85,32 @@ function createDevMode({ repo, secret, ttl = 10000 }) {
 
   const isStaff = (req) => Boolean(pass.read(readCookie(req, PREVIEW_COOKIE)));
 
+  /** Token for the shareable preview link. Making a new link (resetShare) cancels every older one. */
+  function shareToken(now = Date.now()) {
+    const data = Buffer.from(JSON.stringify({ v: state.share_v || 1, exp: now + SHARE_DAYS * 86400000 })).toString('base64url');
+    return `${data}.${shareSign(data)}`;
+  }
+  function readShare(token, now = Date.now()) {
+    const [data, mac] = String(token || '').split('.');
+    if (!data || !mac) return false;
+    const want = Buffer.from(shareSign(data));
+    const got = Buffer.from(mac);
+    if (want.length !== got.length || !crypto.timingSafeEqual(want, got)) return false;
+    try {
+      const t = JSON.parse(Buffer.from(data, 'base64url').toString());
+      return t.exp > now && t.v === (state.share_v || 1);
+    } catch { return false; }
+  }
+  async function resetShare() {
+    await load().catch(() => {});
+    state = { ...state, share_v: (state.share_v || 1) + 1 };
+    await repo.setSetting('devmode', state);
+    loadedAt = Date.now();
+    return state;
+  }
+
   return {
-    SECTIONS, PAGES, load, fresh, save, isStaff,
+    SECTIONS, PAGES, SHARE_DAYS, load, fresh, save, isStaff, shareToken, readShare, resetShare,
     get state() { return state; },
     get loaded() { return loaded; },
     section: (id) => state.sections[id] || 'show',
@@ -94,4 +124,4 @@ function createDevMode({ repo, secret, ttl = 10000 }) {
   };
 }
 
-module.exports = { createDevMode, SECTIONS, PAGES, PREVIEW_COOKIE };
+module.exports = { createDevMode, SECTIONS, PAGES, PREVIEW_COOKIE, SHARE_DAYS };

@@ -117,3 +117,33 @@ test('a change saved in one app process reaches the others (Hostinger can run se
   await a.save({ site_on: '1' });
   assert.equal((await slow.fresh()).site.on, false, 'within the refresh window the cached value is used');
 });
+
+test('shareable preview link with copy buttons: people without an account see the real site, a new link cancels the old one', async () => {
+  const page = await (await fetch(base + '/admin/website/devmode', { headers: AUTH })).text();
+  assert.match(page, /data-copy="#link-share"/);
+  assert.match(page, /data-copy="#link-guest"/);
+  assert.match(page, /data-copy-text="http:\/\/127\.0\.0\.1:\d+\/admin\/website\/devmode\/preview\/404\?lang=id"/);
+  const link = page.match(/id="link-share" readonly value="([^"]+)"/)[1];
+  assert.match(link, /\/\?preview=[\w-]+\.[\w-]+$/);
+  await save({ site_on: '1' });
+  try {
+    assert.equal((await guest('/')).status, 503);
+    const r = await fetch(link, { redirect: 'manual' });
+    assert.equal(r.status, 302);
+    assert.equal(r.headers.get('location'), '/');
+    const cookie = (r.headers.get('set-cookie') || '').match(/kalma_preview=[^;]+/)[0];
+    assert.equal((await fetch(base + '/', { headers: { Cookie: cookie } })).status, 200, 'the shared link opens the real site');
+    assert.equal((await guest('/?preview=abc.def')).status, 503, 'a made-up link does nothing');
+    // a new link makes the old one stop working
+    assert.equal((await fetch(base + '/admin/website/devmode/share', { method: 'POST', redirect: 'manual', headers: { ...AUTH, Origin: base } })).status, 303);
+    assert.equal((await fetch(link, { redirect: 'manual' })).status, 503);
+    const fresh = (await (await fetch(base + '/admin/website/devmode', { headers: AUTH })).text()).match(/id="link-share" readonly value="([^"]+)"/)[1];
+    assert.notEqual(fresh, link);
+    assert.equal((await fetch(fresh, { redirect: 'manual' })).status, 302);
+    // saving the other settings keeps the current link working
+    await save({ site_on: '1' });
+    assert.equal((await fetch(fresh, { redirect: 'manual' })).status, 302);
+  } finally {
+    await save({ site_on: '0' });
+  }
+});
