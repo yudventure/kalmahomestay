@@ -206,6 +206,7 @@
   function openPayment(snap, r) {
     var done = function () { window.location.href = r.doneUrl; };
     var handlers = {
+      language: CFG.lang === "id" ? "id" : "en", // Midtrans speaks the page's language, English by default
       onSuccess: done, onPending: done, onError: done,
       onClose: function () { errBox.textContent = UI.payClosed; if (box && !box.hidden) showPanel(false); }
     };
