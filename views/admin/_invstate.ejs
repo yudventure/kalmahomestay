@@ -1,0 +1,1 @@
+<% var INV_STATE = { draft: ['Draf', ''], sent: ['Terkirim', 'chip--warn'], partial: ['Dibayar sebagian', 'chip--warn'], paid: ['Lunas', 'chip--ok'], overdue: ['Lewat jatuh tempo', 'chip--err'], cancelled: ['Dibatalkan', ''] }; var st = INV_STATE[s] || [s, '']; %><span class="chip <%= st[1] %>"><%= st[0] %></span>

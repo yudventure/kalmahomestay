@@ -15,6 +15,7 @@ const { mountMedia } = require('./admin-media');
 const { mountFeedback } = require('./admin-feedback');
 const { mountActivities } = require('./admin-activities');
 const { mountContent, contentAlerts } = require('./admin-content');
+const { mountInvoices, invoiceAlerts } = require('./admin-invoices');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { LANG_COOKIE, exact, phrases, buildEnglishViews, translateValue } = require('./admin-i18n');
@@ -58,7 +59,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState = {}, t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState = {}, t, translator = () => t }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -250,6 +251,10 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
         if (c.late) alerts.push({ label: `${c.late} konten lewat jadwal`, sub: 'Belum ditandai sudah tayang', href: '/admin/content/board' });
         if (c.dueToday) status.push(`${c.dueToday} konten dijadwalkan tayang hari ini.`);
       }
+      if (can(role, 'invoices')) {
+        const inv = await invoiceAlerts(repo, today);
+        if (inv.overdue) alerts.push({ label: `${inv.overdue} invoice lewat jatuh tempo`, sub: 'Masih ada sisa tagihan', href: '/admin/invoices?status=overdue' });
+      }
       if (can(role, 'hr')) {
         const [pending, staffCount, att] = await Promise.all([
           repo.table('leave_requests').count({ where: { status: 'pending' } }),
@@ -279,6 +284,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
   router.use('/hr', need('hr'));
   router.use('/payroll', need('payroll'));
   router.use('/finance', need('finance'));
+  router.use('/invoices', need('invoices'));
   router.use('/users', need('users'));
 
   mountUsers(router, { repo, ah, idParam });
@@ -290,6 +296,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
   mountFeedback(router, { repo, ah, idParam });
   if (activities) mountActivities(router, { activities, media, ah, idParam });
   mountContent(router, { repo, media, ah, idParam });
+  mountInvoices(router, { repo, config, ah, idParam, translator });
 
   const stamp = () => todayISO();
 
@@ -348,7 +355,8 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
     const item = await repo.getInquiry(id);
     if (!item) return next();
     const payments = can(req.staff.role, 'finance') ? await repo.table('transactions').list({ where: { ref_type: 'inquiry', ref_id: id, kind: 'income' }, order: [['date', 'asc']] }) : [];
-    res.render('admin/inquiry', { title: `Permintaan #${item.id}`, item, payments });
+    const invoices = can(req.staff.role, 'invoices') ? await repo.table('invoices').list({ where: { inquiry_id: id }, order: [['id', 'asc']] }) : [];
+    res.render('admin/inquiry', { title: `Permintaan #${item.id}`, item, payments, invoices });
   }));
 
   router.post('/inquiries/:id', ah(async (req, res, next) => {

@@ -85,7 +85,9 @@ for (const [kind, make] of backends) {
       ({ repo, cleanup } = make());
       if (kind === 'mysql') {
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 0');
-        for (const tname of ['staff_users', 'channels', 'calendar_blocks', 'employees', 'attendance', 'leave_requests', 'payroll', 'transactions', 'ig_comments', 'app_settings', 'survey_responses', 'inquiries', 'customers', 'schema_migrations']) await repo._pool.query(`DROP TABLE IF EXISTS ${tname}`);
+        // start from an empty database so every migration runs again, including ALTERs on later tables
+        const [tables] = await repo._pool.query('SHOW TABLES');
+        for (const row of tables) await repo._pool.query(`DROP TABLE IF EXISTS \`${Object.values(row)[0]}\``);
         await repo._pool.query('SET FOREIGN_KEY_CHECKS = 1');
       }
       await repo.init();

@@ -1,0 +1,55 @@
+<%- include('_top') %>
+<div class="head-row">
+  <h1>Invoice</h1>
+  <a class="btn btn--primary btn--sm" href="/admin/invoices/new">+ Invoice baru</a>
+</div>
+<div class="cards inv-cards">
+  <div class="card-stat"><b><%= rupiah(sums.outstanding) %></b><span>Belum dibayar</span></div>
+  <div class="card-stat"><b><%= sums.overdue %></b><span>Lewat jatuh tempo</span></div>
+  <div class="card-stat"><b><%= rupiah(sums.billed) %></b><span>Ditagihkan bulan ini</span></div>
+  <div class="card-stat"><b><%= sums.drafts %></b><span>Masih draf</span></div>
+</div>
+
+<nav class="tabs" aria-label="Status invoice">
+  <a href="/admin/invoices"<%- !filter ? ' aria-current="page"' : '' %>>Semua</a>
+  <% [['draft', 'Draf'], ['sent', 'Terkirim'], ['partial', 'Dibayar sebagian'], ['overdue', 'Lewat jatuh tempo'], ['paid', 'Lunas'], ['cancelled', 'Dibatalkan']].forEach(function (x) { %>
+  <a href="/admin/invoices?status=<%= x[0] %>"<%- filter === x[0] ? ' aria-current="page"' : '' %>><%= x[1] %></a>
+  <% }) %>
+</nav>
+<form class="filters" method="get" action="/admin/invoices">
+  <% if (filter) { %><input type="hidden" name="status" value="<%= filter %>"><% } %>
+  <input name="q" value="<%= q %>" placeholder="Cari nomor atau nama" aria-label="Cari invoice">
+  <button class="btn btn--ghost btn--sm" type="submit">Cari</button>
+</form>
+<div class="table">
+<table>
+  <thead><tr><th>Nomor</th><th>Tamu / perusahaan</th><th>Tanggal</th><th>Jatuh tempo</th><th>Status</th><th class="num">Total</th><th class="num">Sisa</th></tr></thead>
+  <tbody>
+  <% if (!list.length) { %><tr><td colspan="7" class="muted">Belum ada invoice. Buat dari tombol Invoice baru, atau dari halaman booking.</td></tr><% } %>
+  <% list.forEach(function (r) { %>
+    <tr>
+      <td><a href="/admin/invoices/<%= r.id %>"><b><%= r.number %></b></a></td>
+      <td><%= r.customer_name %><% if (r.customer_email) { %><br><small class="muted"><%= r.customer_email %></small><% } %></td>
+      <td><%= fmtDate(r.issue_date) %></td>
+      <td><%= r.due_date ? fmtDate(r.due_date) : '-' %></td>
+      <td><%- include('_invstate', { s: r.state }) %></td>
+      <td class="num"><%= rupiah(r.total) %></td>
+      <td class="num"><b><%= r.state === 'cancelled' ? '-' : rupiah(r.balance) %></b></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+
+<section class="panel">
+  <h2>Info pembayaran di setiap invoice</h2>
+  <p class="muted">Tulis rekening bank atau cara bayar lain. Teks ini tampil di bagian bawah semua invoice.</p>
+  <form method="post" action="/admin/invoices/settings" class="stack">
+    <div class="field"><label for="pay-info">Cara pembayaran</label>
+      <textarea id="pay-info" name="payment_info" rows="4" maxlength="1500" placeholder="Bank Mandiri 123 456 7890 a.n. Kalma Raja Ampat"><%= settings.payment_info %></textarea></div>
+    <div class="field"><label for="pay-foot">Catatan kaki</label>
+      <input id="pay-foot" name="footer" maxlength="500" value="<%= settings.footer %>" placeholder="NPWP, alamat kantor, atau ucapan terima kasih"></div>
+    <button class="btn btn--primary btn--sm" type="submit">Simpan</button>
+  </form>
+</section>
+<%- include('_bottom') %>

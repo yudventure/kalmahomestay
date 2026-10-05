@@ -276,7 +276,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState, t: translator('id') }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState, t: translator('id'), translator }));
 
   // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
   app.get('/ical/:file', ah(async (req, res, next) => {

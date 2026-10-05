@@ -46,6 +46,16 @@
     <button class="btn btn--primary" type="submit">Simpan</button>
   </form>
 </section>
+<% if (can('invoices')) { %>
+<section class="panel">
+  <h2>Invoice</h2>
+  <p class="muted">Buat invoice dari booking ini. Nama, kontak, kamar, tanggal, dan harga langsung terisi.</p>
+  <div class="btns">
+    <a class="btn btn--primary btn--sm" href="/admin/invoices/new?inquiry=<%= item.id %>">Buat invoice</a>
+    <% (invoices || []).forEach(function (iv) { %><a class="btn btn--ghost btn--sm" href="/admin/invoices/<%= iv.id %>"><%= iv.number %></a><% }) %>
+  </div>
+</section>
+<% } %>
 <% if (can('finance')) { var paidSum = payments.reduce(function (s, p) { return s + p.amount; }, 0); %>
 <section class="panel">
   <div class="panel__head"><h2>Pembayaran</h2><a class="link" href="/admin/finance">Keuangan →</a></div>

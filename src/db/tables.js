@@ -53,6 +53,11 @@ const TABLES = {
     columns: { title: 'str', platforms: 'str', format: 'str', pillar: 'str', status: 'str', publish_date: 'date', publish_time: 'str',
       assignee: 'str', hook: 'text', script: 'text', caption: 'text', hashtags: 'text', cta: 'str', link: 'str', notes: 'text', created_by: 'str' },
   },
+  invoices: {
+    columns: { number: 'str', inquiry_id: 'int', customer_name: 'str', customer_email: 'str', customer_phone: 'str', customer_address: 'text',
+      issue_date: 'date', due_date: 'date', items: 'text', subtotal: 'money', discount: 'money', tax_pct: 'int', tax: 'money', total: 'money',
+      status: 'str', lang: 'str', notes: 'text', created_by: 'str' },
+  },
   transactions: {
     columns: { date: 'date', kind: 'str', category: 'str', amount: 'money', method: 'str', description: 'text',
       ref_type: 'str', ref_id: 'int', created_by: 'str' },
