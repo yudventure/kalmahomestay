@@ -70,3 +70,14 @@ untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 
 - Nilai yang disimpan dalam bahasa Indonesia (kategori keuangan, bagian karyawan) tampil lewat `L(nilai)` dengan
   `value` asli di `<option>`, supaya data tetap konsisten.
 - Cek halaman admin berbahasa Inggris setelah menambah fitur: tidak boleh ada teks Indonesia tersisa.
+
+## Invoice
+- Menu Invoice (`/admin/invoices`, `src/admin-invoices.js`) untuk owner, manager, reservasi, dan finance (area `invoices`).
+- Invoice bisa dibuat kosong atau dari halaman booking (tombol Buat invoice, `?inquiry=<id>`), nama, kontak, kamar, tanggal,
+  dan harga langsung terisi. Nomor otomatis `INV-YYYYMM-NNN`. Baris tagihan disimpan sebagai JSON di kolom `items`.
+- Pembayaran dicatat di halaman invoice dan masuk ke `transactions` (ref_type `invoice`), jadi ikut tampil di Keuangan.
+  Pembayaran booking yang terhubung (Midtrans atau catatan manual) ikut dihitung. Status Lunas, Dibayar sebagian, dan
+  Lewat jatuh tempo dihitung dari pembayaran, tidak disimpan.
+- Dokumen invoice (`views/invoice-print.ejs`, `public/css/invoice.css`) ada di luar `views/admin` supaya tidak ikut
+  diterjemahkan admin. Bahasanya mengikuti pilihan di invoice (English atau Indonesia), A4, siap dicetak atau disimpan PDF.
+- Info pembayaran (rekening bank) dan catatan kaki diatur sekali di halaman daftar invoice dan tampil di semua invoice.

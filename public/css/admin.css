@@ -387,3 +387,23 @@ small.warn { color: var(--color-danger); }
 .login__lang { position: absolute; top: 24px; right: 24px; display: flex; border: 1px solid var(--a-line); border-radius: 999px; padding: 2px; }
 .login__lang button { border: 0; background: none; padding: 5px 10px; border-radius: 999px; font: 600 12px var(--font-body); color: var(--kalma-deep-sea); cursor: pointer; }
 .login__lang button[aria-pressed="true"] { background: var(--kalma-deep-sea); color: #fff; }
+
+/* ---------- invoices ---------- */
+.head-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.head-row h1 { margin: 0; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.inv-lines td input, .inv-lines td.num input { width: 100%; padding: 8px 10px; min-width: 0; border: 1px solid var(--a-line); border-radius: 10px; padding: 8px 10px; font: inherit; background: #fff; }
+.inv-lines td.num input { text-align: right; }
+.inv-lines td:first-child { min-width: 260px; width: 52%; }
+.inv-lines td:nth-child(2) { width: 90px; }
+.inv-lines td:nth-child(3) { width: 160px; }
+.inv-lines .inv-amt { white-space: nowrap; font-weight: 700; color: var(--kalma-deep-sea); }
+.inv-sum { margin: 16px 0 0 auto; max-width: 340px; display: grid; gap: 8px; }
+.inv-sum > div { display: grid; grid-template-columns: 1fr 150px; align-items: center; gap: 12px; }
+.inv-sum input { text-align: right; border: 1px solid var(--a-line); border-radius: 10px; padding: 8px 10px; font: inherit; }
+.inv-sum b { text-align: right; }
+.inv-sum__total { border-top: 1px solid var(--a-line); padding-top: 10px; font-size: var(--text-lg); }
+.inv-sum__total b { font-family: var(--font-display); color: var(--kalma-deep-sea); }
+.inv-pays { list-style: none; margin: 0; padding: 0; }
+.inv-pays li { padding: 8px 0; border-top: 1px solid var(--a-line-soft); font-size: var(--text-sm); }
+.inv-pays b { color: var(--kalma-deep-sea); }
+.inv-cards .card-stat b { font-size: var(--text-xl); white-space: nowrap; }

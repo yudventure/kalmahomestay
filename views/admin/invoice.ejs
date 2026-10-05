@@ -1,0 +1,153 @@
+<%- include('_top') %>
+<p class="crumb"><a href="/admin/invoices">← Semua invoice</a></p>
+<div class="head-row">
+  <h1><%= isNew ? 'Invoice baru' : inv.number %> <% if (!isNew) { %><%- include('_invstate', { s: money.state }) %><% } %></h1>
+  <% if (!isNew) { %><div class="btns">
+    <a class="btn btn--primary btn--sm" href="/admin/invoices/<%= inv.id %>/print" target="_blank" rel="noopener">Lihat & cetak PDF</a>
+    <a class="btn btn--ghost btn--sm" href="/admin/invoices/<%= inv.id %>/print?lang=<%= inv.lang === 'id' ? 'en' : 'id' %>" target="_blank" rel="noopener"><%= inv.lang === 'id' ? 'Versi Inggris' : 'Versi Indonesia' %></a>
+  </div><% } %>
+</div>
+<% if (error) { %><p class="alert alert--err" role="alert"><%= error %></p><% } %>
+<% if (flashErr === 'payment') { %><p class="alert alert--err" role="alert">Isi jumlah pembayaran.</p><% } %>
+<% if (flashErr === 'delete') { %><p class="alert alert--err" role="alert">Hanya invoice draf tanpa pembayaran yang bisa dihapus. Batalkan saja invoice ini.</p><% } %>
+<% if (!isNew) { %>
+<div class="cards inv-cards">
+  <div class="card-stat"><b><%= rupiah(inv.total) %></b><span>Total tagihan</span></div>
+  <div class="card-stat"><b><%= rupiah(money.paid) %></b><span>Sudah dibayar</span></div>
+  <div class="card-stat <%= money.balance ? '' : 'card-stat--new' %>"><b><%= rupiah(money.balance) %></b><span>Sisa tagihan</span></div>
+  <div class="card-stat"><b><%= inv.due_date ? fmtDate(inv.due_date) : '-' %></b><span>Jatuh tempo</span></div>
+</div>
+<% } %>
+
+<form method="post" action="<%= isNew ? '/admin/invoices' : '/admin/invoices/' + inv.id %>" class="stack" id="inv-form">
+  <input type="hidden" name="inquiry_id" value="<%= inv.inquiry_id || '' %>">
+  <div class="grid2">
+    <section class="panel">
+      <h2>Ditagihkan kepada</h2>
+      <div class="field"><label for="i-name">Nama tamu atau perusahaan</label><input id="i-name" name="customer_name" required maxlength="120" value="<%= inv.customer_name || '' %>"></div>
+      <div class="row2">
+        <div class="field"><label for="i-email">Email</label><input id="i-email" name="customer_email" type="email" maxlength="160" value="<%= inv.customer_email || '' %>"></div>
+        <div class="field"><label for="i-phone">WhatsApp/HP</label><input id="i-phone" name="customer_phone" maxlength="40" value="<%= inv.customer_phone || '' %>"></div>
+      </div>
+      <div class="field"><label for="i-addr">Alamat atau negara</label><textarea id="i-addr" name="customer_address" rows="2" maxlength="600"><%= inv.customer_address || '' %></textarea></div>
+      <% if (inv.inquiry_id) { %><p class="muted">Pembayaran dari booking yang terhubung ikut dihitung. <a href="/admin/inquiries/<%= inv.inquiry_id %>">Buka booking</a></p><% } %>
+    </section>
+    <section class="panel">
+      <h2>Detail invoice</h2>
+      <div class="row2">
+        <div class="field"><label for="i-issue">Tanggal invoice</label><input id="i-issue" name="issue_date" type="date" required value="<%= inv.issue_date %>"></div>
+        <div class="field"><label for="i-due">Jatuh tempo</label><input id="i-due" name="due_date" type="date" value="<%= inv.due_date || '' %>"></div>
+      </div>
+      <div class="field"><label for="i-lang">Bahasa invoice</label>
+        <select id="i-lang" name="lang"><option value="en"<%= inv.lang !== 'id' ? ' selected' : '' %>>English</option><option value="id"<%= inv.lang === 'id' ? ' selected' : '' %>>Indonesia</option></select></div>
+      <div class="field"><label for="i-notes">Catatan untuk tamu</label><textarea id="i-notes" name="notes" rows="3" maxlength="2000" placeholder="Mis. uang muka 30% dibayar sebelum tanggal check-in"><%= inv.notes || '' %></textarea></div>
+    </section>
+  </div>
+
+  <section class="panel">
+    <h2>Rincian tagihan</h2>
+    <div class="table inv-lines">
+    <table>
+      <thead><tr><th>Keterangan</th><th class="num">Banyaknya</th><th class="num">Harga satuan (Rp)</th><th class="num">Subtotal</th><th></th></tr></thead>
+      <tbody id="inv-rows">
+      <% (items.length ? items : [{ desc: '', qty: 1, price: 0 }]).forEach(function (it) { %>
+        <tr class="inv-row">
+          <td><input name="item_desc" maxlength="300" value="<%= it.desc %>" aria-label="Keterangan" placeholder="Mis. Lagoon Bungalow, 3 malam × 2 tamu"></td>
+          <td class="num"><input name="item_qty" inputmode="decimal" value="<%= it.qty %>" aria-label="Banyaknya" class="inv-qty"></td>
+          <td class="num"><input name="item_price" inputmode="numeric" value="<%= it.price %>" aria-label="Harga satuan" class="inv-price"></td>
+          <td class="num inv-amt">-</td>
+          <td><button type="button" class="btn btn--ghost btn--sm inv-del" aria-label="Hapus baris">×</button></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+    <button type="button" class="btn btn--ghost btn--sm" id="inv-add">+ Tambah baris</button>
+    <div class="inv-sum">
+      <div><span>Subtotal</span><b id="s-sub">-</b></div>
+      <div><label for="i-disc">Diskon (Rp)</label><input id="i-disc" name="discount" inputmode="numeric" value="<%= inv.discount || 0 %>"></div>
+      <div><label for="i-tax">Pajak (%)</label><input id="i-tax" name="tax_pct" inputmode="numeric" value="<%= inv.tax_pct || 0 %>"></div>
+      <div class="inv-sum__total"><span>Total</span><b id="s-total">-</b></div>
+    </div>
+  </section>
+  <div class="btns" style="margin-bottom: 22px">
+    <button class="btn btn--primary" type="submit">Simpan</button>
+    <% if (isNew) { %><button class="btn btn--ghost" type="submit" name="send" value="1">Simpan dan tandai terkirim</button><% } %>
+  </div>
+</form>
+
+<% if (!isNew) { %>
+<div class="grid2">
+  <section class="panel" id="bayar">
+    <h2>Catat pembayaran</h2>
+    <% if (inv.status === 'cancelled') { %><p class="muted">Invoice ini dibatalkan.</p><% } else { %>
+    <form method="post" action="/admin/invoices/<%= inv.id %>/payment" class="stack">
+      <div class="row2">
+        <div class="field"><label for="p-date">Tanggal</label><input id="p-date" name="date" type="date" value="<%= today %>"></div>
+        <div class="field"><label for="p-amt">Jumlah (Rp)</label><input id="p-amt" name="amount" inputmode="numeric" required value="<%= money.balance || '' %>"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="p-method">Metode</label><select id="p-method" name="method"><% METHODS.forEach(function (x) { %><option<%= x === 'transfer' ? ' selected' : '' %>><%= x %></option><% }) %></select></div>
+        <div class="field"><label for="p-cat">Kategori di Keuangan</label><select id="p-cat" name="category"><% CATEGORIES.income.forEach(function (c) { %><option value="<%= c %>"<%= c === (inv.inquiry_id ? 'Booking website' : 'Lainnya') ? ' selected' : '' %>><%= L(c) %></option><% }) %></select></div>
+      </div>
+      <button class="btn btn--primary btn--sm" type="submit">Simpan pembayaran</button>
+      <p class="muted">Pembayaran otomatis tercatat sebagai pemasukan di Keuangan.</p>
+    </form>
+    <% } %>
+    <h3>Riwayat pembayaran</h3>
+    <% if (!payments.length && !online) { %><p class="muted">Belum ada pembayaran.</p><% } %>
+    <ul class="inv-pays">
+      <% if (online) { %><li><b><%= rupiah(online) %></b> · <span>Dibayar online lewat Midtrans</span></li><% } %>
+      <% payments.forEach(function (p) { %><li><b><%= rupiah(p.amount) %></b> · <%= fmtDate(p.date) %> · <%= p.method || '-' %><% if (p.ref_type === 'inquiry') { %> · <a href="/admin/inquiries/<%= p.ref_id %>">Booking</a><% } %></li><% }) %>
+    </ul>
+  </section>
+  <section class="panel">
+    <h2>Status</h2>
+    <div class="btns">
+      <% if (inv.status === 'draft') { %><form method="post" action="/admin/invoices/<%= inv.id %>/status"><input type="hidden" name="status" value="sent"><button class="btn btn--primary btn--sm" type="submit">Tandai terkirim</button></form><% } %>
+      <% if (inv.status === 'cancelled') { %><form method="post" action="/admin/invoices/<%= inv.id %>/status"><input type="hidden" name="status" value="draft"><button class="btn btn--ghost btn--sm" type="submit">Aktifkan lagi</button></form><% } else { %>
+      <form method="post" action="/admin/invoices/<%= inv.id %>/status" onsubmit="return confirm('Batalkan invoice ini?')"><input type="hidden" name="status" value="cancelled"><button class="btn btn--ghost btn--sm" type="submit">Batalkan invoice</button></form><% } %>
+      <% if (inv.status === 'draft' && !payments.length) { %><form method="post" action="/admin/invoices/<%= inv.id %>/delete" onsubmit="return confirm('Hapus invoice draf ini?')"><button class="btn btn--danger btn--sm" type="submit">Hapus</button></form><% } %>
+    </div>
+    <p class="muted">Kirim invoice ke tamu dengan membuka Lihat & cetak PDF, lalu simpan sebagai PDF dan lampirkan di email.</p>
+    <p class="muted"><span>Dibuat oleh</span> <%= inv.created_by || '-' %> · <%= fmtDateTime(inv.created_at) %></p>
+  </section>
+</div>
+<% } %>
+<template id="inv-row-tpl"><tr class="inv-row">
+  <td><input name="item_desc" maxlength="300" aria-label="Keterangan"></td>
+  <td class="num"><input name="item_qty" inputmode="decimal" value="1" aria-label="Banyaknya" class="inv-qty"></td>
+  <td class="num"><input name="item_price" inputmode="numeric" value="0" aria-label="Harga satuan" class="inv-price"></td>
+  <td class="num inv-amt">-</td>
+  <td><button type="button" class="btn btn--ghost btn--sm inv-del" aria-label="Hapus baris">×</button></td>
+</tr></template>
+<script>
+(function () {
+  var rows = document.getElementById('inv-rows'), form = document.getElementById('inv-form');
+  var num = function (v) { return Number(String(v || '').replace(/[^\d.,]/g, '').replace(',', '.')) || 0; };
+  var rp = function (n) { return 'Rp ' + Math.round(n).toLocaleString('id-ID'); };
+  function calc() {
+    var sub = 0;
+    rows.querySelectorAll('.inv-row').forEach(function (tr) {
+      var a = num(tr.querySelector('.inv-qty').value) * Math.round(num(String(tr.querySelector('.inv-price').value).replace(/\D/g, '')));
+      tr.querySelector('.inv-amt').textContent = rp(a); sub += a;
+    });
+    var disc = Math.min(sub, num(String(document.getElementById('i-disc').value).replace(/\D/g, '')));
+    var tax = Math.round((sub - disc) * num(document.getElementById('i-tax').value) / 100);
+    document.getElementById('s-sub').textContent = rp(sub);
+    document.getElementById('s-total').textContent = rp(sub - disc + tax);
+  }
+  document.getElementById('inv-add').addEventListener('click', function () {
+    rows.appendChild(document.getElementById('inv-row-tpl').content.cloneNode(true)); calc();
+    rows.lastElementChild.querySelector('input').focus();
+  });
+  rows.addEventListener('click', function (e) {
+    var b = e.target.closest('.inv-del'); if (!b) return;
+    if (rows.querySelectorAll('.inv-row').length > 1) b.closest('tr').remove(); else b.closest('tr').querySelectorAll('input').forEach(function (i) { i.value = i.classList.contains('inv-qty') ? 1 : i.classList.contains('inv-price') ? 0 : ''; });
+    calc();
+  });
+  form.addEventListener('input', calc);
+  calc();
+})();
+</script>
+<%- include('_bottom') %>

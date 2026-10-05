@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="<%= lang %>"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
+<title><%= W.invoice %> <%= inv.number %> · Kalma Raja Ampat</title>
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png">
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>"><link rel="stylesheet" href="/css/style.css?v=<%= v %>"><link rel="stylesheet" href="/css/invoice.css?v=<%= v %>">
+</head><body class="inv">
+<div class="inv__bar">
+  <button type="button" class="inv__btn" onclick="window.print()"><%= W.print %></button>
+  <a class="inv__btn inv__btn--ghost" href="?lang=<%= lang === 'en' ? 'id' : 'en' %>"><%= W.other %></a>
+</div>
+<main class="inv__page">
+  <header class="inv__head">
+    <div class="inv__brand">
+      <img src="/brand/assets/kalma-logo-white.png" alt="Kalma Raja Ampat" width="120" height="70">
+    </div>
+    <div class="inv__title">
+      <h1><%= W.invoice %></h1>
+      <p><%= inv.number %></p>
+      <span class="inv__state inv__state--<%= s.state %>"><%= W.state[s.state] %></span>
+    </div>
+  </header>
+
+  <section class="inv__parties">
+    <div>
+      <h2><%= W.from %></h2>
+      <b>Kalma Raja Ampat</b>
+      <p>Raja Ampat, Papua Barat Daya, Indonesia</p>
+      <p><%= contact.email %></p>
+      <p><%= contact.whatsappDisplay %></p>
+      <p><%= String(siteUrl || '').replace(/^https?:\/\//, '') %></p>
+    </div>
+    <div>
+      <h2><%= W.billTo %></h2>
+      <b><%= inv.customer_name %></b>
+      <% if (inv.customer_address) { %><p class="pre"><%= inv.customer_address %></p><% } %>
+      <% if (inv.customer_email) { %><p><%= inv.customer_email %></p><% } %>
+      <% if (inv.customer_phone) { %><p><%= inv.customer_phone %></p><% } %>
+    </div>
+    <dl class="inv__dates">
+      <div><dt><%= W.number %></dt><dd><%= inv.number %></dd></div>
+      <div><dt><%= W.issued %></dt><dd><%= date(inv.issue_date) %></dd></div>
+      <div><dt><%= W.due %></dt><dd><%= date(inv.due_date) %></dd></div>
+    </dl>
+  </section>
+
+  <table class="inv__table">
+    <thead><tr><th><%= W.desc %></th><th class="num"><%= W.qty %></th><th class="num"><%= W.price %></th><th class="num"><%= W.amount %></th></tr></thead>
+    <tbody>
+    <% m.lines.forEach(function (l) { %>
+      <tr><td><%= l.desc || '-' %></td><td class="num"><%= l.qty %></td><td class="num"><%= money(l.price) %></td><td class="num"><%= money(l.amount) %></td></tr>
+    <% }) %>
+    </tbody>
+  </table>
+
+  <div class="inv__bottom">
+    <div class="inv__notes">
+      <% if (settings.payment_info) { %><h2><%= W.payTitle %></h2><p class="pre"><%= settings.payment_info %></p><% } %>
+      <% if (inv.notes) { %><h2><%= W.notes %></h2><p class="pre"><%= inv.notes %></p><% } %>
+    </div>
+    <dl class="inv__sum">
+      <div><dt><%= W.subtotal %></dt><dd><%= money(m.subtotal) %></dd></div>
+      <% if (m.discount) { %><div><dt><%= W.discount %></dt><dd>− <%= money(m.discount) %></dd></div><% } %>
+      <% if (inv.tax_pct) { %><div><dt><%= W.tax %> <%= inv.tax_pct %>%</dt><dd><%= money(m.tax) %></dd></div><% } %>
+      <div class="inv__total"><dt><%= W.total %></dt><dd><%= money(m.total) %></dd></div>
+      <% if (s.paid) { %><div><dt><%= W.paid %></dt><dd>− <%= money(s.paid) %></dd></div><% } %>
+      <div class="inv__due"><dt><%= W.balance %></dt><dd><%= money(s.balance) %></dd></div>
+    </dl>
+  </div>
+
+  <footer class="inv__foot">
+    <p class="inv__thanks"><%= W.thanks %></p>
+    <% if (settings.footer) { %><p><%= settings.footer %></p><% } %>
+  </footer>
+</main>
+</body></html>

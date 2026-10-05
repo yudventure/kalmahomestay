@@ -145,4 +145,4 @@ function mountFinance(router, { repo, calendar, ah, idParam, toCSV }) {
   }));
 }
 
-module.exports = { mountFinance, recordWebsitePayment, soldNights, CATEGORIES };
+module.exports = { mountFinance, recordWebsitePayment, soldNights, CATEGORIES, METHODS };
