@@ -165,20 +165,24 @@ function createApp(options = {}) {
   /** The branded page for 401, 403, 404, 500, 503 (whole site in maintenance) and 'page' (one page in maintenance). */
   function renderError(res, code, lang, extra = {}) {
     const status = code === 'page' ? 503 : Number(code);
-    if (status === 503) res.set('Retry-After', '3600');
+    if (status === 503) res.set({ 'Retry-After': '3600', 'Cache-Control': 'no-store' });
     res.status(status).render('error', {
       code, lang, E: ERR_TEXT[lang], home: homePath(lang), contact: config.contact, until: '', message: '', ...extra,
     });
   }
   app.locals.renderError = renderError;
   app.use(ah(async (req, res, next) => {
-    if (!devmode.loaded) await devmode.load().catch(() => {});
     if (devmode.ALWAYS_OPEN.test(req.path)) return next();
-    const st = devmode.state;
+    const st = await devmode.fresh();
     const busy = st.site.on || Object.keys(st.sections).length || Object.keys(st.pages).length;
-    if (devmode.isStaff(req)) {
+    // pages must follow the switch right away, so they are never kept in a cache while it is in use
+    if (busy) res.set('Cache-Control', 'no-store');
+    if (devmode.isStaff(req) && req.query.as !== 'guest') {
       res.locals.devStaff = true;
-      if (busy) res.locals.devBar = st.site.on ? 'Staff preview. Guests see the maintenance page.' : 'Staff preview. Some sections or pages are hidden or under maintenance for guests.';
+      if (busy) {
+        res.locals.devBar = st.site.on ? 'Staff preview. Guests see the maintenance page.' : 'Staff preview. Some sections or pages are hidden or under maintenance for guests.';
+        res.locals.devGuestUrl = req.path + '?as=guest';
+      }
       return next();
     }
     const lang = langOfPath(req.path);

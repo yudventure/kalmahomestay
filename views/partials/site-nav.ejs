@@ -1,6 +1,6 @@
 <%# Site header. Needs: lang, t, home, anchor(h), feedbackPath, (optional) alt = { id, en }, current %>
 <% var altLinks = locals.alt || { id: '/id', en: '/' }; var cur = locals.current || ''; %>
-<% if (locals.devBar) { %><div class="dev-bar" role="status"><span><%= devBar %></span><a href="/admin/website/devmode">Developer mode</a></div><% } %>
+<% if (locals.devBar) { %><div class="dev-bar" role="status"><span><%= devBar %></span><a href="<%= devGuestUrl %>">See it as a guest</a><a href="/admin/website/devmode">Developer mode</a></div><% } %>
 <header class="nav" id="top">
   <div class="wrap nav__in">
     <a href="<%= home %>" class="nav__logo" aria-label="Kalma Raja Ampat"><img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="110" height="53"></a>
