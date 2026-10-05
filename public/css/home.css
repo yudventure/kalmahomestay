@@ -402,3 +402,13 @@ a.bubble__tag:hover { text-decoration: underline; }
 .nav__hear:hover { background: #1A3A53; transform: translateY(-1px); }
 .nav__hear svg { width: 20px; height: 20px; fill: none; stroke: var(--kalma-sand); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 @media (max-width: 1000px) { .nav__hear { padding: 0 12px; } .nav__hear span { display: none; } }
+
+/* homepage: a section under maintenance, and the staff preview ribbon */
+.sec-maint { padding: var(--space-6) 0; }
+.sec-maint__in { display: flex; align-items: center; gap: 16px; padding: 18px 22px; border-radius: 22px; background: #F4F9FB; border: 1px dashed #BFD4DF; color: var(--kalma-deep-sea); }
+.sec-maint__in svg { width: 46px; height: 46px; flex: none; }
+.sec-maint__in p { margin: 0; font-size: var(--text-sm); }
+[data-dev] { position: relative; outline: 3px dashed var(--kalma-coral); outline-offset: -3px; }
+[data-dev]::before { content: attr(data-dev); position: absolute; z-index: 30; top: 10px; left: 10px; padding: 4px 10px; border-radius: 999px; background: var(--kalma-coral); color: #fff; font: 700 11px var(--font-body); letter-spacing: .04em; }
+.dev-bar { position: relative; z-index: 60; display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; padding: 8px 16px; background: var(--kalma-coral); color: #fff; font: 700 13px var(--font-body); }
+.dev-bar a { color: #fff; }

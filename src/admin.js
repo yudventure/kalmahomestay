@@ -16,6 +16,7 @@ const { mountFeedback } = require('./admin-feedback');
 const { mountActivities } = require('./admin-activities');
 const { mountContent, contentAlerts } = require('./admin-content');
 const { mountInvoices, invoiceAlerts } = require('./admin-invoices');
+const { mountDevMode } = require('./admin-devmode');
 const { UPLOAD_ERRORS } = require('./media');
 const { addDays } = require('./ical');
 const { LANG_COOKIE, exact, phrases, buildEnglishViews, translateValue } = require('./admin-i18n');
@@ -59,7 +60,7 @@ function toCSV(rows, columns) {
   return '﻿' + lines.join('\r\n') + '\r\n';
 }
 
-function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState = {}, t, translator = () => t }) {
+function createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState = {}, t, translator = () => t, devmode = null }) {
   const router = express.Router();
   let siteHost = '';
   try { siteHost = new URL(config.siteUrl).host; } catch { /* no SITE_URL */ }
@@ -174,6 +175,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
 
   router.post('/logout', (req, res) => {
     res.clearCookie(COOKIE, { path: '/admin' });
+    if (devmode) devmode.revoke(res);
     res.redirect(303, '/admin/login');
   });
 
@@ -198,6 +200,8 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
       return res.status(401).send('Login required');
     }
     req.staff = staff;
+    // signed-in staff may look at the public site while it is in maintenance
+    if (devmode && req.method === 'GET' && !devmode.isStaff(req)) devmode.grant(res, req.secure);
     next();
   }));
 
@@ -251,6 +255,11 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
         if (c.late) alerts.push({ label: `${c.late} konten lewat jadwal`, sub: 'Belum ditandai sudah tayang', href: '/admin/content/board' });
         if (c.dueToday) status.push(`${c.dueToday} konten dijadwalkan tayang hari ini.`);
       }
+      if (devmode && can(role, 'website')) {
+        const d = devmode.state;
+        if (d.site.on) alerts.push({ label: 'Website sedang mode maintenance', sub: 'Tamu melihat halaman maintenance', href: '/admin/website/devmode' });
+        else if (Object.keys(d.sections).length || Object.keys(d.pages).length) alerts.push({ label: 'Sebagian website disembunyikan', sub: 'Atur di Mode developer', href: '/admin/website/devmode' });
+      }
       if (can(role, 'invoices')) {
         const inv = await invoiceAlerts(repo, today);
         if (inv.overdue) alerts.push({ label: `${inv.overdue} invoice lewat jatuh tempo`, sub: 'Masih ada sisa tagihan', href: '/admin/invoices?status=overdue' });
@@ -297,6 +306,7 @@ function createAdminRouter({ repo, config, instagram, site, calendar, media, act
   if (activities) mountActivities(router, { activities, media, ah, idParam });
   mountContent(router, { repo, media, ah, idParam });
   mountInvoices(router, { repo, config, ah, idParam, translator });
+  if (devmode) mountDevMode(router, { devmode, ah });
 
   const stamp = () => todayISO();
 

@@ -1,0 +1,64 @@
+<%- include('_top') %>
+<h1>Mode developer</h1>
+<p class="lead-a">Tutup seluruh website atau sebagian saja saat sedang diperbaiki. Staf yang login tetap melihat website asli dengan tanda berwarna, tamu melihat halaman maintenance.</p>
+
+<form method="post" action="/admin/website/devmode" class="stack">
+  <section class="panel dev-site<%= d.site.on ? ' dev-site--on' : '' %>">
+    <h2>Seluruh website</h2>
+    <div class="dev-choice">
+      <label class="dev-opt"><input type="radio" name="site_on" value="0"<%= d.site.on ? '' : ' checked' %>><span><b>Online</b><small>Tamu bisa membuka website seperti biasa.</small></span></label>
+      <label class="dev-opt dev-opt--warn"><input type="radio" name="site_on" value="1"<%= d.site.on ? ' checked' : '' %>><span><b>Maintenance</b><small>Semua halaman untuk tamu diganti halaman maintenance. Admin dan pembayaran Midtrans tetap jalan.</small></span></label>
+    </div>
+    <div class="row3">
+      <div class="field"><label for="d-until">Perkiraan selesai (WIT)</label><input id="d-until" name="site_until" type="datetime-local" value="<%= d.site.until %>"></div>
+      <div class="field"><label for="d-en">Pesan untuk tamu (Inggris)</label><input id="d-en" name="msg_en" maxlength="400" value="<%= d.site.msg_en %>" placeholder="Kosongkan untuk memakai pesan bawaan"></div>
+      <div class="field"><label for="d-id">Pesan untuk tamu (Indonesia)</label><input id="d-id" name="msg_id" maxlength="400" value="<%= d.site.msg_id %>" placeholder="Kosongkan untuk memakai pesan bawaan"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Bagian di beranda</h2>
+    <p class="muted">Sembunyikan berarti bagian itu tidak tampil sama sekali. Maintenance berarti tamu melihat catatan singkat bahwa bagian itu sedang diperbarui.</p>
+    <div class="table">
+    <table>
+      <thead><tr><th>Bagian di beranda</th><th>Tampil</th><th>Sembunyikan</th><th>Maintenance</th></tr></thead>
+      <tbody>
+      <% SECTIONS.forEach(function (s) { var cur = d.sections[s.id] || 'show'; %>
+        <tr><td><b><%= L(s.label) %></b></td>
+          <% ['show', 'hide', 'maint'].forEach(function (v) { %><td><input type="radio" name="sec_<%= s.id %>" value="<%= v %>"<%= cur === v ? ' checked' : '' %> aria-label="<%= L(s.label) %>"></td><% }) %>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2>Halaman website</h2>
+    <div class="table">
+    <table>
+      <thead><tr><th>Halaman website</th><th>Tampil</th><th>Maintenance</th></tr></thead>
+      <tbody>
+      <% PAGES.forEach(function (p) { var cur = d.pages[p.id] || 'show'; %>
+        <tr><td><b><%= L(p.label) %></b></td>
+          <td><input type="radio" name="page_<%= p.id %>" value="show"<%= cur === 'show' ? ' checked' : '' %> aria-label="<%= L(p.label) %>"></td>
+          <td><input type="radio" name="page_<%= p.id %>" value="maint"<%= cur === 'maint' ? ' checked' : '' %> aria-label="<%= L(p.label) %>"></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <div class="btns" style="margin-bottom: 22px"><button class="btn btn--primary" type="submit">Simpan</button><a class="btn btn--ghost" href="/" target="_blank" rel="noopener">Lihat website</a></div>
+</form>
+
+<section class="panel">
+  <h2>Pratinjau halaman error</h2>
+  <p class="muted">Begini tampilan halaman yang dilihat tamu.</p>
+  <div class="dev-previews">
+    <% [['503', 'Maintenance'], ['page', 'Halaman diperbarui'], ['404', '404 tidak ditemukan'], ['500', '500 gangguan server'], ['403', '403 akses ditolak'], ['401', '401 harus masuk']].forEach(function (x) { %>
+    <div class="dev-prev"><b><%= x[1] %></b><span><a href="/admin/website/devmode/preview/<%= x[0] %>" target="_blank" rel="noopener">English</a> · <a href="/admin/website/devmode/preview/<%= x[0] %>?lang=id" target="_blank" rel="noopener">Indonesia</a></span></div>
+    <% }) %>
+  </div>
+</section>
+<%- include('_bottom') %>

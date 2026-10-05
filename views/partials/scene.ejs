@@ -1,0 +1,96 @@
+<%# Branded illustration for error and maintenance pages. Needs: code (401, 403, 404, 500, 503, page). Colours from brand/tokens.css. %>
+<% var c = String(code); %>
+<svg class="scene scene--<%= c %>" viewBox="0 0 560 360" role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sc-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EAF3F7"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient>
+    <linearGradient id="sc-sea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4B8AA5"/><stop offset="1" stop-color="#224866"/></linearGradient>
+    <clipPath id="sc-frame"><rect x="0" y="0" width="560" height="360" rx="36"/></clipPath>
+  </defs>
+  <g clip-path="url(#sc-frame)">
+    <rect width="560" height="360" fill="url(#sc-sky)"/>
+    <!-- sun -->
+    <g class="sc-sun"><circle cx="438" cy="86" r="38" fill="#EDE0B5"/><circle cx="438" cy="86" r="54" fill="#EDE0B5" opacity=".35"/></g>
+    <!-- clouds -->
+    <g class="sc-cloud" fill="#fff" opacity=".95"><ellipse cx="120" cy="70" rx="38" ry="12"/><ellipse cx="146" cy="62" rx="24" ry="13"/><ellipse cx="300" cy="46" rx="28" ry="9"/></g>
+    <!-- karst islands -->
+    <path d="M40 190c10-38 24-58 40-60 14 2 22 26 28 60z" fill="#3F6B4E" opacity=".85"/>
+    <path d="M96 190c6-22 16-36 26-36 9 0 16 14 20 36z" fill="#3F6B4E" opacity=".65"/>
+    <path d="M430 192c8-30 22-50 36-50 15 0 26 22 32 50z" fill="#3F6B4E" opacity=".8"/>
+    <!-- sea -->
+    <rect y="186" width="560" height="174" fill="url(#sc-sea)"/>
+    <g class="sc-wave sc-wave--a"><path d="M-40 196q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0q35.0 -12 70 0q35.0 12 70 0v40H-40z" fill="#5E9AB4" opacity=".55"/></g>
+    <g class="sc-wave sc-wave--b"><path d="M-40 226q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0q30.0 -9 60 0q30.0 9 60 0v24H-40z" fill="#fff" opacity=".18"/></g>
+
+    <% if (c === '404') { %>
+      <!-- a small boat with a question flag, drifting -->
+      <g class="sc-bob" style="transform-origin: 280px 238px">
+        <path d="M216 236h128l-16 26h-96z" fill="#E07A5F"/>
+        <path d="M222 236h116" stroke="#224866" stroke-width="4" stroke-linecap="round"/>
+        <path d="M280 236V158" stroke="#224866" stroke-width="4" stroke-linecap="round"/>
+        <path d="M282 160l46 14-46 14z" fill="#EDE0B5" stroke="#224866" stroke-width="3" stroke-linejoin="round"/>
+        <text x="296" y="181" font-family="Fraunces, Georgia, serif" font-size="20" font-weight="700" fill="#224866">?</text>
+      </g>
+      <!-- message bottle -->
+      <g class="sc-bob sc-bob--slow" style="transform-origin: 120px 262px"><rect x="104" y="254" width="34" height="14" rx="7" fill="#BFE0E8" stroke="#224866" stroke-width="2.5"/><rect x="136" y="257" width="9" height="8" rx="2" fill="#C69C6D"/><path d="M110 261h18" stroke="#EDE0B5" stroke-width="3" stroke-linecap="round"/></g>
+    <% } else if (c === '401') { %>
+      <!-- a treasure chest locked on the sand -->
+      <g class="sc-bob sc-bob--slow" style="transform-origin: 280px 280px">
+        <rect x="226" y="236" width="108" height="64" rx="8" fill="#C69C6D" stroke="#224866" stroke-width="4"/>
+        <path d="M226 252c0-26 24-40 54-40s54 14 54 40" fill="#D9B07E" stroke="#224866" stroke-width="4"/>
+        <path d="M226 252h108" stroke="#224866" stroke-width="4"/>
+        <rect x="266" y="252" width="28" height="26" rx="5" fill="#EDE0B5" stroke="#224866" stroke-width="3.5"/>
+        <path d="M272 252v-8a8 8 0 0 1 16 0v8" fill="none" stroke="#224866" stroke-width="3.5"/>
+        <circle cx="280" cy="264" r="3.5" fill="#224866"/>
+      </g>
+    <% } else if (c === '403') { %>
+      <!-- a dock closed with a rope and a sign -->
+      <g>
+        <path d="M150 300l60-70h140l60 70z" fill="#C69C6D" stroke="#224866" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M180 300l42-50M230 300l26-50M280 300v-50M330 300l-26-50M380 300l-42-50" stroke="#A47B4E" stroke-width="3"/>
+        <path d="M216 226v-40M344 226v-40" stroke="#224866" stroke-width="6" stroke-linecap="round"/>
+        <path class="sc-sway" d="M216 196c40 22 88 22 128 0" fill="none" stroke="#E07A5F" stroke-width="5" stroke-linecap="round" style="transform-origin: 280px 196px"/>
+        <g class="sc-sway" style="transform-origin: 280px 200px"><rect x="252" y="204" width="56" height="34" rx="6" fill="#EDE0B5" stroke="#224866" stroke-width="3"/><path d="M270 214l20 14M290 214l-20 14" stroke="#E07A5F" stroke-width="4" stroke-linecap="round"/></g>
+      </g>
+    <% } else if (c === '500') { %>
+      <!-- a tilted boat, a splash and a life ring -->
+      <g class="sc-rock" style="transform-origin: 280px 250px">
+        <path d="M206 240l132-14-10 30-104 12z" fill="#E07A5F"/>
+        <path d="M212 238l122-13" stroke="#224866" stroke-width="4" stroke-linecap="round"/>
+        <path d="M270 232l-8-70" stroke="#224866" stroke-width="4" stroke-linecap="round"/>
+        <path d="M264 164l40 10-36 18z" fill="#EDE0B5" stroke="#224866" stroke-width="3" stroke-linejoin="round"/>
+      </g>
+      <g class="sc-splash" fill="#fff"><circle cx="352" cy="226" r="6"/><circle cx="366" cy="212" r="4"/><circle cx="342" cy="206" r="3.5"/><circle cx="196" cy="226" r="4.5"/></g>
+      <g class="sc-bob" style="transform-origin: 440px 270px"><circle cx="440" cy="270" r="20" fill="none" stroke="#fff" stroke-width="10"/><circle cx="440" cy="270" r="20" fill="none" stroke="#E07A5F" stroke-width="10" stroke-dasharray="15.7 15.7"/></g>
+    <% } else { %>
+      <!-- maintenance: a buoy with a sign and a hermit crab at work -->
+      <g class="sc-bob" style="transform-origin: 196px 250px">
+        <path d="M172 262h48l-6-46h-36z" fill="#fff" stroke="#224866" stroke-width="4" stroke-linejoin="round"/>
+        <path d="M176 248h40M178 232h36" stroke="#E07A5F" stroke-width="8"/>
+        <path d="M196 216v-34" stroke="#224866" stroke-width="4"/>
+        <circle class="sc-blink" cx="196" cy="178" r="7" fill="#E07A5F"/>
+      </g>
+      <g>
+        <path d="M300 300v-64M380 300v-64" stroke="#A47B4E" stroke-width="6" stroke-linecap="round"/>
+        <rect x="286" y="214" width="108" height="46" rx="8" fill="#EDE0B5" stroke="#224866" stroke-width="4"/>
+        <path d="M300 228h80M300 244h56" stroke="#224866" stroke-width="5" stroke-linecap="round" opacity=".7"/>
+      </g>
+    <% } %>
+
+    <!-- sand -->
+    <path d="M0 300c80-18 170-22 280-16s200 4 280-10v86H0z" fill="#EDE0B5"/>
+    <g fill="#D9C68E"><circle cx="70" cy="326" r="2"/><circle cx="140" cy="340" r="1.6"/><circle cx="210" cy="320" r="1.8"/><circle cx="330" cy="334" r="2"/><circle cx="420" cy="322" r="1.6"/><circle cx="500" cy="338" r="2"/></g>
+    <!-- shells and a starfish -->
+    <path d="M470 318c0-10 8-18 18-18s18 8 18 18z" fill="#F3D3C7" stroke="#E07A5F" stroke-width="2"/><path d="M488 300v18M480 302l4 16M496 302l-4 16" stroke="#E07A5F" stroke-width="1.6"/>
+    <path d="M82 312l5 9 10 1-7 7 2 10-10-5-9 5 2-10-7-7 10-1z" fill="#E07A5F" opacity=".85"/>
+    <!-- hermit crab, the Kalma mascot -->
+    <g class="sc-crab" style="transform-origin: 380px 306px">
+      <path d="M362 306c0-18 14-30 30-30s28 12 28 28c0 6-4 8-10 8h-40c-6 0-8-2-8-6z" fill="#EDE0B5" stroke="#224866" stroke-width="3.5"/>
+      <path d="M392 288a10 10 0 1 1-10 10c0-4 3-7 7-7a5 5 0 0 1 5 5" fill="none" stroke="#224866" stroke-width="3" stroke-linecap="round"/>
+      <path d="M352 306c-2-8 4-14 12-12" fill="#E07A5F" stroke="#224866" stroke-width="3"/>
+      <circle cx="354" cy="290" r="3" fill="#224866"/><circle cx="362" cy="288" r="3" fill="#224866"/>
+      <path d="M354 293v6M362 291v6" stroke="#224866" stroke-width="2"/>
+      <path d="M356 312l-6 8M364 312l-2 9M372 312l2 9" stroke="#E07A5F" stroke-width="3" stroke-linecap="round"/>
+      <% if (c === '503' || c === 'page') { %><g class="sc-tool" style="transform-origin: 346px 300px"><path d="M346 300l-16-18" stroke="#224866" stroke-width="4" stroke-linecap="round"/><path d="M324 276a6 6 0 1 0 8 8l-4-4z" fill="#224866"/></g><% } %>
+    </g>
+  </g>
+</svg>
