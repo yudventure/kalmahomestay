@@ -151,3 +151,34 @@ test('partner logos are uploaded per partner and shown in the running strip', as
   assert.equal(app.locals.media.logoUrl('Partner 2'), '');
   assert.deepEqual(fs.readdirSync(path.join(dataDir, 'uploads')), []);
 });
+
+test('default experience photos are downloaded once into empty slots and can be replaced', async () => {
+  const { createApp: make } = require('../src/app');
+  const app = make({ dataDir: fs.mkdtempSync(path.join(os.tmpdir(), 'seed-')), db: null, uploadDir: fs.mkdtempSync(path.join(os.tmpdir(), 'seedup-')), payments: { enabled: false, percent: 100 } });
+  await app.locals.repo.init();
+  const media = app.locals.media;
+  await media.reload();
+  const jpg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(200, 1)]);
+  let calls = 0;
+  const fetchImpl = async (url) => {
+    calls++;
+    if (url.includes('bad')) return { ok: false, status: 404 };
+    return { ok: true, status: 200, arrayBuffer: async () => jpg };
+  };
+  const list = [{ slot: 'exp-2', url: 'https://cdn.test/a.png' }, { slot: 'exp-3', url: 'https://cdn.test/bad.png' }];
+  assert.equal(await media.seedDefaults(list, { fetchImpl }), 1);
+  assert.match(media.photoUrl('exp-2'), /^\/media\/[0-9a-f]{24}\.jpg$/);
+  assert.equal(media.photoUrl('exp-3'), '', 'a failed download leaves the placeholder');
+  // second start: exp-2 is not fetched again, exp-3 is retried
+  calls = 0;
+  assert.equal(await media.seedDefaults(list, { fetchImpl }), 0);
+  assert.equal(calls, 1);
+  // staff delete the photo: it does not come back
+  const row = (await media.list({ where: { slot: 'exp-2' } }))[0];
+  await media.remove(row.id);
+  assert.equal(await media.seedDefaults(list, { fetchImpl }), 0);
+  assert.equal(media.photoUrl('exp-2'), '');
+  // a page that is not a photo is refused
+  const html = async () => ({ ok: true, status: 200, arrayBuffer: async () => Buffer.from('<html>nope</html>') });
+  assert.equal(await media.seedDefaults([{ slot: 'exp-4', url: 'https://cdn.test/x' }], { fetchImpl: html }), 0);
+});

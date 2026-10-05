@@ -143,8 +143,38 @@ function createMedia({ repo, dir }) {
     return row;
   }
 
+  /**
+   * First photos for empty website slots, downloaded once from the given links and stored like an upload,
+   * so they live on Kalma's own server and staff can replace them in Admin, Website, Foto & video.
+   * A slot is only filled once: a photo the staff later delete does not come back.
+   */
+  async function seedDefaults(list, { fetchImpl = fetch } = {}) {
+    const done = (await repo.getSetting('default_photos').catch(() => null)) || {};
+    let added = 0;
+    for (const { slot, url } of list) {
+      if (done[slot] || (slots[slot] && slots[slot].image)) continue;
+      try {
+        const res = await fetchImpl(url, { signal: AbortSignal.timeout(20000) });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const buf = Buffer.from(await res.arrayBuffer());
+        const type = sniff(buf);
+        if (!['jpg', 'png', 'webp'].includes(type) || buf.length > KINDS.image.max) throw new Error('not a photo');
+        await fs.promises.mkdir(dir, { recursive: true });
+        const filename = crypto.randomBytes(12).toString('hex') + '.' + type;
+        await fs.promises.writeFile(path.join(dir, filename), buf);
+        await save({ filename, originalname: slot + '.' + type, size: buf.length }, { kind: 'image', slot, ownerType: 'website', label: slot, by: 'system' });
+        done[slot] = new Date().toISOString();
+        await repo.setSetting('default_photos', done);
+        added++;
+      } catch (e) {
+        console.error(`Default photo for ${slot} not downloaded (${e.message}), will try again on next start`);
+      }
+    }
+    return added;
+  }
+
   return {
-    KINDS, SLOTS, SLOT_IDS, dir, receive, save, remove, reload, filePath, urlOf,
+    KINDS, SLOTS, SLOT_IDS, dir, receive, save, remove, reload, filePath, urlOf, seedDefaults,
     get slots() { return slots; },
     list: (q) => table.list(q),
     get: (id) => table.get(id),
@@ -170,4 +200,14 @@ const UPLOAD_ERRORS = {
   failed: 'File gagal diunggah. Coba lagi.',
 };
 
-module.exports = { createMedia, sniff, KINDS, SLOTS, SLOT_IDS, UPLOAD_ERRORS };
+/** First photos for the experience circles (Island hopping, Mantas, Birds of paradise, Village visit, Sunset kayak). */
+const CDN = 'https://d8j0ntlcm91z4.cloudfront.net/user_3CC0gTPGwEBt4DoPjoAL0fOVF9K/hf_';
+const DEFAULT_PHOTOS = [
+  { slot: 'exp-2', url: CDN + '20261005_000038_cdae4a58-b678-4737-b858-53c743577c22.png' },
+  { slot: 'exp-3', url: CDN + '20261005_000038_9ee2568e-5602-4db8-badb-abb30f7b9801.png' },
+  { slot: 'exp-4', url: CDN + '20261005_000038_e9b9ccf6-c117-41ba-97ea-983785107f40.png' },
+  { slot: 'exp-5', url: CDN + '20261005_000038_068258b9-4c05-4478-9fbe-77c6ddbc0adf.png' },
+  { slot: 'exp-6', url: CDN + '20261005_000114_5c988a97-4599-4fca-a59d-abf60e5a4f52.png' },
+];
+
+module.exports = { DEFAULT_PHOTOS, createMedia, sniff, KINDS, SLOTS, SLOT_IDS, UPLOAD_ERRORS };
