@@ -81,3 +81,14 @@ untuk elemen website. Uji dengan Playwright `reducedMotion: 'reduce'` di ukuran 
 - Dokumen invoice (`views/invoice-print.ejs`, `public/css/invoice.css`) ada di luar `views/admin` supaya tidak ikut
   diterjemahkan admin. Bahasanya mengikuti pilihan di invoice (English atau Indonesia), A4, siap dicetak atau disimpan PDF.
 - Info pembayaran (rekening bank) dan catatan kaki diatur sekali di halaman daftar invoice dan tampil di semua invoice.
+
+## Mode developer dan halaman error
+- Admin Website → Mode developer (`/admin/website/devmode`, `src/devmode.js`, `src/admin-devmode.js`). Seluruh website bisa
+  maintenance (tamu dapat halaman 503 dengan perkiraan selesai dan pesan EN/ID). Bagian beranda bisa Tampil, Sembunyikan,
+  atau Maintenance (catatan singkat). Halaman pemesanan, layanan, dan We hear you bisa maintenance sendiri-sendiri.
+- Admin, `/api/payments/midtrans`, `/healthz`, dan file statis selalu terbuka. Staf yang membuka admin mendapat cookie
+  `kalma_preview` (bertanda tangan) sehingga tetap melihat website asli dengan pita penanda dan bar oranye.
+- Bagian beranda baru dibungkus `<%- secNote('id') %><% if (vis('id')) { %> ... <% } %>` dan `<%- devAttr('id') %>` di tag
+  pembukanya, lalu didaftarkan di `SECTIONS` (`src/devmode.js`) dan kamus admin.
+- Semua halaman error memakai `views/error.ejs` + ilustrasi `views/partials/scene.ejs` (401, 403, 404, 500, 503, page),
+  teks di `src/errors.js`. Pakai `app.locals.renderError(res, code, lang)`.

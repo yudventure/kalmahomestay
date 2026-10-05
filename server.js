@@ -35,6 +35,7 @@ async function initStorage(attempt = 1) {
     status.ready = true;
     status.error = '';
     app.locals.site.load().catch((e) => console.error('Website settings not loaded:', e.message)); // admin-edited settings
+    app.locals.devmode.load().catch((e) => console.error('Developer mode not loaded:', e.message)); // maintenance switches
     app.locals.instagram.start().catch(() => {}); // guest comments from Instagram, refreshed daily
     app.locals.calendar.start(); // OTA/agent calendars, every 30 minutes
     app.locals.media.reload()

@@ -74,7 +74,8 @@
 
 <!-- ============================== HERO ============================== -->
 <div class="fold">
-<section class="hero">
+<%- secNote('hero') %><% if (vis('hero')) { %>
+<section class="hero"<%- devAttr('hero') %>>
   <div class="wrap hero__in">
     <div class="hero__text">
       <h1><%- t('hero.title') %></h1>
@@ -123,8 +124,10 @@
     </svg>
   </div>
 </section>
+<% } %>
 
-<section class="facts" aria-label="<%= t('hero.eyebrow') %>">
+<%- secNote('facts') %><% if (vis('facts')) { %>
+<section class="facts" aria-label="<%= t('hero.eyebrow') %>"<%- devAttr('facts') %>>
   <div class="wrap facts__in">
     <% const FACT_ICONS = [
          '<path d="M7 3v8M5 3v5a2 2 0 0 0 4 0V3M7 11v10M17 21V3c-2.2 0-4 2.7-4 6.5V13h4"/>',
@@ -135,10 +138,11 @@
     <% [4, 1, 2, 3].forEach(function (i) { %><div class="fact"><span class="fact__ic" aria-hidden="true"><svg viewBox="0 0 24 24"><%- FACT_ICONS[i - 1] %></svg></span><p><b><%- t('facts.' + i + 'a') %></b><span><%- t('facts.' + i + 'b') %></span></p></div><% }) %>
   </div>
 </section>
+<% } %>
 </div>
 
-<% if (partners.length) { %>
-<div class="partners" role="region" aria-label="Partner Kalma">
+<%- secNote('partners') %><% if (partners.length && vis('partners')) { %>
+<div class="partners" role="region" aria-label="Partner Kalma"<%- devAttr('partners') %>>
   <div class="partners__viewport">
   <% let loop = partners.slice(); while (loop.length < 6) loop = loop.concat(partners); /* at least two screens of three */ %>
   <div class="partners__track" style="--n: <%= loop.length %>">
@@ -156,7 +160,8 @@
 <% } %>
 
 <!-- ============================== EXPERIENCES (categories) ============================== -->
-<section class="sec" id="pengalaman">
+<%- secNote('experiences') %><% if (vis('experiences')) { %>
+<section class="sec" id="pengalaman"<%- devAttr('experiences') %>>
   <div class="wrap">
     <div class="sec__head reveal">
       <p class="eyebrow"><%- t('exp.eyebrow') %></p>
@@ -174,12 +179,14 @@
     </ul>
   </div>
 </section>
+<% } %>
 
 <!-- ============================== KALMA SERVICES ============================== -->
 <%
   const tick = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 %>
-<section class="sec sec--tint" id="kamar">
+<%- secNote('services') %><% if (vis('services')) { %>
+<section class="sec sec--tint" id="kamar"<%- devAttr('services') %>>
   <div class="wrap">
     <div class="sec__head reveal">
       <p class="eyebrow"><%- t('svc.eyebrow') %></p>
@@ -224,9 +231,11 @@
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- ============================== WHY KALMA (feature band) ============================== -->
-<section class="sec sec--tight">
+<%- secNote('why') %><% if (vis('why')) { %>
+<section class="sec sec--tight"<%- devAttr('why') %>>
   <div class="wrap">
     <div class="band reveal">
       <ul class="band__list">
@@ -247,9 +256,11 @@
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- ============================== REVIEWS ============================== -->
-<section class="sec" id="ulasan">
+<%- secNote('reviews') %><% if (vis('reviews')) { %>
+<section class="sec" id="ulasan"<%- devAttr('reviews') %>>
   <div class="wrap">
     <div class="sec__head reveal">
       <p class="eyebrow"><%- t('rev.eyebrow') %></p>
@@ -314,9 +325,11 @@
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- ============================== GETTING THERE ============================== -->
-<section class="sec sec--tint" id="lokasi">
+<%- secNote('location') %><% if (vis('location')) { %>
+<section class="sec sec--tint" id="lokasi"<%- devAttr('location') %>>
   <div class="wrap">
     <div class="sec__head reveal">
       <p class="eyebrow"><%- t('loc.eyebrow') %></p>
@@ -334,9 +347,11 @@
     </div>
   </div>
 </section>
+<% } %>
 
 <!-- ============================== FAQ ============================== -->
-<section class="sec" id="faq">
+<%- secNote('faq') %><% if (vis('faq')) { %>
+<section class="sec" id="faq"<%- devAttr('faq') %>>
   <div class="wrap faq">
     <div class="sec__head reveal">
       <p class="eyebrow">FAQ</p>
@@ -350,6 +365,7 @@
     </div>
   </div>
 </section>
+<% } %>
 
 </main>
 

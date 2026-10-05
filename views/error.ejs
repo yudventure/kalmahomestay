@@ -1,0 +1,32 @@
+<%# Branded error and maintenance page. Needs: code (401, 403, 404, 500, 503, page), lang, E (texts), home, contact, until, message %>
+<!doctype html>
+<html lang="<%= lang %>">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title><%= E[code].title %> · Kalma Raja Ampat</title>
+<link rel="icon" href="/brand/assets/favicon.ico" sizes="any">
+<link rel="icon" href="/brand/assets/favicon-32.png" type="image/png" sizes="32x32">
+<link rel="preload" href="/fonts/fraunces-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/brand/tokens.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/style.css?v=<%= v %>">
+<link rel="stylesheet" href="/css/errors.css?v=<%= v %>">
+</head>
+<body class="err err--<%= code %>">
+<main class="err__card">
+  <a class="err__logo" href="<%= home %>"><img src="/brand/assets/kalma-logo-primary.png" alt="Kalma Raja Ampat" width="150" height="88"></a>
+  <div class="err__art"><%- include('partials/scene', { code: code }) %></div>
+  <p class="err__eyebrow"><%= E[code].eyebrow %></p>
+  <h1><%= E[code].title %></h1>
+  <p class="err__text"><%= message || E[code].text %></p>
+  <% if (until) { %><p class="err__until"><span><%= E.until %></span> <b><%= until %></b></p><% } %>
+  <div class="err__btns">
+    <% if (String(code) === '401') { %><a class="btn btn--primary" href="/admin/login"><%= E.login %></a><% } %>
+    <% if (String(code) === '500' || String(code) === '503') { %><a class="btn btn--primary" href=""><%= E.retry %></a><% } %>
+    <% if (String(code) !== '503') { %><a class="btn <%= String(code) === '401' || String(code) === '500' ? 'btn--ghost' : 'btn--primary' %>" href="<%= home %>"><%= E.home %></a><% } %>
+  </div>
+  <% if (contact && contact.email) { %><p class="err__help"><%= E.contact %> <a href="mailto:<%= contact.email %>"><%= contact.email %></a></p><% } %>
+</main>
+</body>
+</html>

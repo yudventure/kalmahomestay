@@ -1,0 +1,43 @@
+/* Branded error and maintenance pages (401, 403, 404, 500, 503, page under maintenance). Animations run on every device. */
+body.err { margin: 0; min-height: 100vh; min-height: 100svh; display: grid; place-items: center; padding: 24px 16px;
+  background: #F4F9FB url("/img/beach-pattern.svg") 0 0 / 260px 260px; color: var(--kalma-ink); font-family: var(--font-body); }
+.err__card { width: min(620px, 100%); background: #fff; border-radius: 32px; border: 1px solid var(--line, #E2EAEF);
+  box-shadow: 0 30px 70px -40px rgba(34, 72, 102, .55); padding: clamp(22px, 5vw, 40px); text-align: center; }
+.err__logo img { height: 52px; width: auto; display: inline-block; }
+.err__art { margin: 14px 0 18px; }
+.scene { display: block; width: 100%; height: auto; border-radius: 26px; }
+.err__eyebrow { margin: 0 0 6px; font-size: var(--text-xs); font-weight: 800; letter-spacing: .24em; text-transform: uppercase; color: var(--kalma-lagoon); }
+.err h1 { margin: 0 0 10px; font-family: var(--font-display); color: var(--kalma-deep-sea); font-size: clamp(1.8rem, 1.2rem + 2.6vw, 2.6rem); line-height: 1.1; }
+.err__text { margin: 0 auto 18px; max-width: 46ch; color: var(--muted, #4A6070); font-size: var(--text-lg); line-height: 1.6; }
+.err__until { display: inline-flex; gap: 8px; align-items: center; margin: 0 0 18px; padding: 8px 16px; border-radius: 999px; background: var(--kalma-sand); color: var(--kalma-deep-sea); font-size: var(--text-sm); }
+.err__until b { font-weight: 800; }
+.err__btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.err__help { margin: 18px 0 0; font-size: var(--text-sm); color: var(--muted, #4A6070); }
+.err__help a { color: var(--kalma-lagoon); font-weight: 700; }
+
+/* scene motion */
+.scene * { transform-box: fill-box; }
+.sc-wave { animation: sc-wave 7s linear infinite; }
+.sc-wave--b { animation: sc-wave2 5s linear infinite reverse; }
+@keyframes sc-wave2 { from { transform: translateX(0); } to { transform: translateX(-120px); } }
+@keyframes sc-wave { from { transform: translateX(0); } to { transform: translateX(-140px); } }
+.sc-bob { animation: sc-bob 3.2s ease-in-out infinite; }
+.sc-bob--slow { animation-duration: 4.4s; }
+@keyframes sc-bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-7px) rotate(2deg); } }
+.sc-rock { animation: sc-rock 2.6s ease-in-out infinite; }
+@keyframes sc-rock { 0%, 100% { transform: rotate(-9deg); } 50% { transform: rotate(-3deg) translateY(-4px); } }
+.sc-splash { animation: sc-splash 2.6s ease-out infinite; }
+@keyframes sc-splash { 0% { opacity: 0; transform: translateY(8px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-14px); } }
+.sc-sway { animation: sc-sway 3s ease-in-out infinite; }
+@keyframes sc-sway { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg); } }
+.sc-sun { animation: sc-sun 6s ease-in-out infinite; transform-origin: center; }
+@keyframes sc-sun { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+.sc-cloud { animation: sc-cloud 18s ease-in-out infinite alternate; }
+@keyframes sc-cloud { from { transform: translateX(-10px); } to { transform: translateX(30px); } }
+.sc-crab { animation: sc-crab 6s ease-in-out infinite; }
+@keyframes sc-crab { 0%, 100% { transform: translateX(0); } 45% { transform: translateX(-40px); } 55% { transform: translateX(-40px) translateY(-2px); } }
+.sc-tool { animation: sc-tool .9s ease-in-out infinite; }
+@keyframes sc-tool { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(-24deg); } }
+.sc-blink { animation: sc-blink 1.4s steps(2, jump-none) infinite; }
+@keyframes sc-blink { 0% { opacity: 1; } 100% { opacity: .25; } }
+

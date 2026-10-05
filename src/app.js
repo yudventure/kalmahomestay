@@ -11,6 +11,8 @@ const { createCalendar } = require('./calendar');
 const { createMedia } = require('./media');
 const { createActivities, servicePath, bookPath, homePath } = require('./activities');
 const { mountLegal, PATHS: LEGAL_PATHS } = require('./legal');
+const { createDevMode } = require('./devmode');
+const { TEXT: ERR_TEXT, SECTION_NOTE } = require('./errors');
 const { mountBooking } = require('./booking');
 const { recordWebsitePayment } = require('./admin-finance');
 const payments = require('./payments');
@@ -150,6 +152,59 @@ function createApp(options = {}) {
     if (!row) return next();
     res.sendFile(media.filePath(row), { maxAge: '30d', headers: { 'Content-Type': row.mime } }, (err) => { if (err && !res.headersSent) next(); });
   }));
+  /* ---------- developer mode: maintenance for the whole site, a page or a homepage section ---------- */
+  const devmode = createDevMode({ repo, secret: config.sessionSecret || 'pw:' + config.adminPassword });
+  app.locals.devmode = devmode;
+  const langOfPath = (p) => (/^\/(id|pesan|layanan|masukan|privasi|ketentuan)(\/|$)/.test(p) ? 'id' : 'en');
+  const untilText = (lang) => {
+    const u = devmode.state.site.until;
+    if (!u) return '';
+    const d = new Date(u + ':00+09:00');
+    return isNaN(d) ? '' : d.toLocaleString(lang === 'en' ? 'en-GB' : 'id-ID', { timeZone: 'Asia/Jayapura', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) + ' WIT';
+  };
+  /** The branded page for 401, 403, 404, 500, 503 (whole site in maintenance) and 'page' (one page in maintenance). */
+  function renderError(res, code, lang, extra = {}) {
+    const status = code === 'page' ? 503 : Number(code);
+    if (status === 503) res.set('Retry-After', '3600');
+    res.status(status).render('error', {
+      code, lang, E: ERR_TEXT[lang], home: homePath(lang), contact: config.contact, until: '', message: '', ...extra,
+    });
+  }
+  app.locals.renderError = renderError;
+  app.use(ah(async (req, res, next) => {
+    if (!devmode.loaded) await devmode.load().catch(() => {});
+    if (devmode.ALWAYS_OPEN.test(req.path)) return next();
+    const st = devmode.state;
+    const busy = st.site.on || Object.keys(st.sections).length || Object.keys(st.pages).length;
+    if (devmode.isStaff(req)) {
+      res.locals.devStaff = true;
+      if (busy) res.locals.devBar = st.site.on ? 'Staff preview. Guests see the maintenance page.' : 'Staff preview. Some sections or pages are hidden or under maintenance for guests.';
+      return next();
+    }
+    const lang = langOfPath(req.path);
+    if (st.site.on) {
+      if (/\/api\//.test(req.path)) return res.status(503).json({ ok: false, error: ERR_TEXT[lang][503].title });
+      return renderError(res, 503, lang, { until: untilText(lang), message: lang === 'en' ? st.site.msg_en : st.site.msg_id });
+    }
+    if (devmode.pageDown(req.path)) {
+      if (/\/api\//.test(req.path)) return res.status(503).json({ ok: false, error: ERR_TEXT[lang].page.title });
+      return renderError(res, 'page', lang);
+    }
+    next();
+  }));
+  // what a homepage section shows: the section, nothing, or a short note (staff always see the section, marked)
+  const STATE_LABEL = { hide: 'Hidden from guests', maint: 'Under maintenance for guests' };
+  const sectionHelpers = (res, lang) => {
+    const staff = Boolean(res.locals.devStaff);
+    return {
+      vis: (id) => staff || devmode.section(id) === 'show',
+      devAttr: (id) => (staff && devmode.section(id) !== 'show' ? ` data-dev="${STATE_LABEL[devmode.section(id)]}"` : ''),
+      secNote: (id) => (!staff && devmode.section(id) === 'maint'
+        ? `<section class="sec-maint" aria-label="${SECTION_NOTE[lang]}"><div class="wrap"><div class="sec-maint__in"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M8 34c0-11 7-19 16-19s16 8 16 19c0 3-2 4-5 4H13c-3 0-5-1-5-4z" fill="#EDE0B5" stroke="#224866" stroke-width="2.5"/><path d="M24 24a6 6 0 1 1-6 6c0-2 2-4 4-4a3 3 0 0 1 3 3" fill="none" stroke="#224866" stroke-width="2.2" stroke-linecap="round"/><path d="M6 40c6-2 12-2 18 0s12 2 18 0" fill="none" stroke="#4B8AA5" stroke-width="2.5" stroke-linecap="round"/></svg><p>${SECTION_NOTE[lang]}</p></div></div></section>`
+        : ''),
+    };
+  };
+
   const instagram = options.instagramSync || createInstagramSync({ repo, token: (config.instagram || {}).token, api: options.instagramApi });
   app.locals.instagram = instagram;
 
@@ -157,6 +212,7 @@ function createApp(options = {}) {
     const t = translator(lang);
     const base = lang === 'en' ? '/en' : '';
     res.render('index', {
+      ...sectionHelpers(res, lang),
       pay,
       lang, t, rupiah,
       photo: withUploads(photoFinder(), media),
@@ -276,7 +332,7 @@ function createApp(options = {}) {
   }));
 
   /* ---------- admin ---------- */
-  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState, t: translator('id'), translator }));
+  app.use('/admin', createAdminRouter({ repo, config, instagram, site, calendar, media, activities, payState, t: translator('id'), translator, devmode }));
 
   // Kalma's availability for one OTA/agent channel, imported by that channel (Admin → Channel OTA & agen).
   app.get('/ical/:file', ah(async (req, res, next) => {
@@ -322,16 +378,14 @@ function createApp(options = {}) {
     res.status(db === 'ok' ? 200 : 503).json(body);
   }));
 
-  app.use((req, res) => {
-    const lang = /^\/(id|pesan|layanan|masukan)(\/|$)/.test(req.path) ? 'id' : 'en';
-    res.status(404).render('404', { lang, t: translator(lang), home: homePath(lang) });
-  });
+  app.use((req, res) => renderError(res, 404, langOfPath(req.path)));
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
     if (err.type === 'entity.too.large' || err.type === 'entity.parse.failed') return res.status(400).json({ ok: false, error: 'Bad request' });
     console.error(err);
-    res.status(500).send('Server error');
+    if (res.headersSent) return;
+    try { renderError(res, 500, langOfPath(req.path)); } catch { res.status(500).send('Server error'); }
   });
 
   app.locals.config = config;
