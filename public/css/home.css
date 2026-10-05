@@ -178,12 +178,16 @@
 /* ------------------------------------------------ experiences as round categories */
 .cats { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--space-5); text-align: center; }
 .cat__img { width: 100%; max-width: 132px; aspect-ratio: 1; margin: 0 auto var(--space-3); border-radius: 50%; box-shadow: var(--card-shadow); transition: transform var(--dur-base) var(--ease-tide); }
-.cat:hover .cat__img { transform: translateY(-4px) scale(1.03); }
+@media (hover: hover) { .cat:hover .cat__img { transform: translateY(-4px) scale(1.03); } }
 .cat h3 { font-size: var(--text-lg); margin: 0 0 4px; }
 .cat p { font-size: var(--text-xs); color: var(--muted); line-height: 1.5; margin: 0; }
 @media (max-width: 900px) {
-  .cats { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: var(--space-4); padding-bottom: var(--space-3); margin: 0 -16px; padding-inline: 16px; scroll-padding-inline: 16px; scrollbar-width: none; }
+  /* swipes sideways only: the row never scrolls up or down, so no circle gets cut off at the top */
+  .cats { display: flex; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; touch-action: pan-x pan-y; scroll-snap-type: x mandatory; gap: var(--space-4); padding-top: 8px; padding-bottom: var(--space-3); margin: -8px -16px 0; padding-inline: 16px; scroll-padding-inline: 16px; scrollbar-width: none; }
   .cats::-webkit-scrollbar { display: none; }
+  /* items still waiting off to the side keep their fade-in, but grow in place instead of rising, so they never push the row taller */
+  .js .cats .reveal { transform: scale(.94); }
+  .js .cats .reveal.is-in { transform: none; }
   .cat { flex: 0 0 132px; scroll-snap-align: start; }
 }
 
