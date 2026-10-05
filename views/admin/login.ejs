@@ -12,6 +12,7 @@
 </head>
 <body class="admin">
 <main class="login">
+  <%- include('_login-scene') %>
   <form class="login__box admin" method="post" action="/admin/login">
     <img src="/brand/assets/kalma-wordmark.png" alt="Kalma" width="96" height="46">
     <div class="login__lang"><button type="submit" form="lang-form" name="lang" value="en"<%- locals.adminLang === 'en' ? ' aria-pressed="true"' : '' %>>EN</button><button type="submit" form="lang-form" name="lang" value="id"<%- locals.adminLang !== 'en' ? ' aria-pressed="true"' : '' %>>ID</button></div>
