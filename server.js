@@ -4,6 +4,7 @@
 try { process.loadEnvFile(); } catch { /* no .env file */ }
 
 const { createApp } = require('./src/app');
+const { DEFAULT_PHOTOS } = require('./src/media');
 
 const app = createApp();
 const { port, siteUrl, adminPassword } = app.locals.config;
@@ -36,7 +37,9 @@ async function initStorage(attempt = 1) {
     app.locals.site.load().catch((e) => console.error('Website settings not loaded:', e.message)); // admin-edited settings
     app.locals.instagram.start().catch(() => {}); // guest comments from Instagram, refreshed daily
     app.locals.calendar.start(); // OTA/agent calendars, every 30 minutes
-    app.locals.media.reload().catch((e) => console.error('Uploaded media not loaded:', e.message));
+    app.locals.media.reload()
+      .then(() => app.locals.media.seedDefaults(DEFAULT_PHOTOS)) // first experience photos, replaceable in the admin
+      .catch((e) => console.error('Uploaded media not loaded:', e.message));
     app.locals.activities.seed().catch((e) => console.error('Activities not prepared:', e.message)); // first diving & trip list
     console.log(repo.kind === 'mysql' ? `Storage: MySQL database ready (${repo.connection})` : `Storage: JSON file (${repo.file}) — set DB_* settings for production`);
   } catch (e) {
